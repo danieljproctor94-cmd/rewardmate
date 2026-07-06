@@ -94,12 +94,6 @@ export default function Landing() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px]" />
         
         <div className="max-w-6xl mx-auto px-6 text-center relative z-10 space-y-12">
-          
-          {/* Top Pill Badge */}
-          <div className="inline-flex items-center space-x-2 bg-[#0052FF]/10 border border-[#0052FF]/20 rounded-full px-4.5 py-1.5 transition-all cursor-default mx-auto">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-bold text-[#38bdf8] tracking-widest uppercase">Australia's Premier Affiliate Network</span>
-          </div>
 
           {/* Heading and Description */}
           <div className="space-y-6">
@@ -113,52 +107,52 @@ export default function Landing() {
             </p>
           </div>
 
-          {/* Three Integrated Cards (White Background) */}
+          {/* Three Integrated Cards (Premium Dark Glassmorphic Style) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 text-left max-w-5xl mx-auto">
             
             {/* Advertisers */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                <Briefcase className="h-5 w-5 text-[#0052FF]" />
+            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex items-start gap-4 hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-[#0052FF]/10 border border-[#0052FF]/25 flex items-center justify-center shrink-0">
+                <Briefcase className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Advertisers</h3>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                <h3 className="font-extrabold text-white text-lg leading-snug">Advertisers</h3>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
                   Turn partnerships into profit, whether you're a new brand or scaling fast.
                 </p>
-                <a href={getAppUrl('/register?role=advertiser')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                <a href={getAppUrl('/register?role=advertiser')} className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-white transition-all pt-2">
                   Start growing &rarr;
                 </a>
               </div>
             </div>
 
             {/* Affiliate Partners */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                <User className="h-5 w-5 text-[#0052FF]" />
+            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex items-start gap-4 hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-[#0052FF]/10 border border-[#0052FF]/25 flex items-center justify-center shrink-0">
+                <User className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Affiliate Partners</h3>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                <h3 className="font-extrabold text-white text-lg leading-snug">Affiliate Partners</h3>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
                   Monetise your content or platform through strategic brand partnerships.
                 </p>
-                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-white transition-all pt-2">
                   Start earning &rarr;
                 </a>
               </div>
             </div>
 
             {/* Agencies */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-                <Presentation className="h-5 w-5 text-[#0052FF]" />
+            <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex items-start gap-4 hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-[#0052FF]/10 border border-[#0052FF]/25 flex items-center justify-center shrink-0">
+                <Presentation className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Agencies</h3>
-                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                <h3 className="font-extrabold text-white text-lg leading-snug">Agencies</h3>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
                   Accelerate your clients' growth with tech that simplifies affiliate marketing.
                 </p>
-                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-white transition-all pt-2">
                   Start growing &rarr;
                 </a>
               </div>
