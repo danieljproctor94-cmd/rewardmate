@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
-import { isAppDomain } from './lib/domain';
+import { isAppDomain, getLandingUrl } from './lib/domain';
 import { useAuth } from './contexts/AuthContext';
 import { getCampaigns, logClick } from './lib/mockDatabase';
 import { Toaster, toast } from 'sonner';
@@ -9,6 +9,8 @@ import Landing from './pages/public/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AdvertiserRegister from './pages/AdvertiserRegister';
+import About from './pages/public/About';
+import Contact from './pages/public/Contact';
 
 export default function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -53,6 +55,8 @@ export default function App() {
             <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register/advertiser" element={<AdvertiserRegister />} />
+            <Route path="/about" element={<Navigate to={getLandingUrl('/about')} replace />} />
+            <Route path="/contact" element={<Navigate to={getLandingUrl('/contact')} replace />} />
             <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
@@ -60,6 +64,8 @@ export default function App() {
           // Main domain rewardmate.com.au Routing
           <>
             <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             {/* Fallback to landing, but let path queries redirect inside dev */}
             <Route path="/login" element={<Navigate to={window.location.search.includes('domain=app') ? '/login' : '/'} replace />} />
             <Route path="/register" element={<Navigate to={window.location.search.includes('domain=app') ? '/register' : '/'} replace />} />

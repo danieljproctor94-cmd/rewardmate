@@ -206,7 +206,7 @@ export default function Landing() {
               )}
             </div>
 
-            <a href="#" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Who we are</a>
+            <a href="/about" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Who we are</a>
           </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
             <a 
@@ -700,8 +700,8 @@ export default function Landing() {
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Company</h4>
             <ul className="space-y-2.5 text-xs text-slate-500">
-              <li><a href="#" className="hover:text-white transition-colors">Who We Are</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="/about" className="hover:text-white transition-colors">Who We Are</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Market Insights</a></li>
             </ul>
           </div>
@@ -713,7 +713,7 @@ export default function Landing() {
               <p className="text-xs text-slate-500 leading-relaxed">
                 Reach out for support, guidance, or any info about Reward Mate.
               </p>
-              <a href="mailto:support@rewardmate.com.au" className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-[#0052FF] transition-all">
+              <a href="/contact" className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-[#0052FF] transition-all">
                 Contact us &rarr;
               </a>
             </div>
