@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Layers } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle } from 'lucide-react';
 
 export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
@@ -39,13 +39,8 @@ export default function Landing() {
       {/* Premium Header */}
       <header className="absolute top-8 left-0 w-full z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer">
-            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
-              <Layers className="h-6 w-6 text-[#0052FF]" strokeWidth={2.5} />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              Reward<span className="text-blue-100">Mate</span>
-            </span>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img src="/rewardmate-logo-cropped.png" className="h-9 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -457,10 +452,9 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-12 border-t border-slate-100 bg-slate-50 text-slate-500">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="flex items-center space-x-2 mb-6 md:mb-0">
-            <Layers className="h-5 w-5 text-[#0052FF]" />
-            <span className="font-bold text-slate-900">RewardMate</span>
-            <span className="text-slate-400">| Australia's Affiliate Leader</span>
+          <div className="flex items-center space-x-3 mb-6 md:mb-0">
+            <img src="/rewardmate-logo-cropped.png" className="h-7 w-auto object-contain" alt="RewardMate Logo" />
+            <span className="text-slate-400 text-xs">| Australia's Affiliate Leader</span>
           </div>
           <div className="flex space-x-6">
             <a href="#features" className="hover:text-[#0052FF] transition-colors">Features</a>

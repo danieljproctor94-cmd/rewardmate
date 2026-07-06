@@ -64,12 +64,7 @@ export default function Login() {
         <div className="absolute bottom-[10%] left-[-10%] w-[300px] h-[300px] rounded-full opacity-10 blur-[70px] pointer-events-none bg-blue-900" />
 
         <div className="flex items-center space-x-3 cursor-pointer relative z-10" onClick={() => navigate('/')}>
-          <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg">
-            <Layers className="h-6 w-6 text-[#0052FF]" strokeWidth={2.5} />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            Reward<span className="text-blue-100">Mate</span>
-          </span>
+          <img src="/rewardmate-logo-cropped.png" className="h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
         </div>
 
         <div className="relative z-10 space-y-6 max-w-lg">
@@ -106,12 +101,7 @@ export default function Login() {
           
           <div className="text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer" onClick={() => navigate('/')}>
-              <div className="h-10 w-10 rounded-xl bg-[#0052FF] flex items-center justify-center shadow-lg">
-                <Layers className="h-6 w-6 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">
-                Reward<span className="text-[#0052FF]">Mate</span>
-              </span>
+              <img src="/rewardmate-logo-cropped.png" className="h-8 w-auto object-contain" alt="RewardMate Logo" />
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">

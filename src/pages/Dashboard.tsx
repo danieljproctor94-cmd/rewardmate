@@ -9,8 +9,8 @@ import {
 import type { Campaign, AffiliateLink, Click, Conversion } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
-  Layers, LogOut, DollarSign, MousePointer, CheckCircle, Plus, Copy, 
-  Play, TrendingUp, Check, X, Shield, AlertCircle 
+  LogOut, DollarSign, MousePointer, CheckCircle, Plus, Copy, 
+  Play, TrendingUp, Check, X, AlertCircle 
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -139,12 +139,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
-            <Layers className="h-5 w-5 text-slate-900" />
-          </div>
-          <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
-          </span>
+          <img src="/rewardmate-logo-cropped.png" className="h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
         </div>
 
         <div className="flex items-center space-x-6">
@@ -535,12 +531,8 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
-            <Layers className="h-5 w-5 text-slate-900" />
-          </div>
-          <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
-          </span>
+          <img src="/rewardmate-logo-cropped.png" className="h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
         </div>
 
         <div className="flex items-center space-x-6">
@@ -925,12 +917,8 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       {/* Top Navbar */}
       <nav className="border-b border-b-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
-            <Shield className="h-5 w-5 text-slate-900" />
-          </div>
-          <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
-          </span>
+          <img src="/rewardmate-logo-cropped.png" className="h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
         </div>
 
         <div className="flex items-center space-x-6">
