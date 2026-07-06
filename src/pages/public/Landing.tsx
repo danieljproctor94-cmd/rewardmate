@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, Sun, Moon, X, ChevronDown, Search, Zap, Mic, BookOpen } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, X, ChevronDown, Search, Zap, Mic, BookOpen } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [isHeroDark, setIsHeroDark] = useState(true);
   const [notification, setNotification] = useState<{ text: string; subText: string; type: string } | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
@@ -130,13 +129,13 @@ export default function Landing() {
           <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
               src="/rewardmate-logo-cropped.png" 
-              className={`h-6 sm:h-8 w-auto object-contain transition-all ${isHeroDark ? 'brightness-0 invert' : 'brightness-0'}`} 
+              className="h-6 sm:h-8 w-auto object-contain transition-all brightness-0 invert" 
               alt="Reward Mate Logo" 
             />
           </div>
-          <nav className={`hidden md:flex items-center space-x-6 text-sm font-bold transition-all ${isHeroDark ? 'text-white/90' : 'text-slate-600'}`}>
-            <a href="#features" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Features</a>
-            <a href="#pricing" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Pricing</a>
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-bold transition-all text-white/90">
+            <a href="#features" className="transition-colors hover:text-white">Features</a>
+            <a href="#pricing" className="transition-colors hover:text-white">Pricing</a>
             
             {/* Resources Dropdown */}
             <div className="relative">
@@ -144,8 +143,8 @@ export default function Landing() {
                 onClick={() => setIsResourcesOpen(!isResourcesOpen)}
                 className={`flex items-center gap-1 py-1.5 px-3 rounded-full text-sm font-bold transition-all ${
                   isResourcesOpen 
-                    ? (isHeroDark ? 'bg-white/10 text-white' : 'bg-blue-50 text-[#0052FF]') 
-                    : (isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]')
+                    ? 'bg-white/10 text-white' 
+                    : 'hover:text-white'
                 }`}
               >
                 <span>Resources</span>
@@ -207,25 +206,18 @@ export default function Landing() {
               )}
             </div>
 
-            <a href="#" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Who we are</a>
+            <a href="#" className="transition-colors hover:text-white">Who we are</a>
           </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <button 
-              onClick={() => setIsHeroDark(!isHeroDark)} 
-              className={`p-2 rounded-full transition-colors ${isHeroDark ? 'text-white/80 hover:text-white hover:bg-white/10' : 'text-slate-600 hover:text-[#0052FF] hover:bg-slate-100'}`}
-              title={isHeroDark ? 'Switch to Light Hero' : 'Switch to Dark Hero'}
-            >
-              {isHeroDark ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
-            </button>
             <a 
               href={getAppUrl('/login')} 
-              className={`text-xs sm:text-sm font-bold transition-colors ${isHeroDark ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-[#0052FF]'}`}
+              className="border border-white/20 text-white hover:bg-white/10 hover:border-white/30 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
             >
               Login
             </a>
             <a 
               href={getAppUrl('/register')}
-              className={`px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm ${isHeroDark ? 'bg-white text-black hover:bg-white/95 hover:shadow-xl' : 'bg-slate-950 text-white hover:bg-slate-900'}`}
+              className="bg-white text-black hover:bg-white/95 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
             >
               Register
             </a>
@@ -234,29 +226,25 @@ export default function Landing() {
       </header>
       
       {/* Centered Hero Section */}
-      <section className={`relative transition-all duration-500 pt-28 pb-16 sm:pt-40 sm:pb-24 md:pt-48 md:pb-32 overflow-hidden ${isHeroDark ? 'bg-[#070913] text-white' : 'bg-slate-50 text-slate-800'}`}>
+      <section className="relative pt-28 pb-16 sm:pt-40 sm:pb-24 md:pt-48 md:pb-32 overflow-hidden bg-[#070913] text-white">
         
-        {/* Radial Glow Overlays (using brand digital blue - visible in dark mode) */}
-        {isHeroDark && (
-          <>
-            <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[90px] pointer-events-none" />
-            <div className="absolute top-[20%] right-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-25 blur-[95px] pointer-events-none" />
-          </>
-        )}
+        {/* Radial Glow Overlays (using brand digital blue) */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[90px] pointer-events-none" />
+        <div className="absolute top-[20%] right-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-25 blur-[95px] pointer-events-none" />
         
         {/* Soft Background Grid Overlay */}
-        <div className={`absolute inset-0 transition-all duration-500 ${isHeroDark ? 'bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]' : 'bg-[linear-gradient(to_right,#00000003_1px,transparent_1px),linear-gradient(to_bottom,#00000003_1px,transparent_1px)]'} bg-[size:40px_40px] pointer-events-none`} />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-8 sm:space-y-12">
  
           {/* Heading and Description */}
           <div className="space-y-4 sm:space-y-6">
-            <h1 className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.12] sm:leading-[1.08] max-w-4xl mx-auto transition-all ${isHeroDark ? 'text-white' : 'text-slate-900'}`}>
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.12] sm:leading-[1.08] max-w-4xl mx-auto text-white">
               Australian Owned.<br />
               <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Marketing.</span>
             </h1>
  
-            <p className={`text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed transition-all ${isHeroDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-slate-400">
               Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's independent network.
             </p>
           </div>
@@ -265,48 +253,48 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-6 text-left max-w-5xl mx-auto">
             
             {/* Advertisers */}
-            <div className={`rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 ${isHeroDark ? 'bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]' : 'bg-white border border-slate-100/80 shadow-md text-slate-800 hover:shadow-lg hover:border-blue-200/50 hover:scale-[1.02]'}`}>
-              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all ${isHeroDark ? 'bg-[#0052FF]/10 border border-[#0052FF]/25' : 'bg-blue-50 border border-blue-100'}`}>
-                <Briefcase className={`h-5 w-5 ${isHeroDark ? 'text-[#38bdf8]' : 'text-[#0052FF]'}`} />
+            <div className="rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]">
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all bg-[#0052FF]/10 border border-[#0052FF]/25">
+                <Briefcase className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className={`font-extrabold text-lg leading-snug transition-all ${isHeroDark ? 'text-white' : 'text-slate-900'}`}>Advertisers & Brands</h3>
-                <p className={`text-xs sm:text-sm leading-relaxed transition-all ${isHeroDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Advertisers & Brands</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Acquire customers on a risk-free cost-per-acquisition basis. Pay only for tracked sales, sign-ups, and leads generated by top partners.
                 </p>
-                <a href={getAppUrl('/register?role=advertiser')} className={`inline-flex items-center text-xs font-bold transition-all pt-2 ${isHeroDark ? 'text-[#38bdf8] hover:text-white' : 'text-[#0052FF] hover:underline'}`}>
+                <a href={getAppUrl('/register?role=advertiser')} className="inline-flex items-center text-xs font-bold transition-all pt-2 text-[#38bdf8] hover:text-white">
                   Launch campaign &rarr;
                 </a>
               </div>
             </div>
  
             {/* Affiliate Partners */}
-            <div className={`rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 ${isHeroDark ? 'bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]' : 'bg-white border border-slate-100/80 shadow-md text-slate-800 hover:shadow-lg hover:border-blue-200/50 hover:scale-[1.02]'}`}>
-              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all ${isHeroDark ? 'bg-[#0052FF]/10 border border-[#0052FF]/25' : 'bg-blue-50 border border-blue-100'}`}>
-                <User className={`h-5 w-5 ${isHeroDark ? 'text-[#38bdf8]' : 'text-[#0052FF]'}`} />
+            <div className="rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]">
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all bg-[#0052FF]/10 border border-[#0052FF]/25">
+                <User className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className={`font-extrabold text-lg leading-snug transition-all ${isHeroDark ? 'text-white' : 'text-slate-900'}`}>Publishers & Affiliates</h3>
-                <p className={`text-xs sm:text-sm leading-relaxed transition-all ${isHeroDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Publishers & Affiliates</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Partner directly with premium Australian brands. Monetise your traffic with market-leading CPA offers and instant wallet payouts.
                 </p>
-                <a href={getAppUrl('/register?role=publisher')} className={`inline-flex items-center text-xs font-bold transition-all pt-2 ${isHeroDark ? 'text-[#38bdf8] hover:text-white' : 'text-[#0052FF] hover:underline'}`}>
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold transition-all pt-2 text-[#38bdf8] hover:text-white">
                   Start earning now &rarr;
                 </a>
               </div>
             </div>
  
             {/* Agencies */}
-            <div className={`rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 ${isHeroDark ? 'bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]' : 'bg-white border border-slate-100/80 shadow-md text-slate-800 hover:shadow-lg hover:border-blue-200/50 hover:scale-[1.02]'}`}>
-              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all ${isHeroDark ? 'bg-[#0052FF]/10 border border-[#0052FF]/25' : 'bg-blue-50 border border-blue-100'}`}>
-                <Presentation className={`h-5 w-5 ${isHeroDark ? 'text-[#38bdf8]' : 'text-[#0052FF]'}`} />
+            <div className="rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]">
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all bg-[#0052FF]/10 border border-[#0052FF]/25">
+                <Presentation className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className={`font-extrabold text-lg leading-snug transition-all ${isHeroDark ? 'text-white' : 'text-slate-900'}`}>Agencies & Networks</h3>
-                <p className={`text-xs sm:text-sm leading-relaxed transition-all ${isHeroDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Agencies & Networks</h3>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Supercharge your clients' affiliate programs. Manage multiple campaigns, tracking links, and budgets from one centralized portal.
                 </p>
-                <a href={getAppUrl('/register?role=publisher')} className={`inline-flex items-center text-xs font-bold transition-all pt-2 ${isHeroDark ? 'text-[#38bdf8] hover:text-white' : 'text-[#0052FF] hover:underline'}`}>
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold transition-all pt-2 text-[#38bdf8] hover:text-white">
                   Partner with us &rarr;
                 </a>
               </div>
