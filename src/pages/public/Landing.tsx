@@ -84,7 +84,7 @@ export default function Landing() {
           </div>
         </div>
       </header>      {/* Dark Centered Hero Section */}
-      <section className="relative bg-[#070913] text-white pt-40 pb-24 md:pt-48 md:pb-32 overflow-hidden">
+      <section className="relative bg-[#070913] text-white pt-28 pb-16 sm:pt-40 sm:pb-24 md:pt-48 md:pb-32 overflow-hidden">
         
         {/* Radial Glow Overlays (using brand digital blue) */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[90px] pointer-events-none" />
@@ -93,11 +93,11 @@ export default function Landing() {
         {/* Soft Background Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px]" />
         
-        <div className="max-w-6xl mx-auto px-6 text-center relative z-10 space-y-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-8 sm:space-y-12">
 
           {/* Heading and Description */}
-          <div className="space-y-6">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.12] sm:leading-[1.08] max-w-4xl mx-auto">
               Australian Owned.<br />
               <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Marketing.</span>
             </h1>
@@ -108,7 +108,7 @@ export default function Landing() {
           </div>
 
           {/* Three Integrated Cards (Premium Dark Glassmorphic Style) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 text-left max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-6 text-left max-w-5xl mx-auto">
             
             {/* Advertisers */}
             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex items-start gap-4 hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02] transition-all duration-300">
