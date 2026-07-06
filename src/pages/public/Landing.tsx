@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, Sun, Moon } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, Sun, Moon, X } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isHeroDark, setIsHeroDark] = useState(true);
+  const [notification, setNotification] = useState<{ text: string; subText: string; type: string } | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   const schema = {
     "@context": "https://schema.org",
@@ -30,6 +32,67 @@ export default function Landing() {
     description: "Reward Mate connects premium Australian publishers with premier brands. Acquire customers on a 100% risk-free CPA affiliate basis or earn top revenues today.",
     schema
   });
+
+  useEffect(() => {
+    const locations = [
+      'Sydney, NSW', 'Melbourne, VIC', 'Brisbane, QLD', 'Perth, WA', 
+      'Adelaide, SA', 'Hobart, TAS', 'Darwin, NT', 'Gold Coast, QLD', 
+      'Newcastle, NSW', 'Wollongong, NSW', 'Geelong, VIC', 'Canberra, ACT'
+    ];
+    const roles = [
+      'Affiliate Partner', 'Publisher', 'Content Creator', 'Media Buyer', 
+      'Advertiser', 'SaaS Brand', 'E-commerce Store'
+    ];
+    const times = [
+      'just now', '2 minutes ago', '5 minutes ago', '12 minutes ago', 
+      '25 minutes ago', '45 minutes ago', '1 hour ago', '2 hours ago', 
+      '3 hours ago', '5 hours ago'
+    ];
+
+    const generateRandomNotification = () => {
+      const isAggregated = Math.random() > 0.5;
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      
+      if (isAggregated) {
+        const count = Math.floor(Math.random() * 15) + 3;
+        return {
+          text: `${count} new affiliates joined today from ${location}`,
+          subText: 'Verified Sign-up Activity',
+          type: 'aggregate'
+        };
+      } else {
+        const role = roles[Math.floor(Math.random() * roles.length)];
+        const time = times[Math.floor(Math.random() * times.length)];
+        return {
+          text: `A new ${role} from ${location} joined`,
+          subText: time,
+          type: 'individual'
+        };
+      }
+    };
+
+    let timer1: any;
+    let timer2: any;
+    
+    const showNext = () => {
+      const nextNotif = generateRandomNotification();
+      setNotification(nextNotif);
+      setShowNotification(true);
+      
+      timer1 = setTimeout(() => {
+        setShowNotification(false);
+        timer2 = setTimeout(showNext, 12000);
+      }, 5000);
+    };
+
+    const initialTimer = setTimeout(showNext, 5000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, []);
 
   const faqs = [
     {
@@ -612,6 +675,35 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Social Proof Popup Notification */}
+      {notification && (
+        <div 
+          className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-white border border-slate-100 rounded-2xl p-4.5 shadow-2xl flex items-start gap-4 transition-all duration-500 ease-out ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
+        >
+          {/* Circular avatar box */}
+          <div className="h-9 w-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 relative">
+            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-emerald-500 animate-pulse border border-white" />
+            <User className="h-4.5 w-4.5 text-[#0052FF]" />
+          </div>
+          
+          <div className="space-y-0.5 pr-6">
+            <p className="text-xs font-bold text-slate-800 leading-snug">
+              {notification.text}
+            </p>
+            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+              {notification.subText}
+            </p>
+          </div>
+
+          <button 
+            onClick={() => setShowNotification(false)} 
+            className="text-slate-400 hover:text-slate-600 shrink-0 ml-auto -mt-1 p-0.5 hover:bg-slate-50 rounded-lg transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
