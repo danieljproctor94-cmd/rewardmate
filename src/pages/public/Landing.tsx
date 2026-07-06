@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, Sun, Moon, X } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, Sun, Moon, X, ChevronDown, Search, Zap, Mic, BookOpen } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
@@ -9,6 +9,7 @@ export default function Landing() {
   const [isHeroDark, setIsHeroDark] = useState(true);
   const [notification, setNotification] = useState<{ text: string; subText: string; type: string } | null>(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
 
   const schema = {
     "@context": "https://schema.org",
@@ -133,10 +134,80 @@ export default function Landing() {
               alt="Reward Mate Logo" 
             />
           </div>
-          <nav className={`hidden md:flex items-center space-x-8 text-sm font-bold transition-all ${isHeroDark ? 'text-white/90' : 'text-slate-600'}`}>
+          <nav className={`hidden md:flex items-center space-x-6 text-sm font-bold transition-all ${isHeroDark ? 'text-white/90' : 'text-slate-600'}`}>
             <a href="#features" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Features</a>
             <a href="#pricing" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Pricing</a>
-            <a href="#faq" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>FAQ</a>
+            
+            {/* Resources Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                className={`flex items-center gap-1 py-1.5 px-3 rounded-full text-sm font-bold transition-all ${
+                  isResourcesOpen 
+                    ? (isHeroDark ? 'bg-white/10 text-white' : 'bg-blue-50 text-[#0052FF]') 
+                    : (isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]')
+                }`}
+              >
+                <span>Resources</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResourcesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu Box */}
+              {isResourcesOpen && (
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-white text-slate-800 rounded-3xl p-5 shadow-2xl border border-slate-100 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="space-y-4 text-left">
+                    
+                    {/* Item 1: Advertiser Directory */}
+                    <a href="#features" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
+                      <Search className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0052FF] transition-colors">Advertiser directory</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Search and connect with brands across every industry.</p>
+                      </div>
+                    </a>
+
+                    {/* Item 2: Product Releases */}
+                    <a href="#features" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
+                      <Zap className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0052FF] transition-colors">Product releases</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Stay informed with our latest platform innovations and updates.</p>
+                      </div>
+                    </a>
+
+                    {/* Item 3: Podcast */}
+                    <a href="#" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
+                      <Mic className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0052FF] transition-colors">Podcast</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Practical affiliate marketing advice and industry insights.</p>
+                      </div>
+                    </a>
+
+                    {/* Item 4: FAQ */}
+                    <a href="#faq" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
+                      <HelpCircle className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0052FF] transition-colors">FAQ</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Get quick answers about Reward Mate and affiliate best practices.</p>
+                      </div>
+                    </a>
+
+                    {/* Item 5: Market Insights */}
+                    <a href="#" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
+                      <BookOpen className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0052FF] transition-colors">Market Insights</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Expert affiliate marketing insights and industry trends.</p>
+                      </div>
+                    </a>
+
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <a href="#" className={`transition-colors ${isHeroDark ? 'hover:text-white' : 'hover:text-[#0052FF]'}`}>Who we are</a>
           </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
             <button 
