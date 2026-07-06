@@ -12,10 +12,19 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Plus, Copy, 
   Play, TrendingUp, Check, X, AlertCircle 
 } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 export default function Dashboard() {
   const { user, profile, signOut, updateBalance } = useAuth();
   const navigate = useNavigate();
+
+  const roleName = profile?.user_type ? profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1) : 'Affiliate';
+
+  useSEO({
+    title: `${roleName} Dashboard | RewardMate`,
+    description: "RewardMate secure client portal dashboard. Track performance, analyze click conversion statistics, and request wallet payouts.",
+    noIndex: true
+  });
 
   // If not authenticated, redirect to login
   useEffect(() => {

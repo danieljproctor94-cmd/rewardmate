@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Layers, Mail, Lock, User, Briefcase, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { getLandingUrl } from '../lib/domain';
+import { useSEO } from '../hooks/useSEO';
 
 export default function Login() {
   const { signIn, signUp, isMock } = useAuth();
@@ -14,6 +15,12 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<'advertiser' | 'publisher'>('publisher');
+
+  useSEO({
+    title: isRegister ? "Sign Up | RewardMate Affiliate Portal" : "Sign In | RewardMate Affiliate Portal",
+    description: "Access your RewardMate performance dashboard. Register or log in to manage your CPA campaigns, track link clicks, and claim affiliate payouts.",
+    noIndex: false
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 

@@ -1,10 +1,34 @@
 import { useState } from 'react';
 import { getAppUrl } from '../../lib/domain';
 import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle } from 'lucide-react';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "RewardMate",
+    "url": "https://rewardmate.com.au",
+    "logo": "https://rewardmate.com.au/rewardmate-logo-cropped.png",
+    "description": "Australia's leading affiliate marketing network connecting high-intent publishers with premier advertisers on a risk-free CPA basis.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "AU"
+    },
+    "sameAs": [
+      "https://twitter.com/rewardmate",
+      "https://www.linkedin.com/company/rewardmate"
+    ]
+  };
+
+  useSEO({
+    title: "RewardMate | Australia's Leading Affiliate & CPA Network",
+    description: "RewardMate connects premium Australian publishers with premier brands. Acquire customers on a 100% risk-free CPA affiliate basis or earn top revenues today.",
+    schema
+  });
 
   const faqs = [
     {
