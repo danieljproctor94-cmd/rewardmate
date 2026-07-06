@@ -451,45 +451,134 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden bg-gradient-to-tr from-[#0038FF] via-[#0052FF] to-[#3b82f6] text-white">
-        <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+      <section className="py-24 relative overflow-hidden bg-[#0a0f24] text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0052FF_0%,transparent_50%)] opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,#002699_0%,transparent_50%)] opacity-35 pointer-events-none" />
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-6">Ready to scale your affiliate growth?</h2>
-          <p className="text-white/80 max-w-lg mx-auto mb-10 text-base md:text-lg">
-            Join Australia's most transparent performance network today. Sign up takes less than 2 minutes.
+          <div className="text-[10px] sm:text-xs font-black tracking-[0.2em] text-[#38bdf8] uppercase mb-4">
+            Get Started Today
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+            Join the #1 Affiliate Marketing Platform in Australia
+          </h2>
+          <p className="text-slate-400 max-w-xl mx-auto mb-10 text-sm sm:text-base leading-relaxed">
+            Start growing your business with affiliate marketing today.<br className="hidden sm:inline" />
+            Thousands of advertisers and partners are already seeing results.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
-              href={getAppUrl('/register')}
-              className="bg-white text-[#0052FF] font-bold h-14 px-8 rounded-full flex items-center justify-center hover:bg-white/95 transition-all shadow-xl"
+              href={getAppUrl('/register?role=advertiser')}
+              className="bg-[#0052FF] text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/20 text-sm w-full sm:w-auto"
             >
-              Get Started for Free
+              Become an Advertiser
             </a>
             <a 
-              href={getAppUrl('/login')}
-              className="bg-transparent border border-white/30 text-white font-bold h-14 px-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-all"
+              href={getAppUrl('/register?role=publisher')}
+              className="bg-transparent border border-white/20 text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-all text-sm w-full sm:w-auto"
             >
-              Sign In as Existing User
+              Become an Affiliate
             </a>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-slate-100 bg-slate-50 text-slate-500">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
-          <div className="flex items-center space-x-3 mb-6 md:mb-0">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain" alt="Reward Mate Logo" />
-            <span className="text-slate-400 text-xs">| Australia's Affiliate Leader</span>
+      <footer className="bg-[#05070f] text-slate-400 py-16 border-t border-white/5 font-sans relative z-10">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
+          
+          {/* Logo & Description */}
+          <div className="lg:col-span-4 space-y-4">
+            <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+              Australia's leading affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
+            </p>
+            <div className="inline-block bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full uppercase tracking-wider">
+              Australia's Performance Leader
+            </div>
+            <div className="flex space-x-3 pt-2">
+              <a href="#" className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:border-white/30 hover:bg-white/5 hover:text-white transition-all">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+                </svg>
+              </a>
+              <a href="#" className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:border-white/30 hover:bg-white/5 hover:text-white transition-all">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+              <a href="#" className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:border-white/30 hover:bg-white/5 hover:text-white transition-all">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a href="#" className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:border-white/30 hover:bg-white/5 hover:text-white transition-all">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.52 3.545 12 3.545 12 3.545s-7.52 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.868.508 9.388.508 9.388.508s7.52 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Solutions Column */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Solutions</h4>
+            <ul className="space-y-2.5 text-xs text-slate-500">
+              <li><a href={getAppUrl('/register?role=advertiser')} className="hover:text-white transition-colors">Advertisers</a></li>
+              <li><a href={getAppUrl('/register?role=publisher')} className="hover:text-white transition-colors">Affiliate Partners</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Agencies</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">API Integration</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">AI Features</a></li>
+            </ul>
+          </div>
+
+          {/* Resources Column */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Resources</h4>
+            <ul className="space-y-2.5 text-xs text-slate-500">
+              <li><a href="#features" className="hover:text-white transition-colors">Advertiser Directory</a></li>
+              <li><a href="#features" className="hover:text-white transition-colors">Agency Directory</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Product Releases</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Podcast</a></li>
+              <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
+            </ul>
+          </div>
+
+          {/* Company Column */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Company</h4>
+            <ul className="space-y-2.5 text-xs text-slate-500">
+              <li><a href="#" className="hover:text-white transition-colors">Who We Are</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Market Insights</a></li>
+            </ul>
+          </div>
+
+          {/* Help Column */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Questions?</h4>
+            <div className="space-y-3">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Reach out for support, guidance, or any info about Reward Mate.
+              </p>
+              <a href="mailto:support@rewardmate.com.au" className="inline-flex items-center text-xs font-bold text-[#38bdf8] hover:text-[#0052FF] transition-all">
+                Contact us &rarr;
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom bar */}
+        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600">
+          <div className="mb-4 md:mb-0">
+            &copy; {new Date().getFullYear()} Reward Mate. All rights reserved.
           </div>
           <div className="flex space-x-6">
-            <a href="#features" className="hover:text-[#0052FF] transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-[#0052FF] transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-[#0052FF] transition-colors">FAQ</a>
-            <a href={getAppUrl('/login')} className="hover:text-[#0052FF] transition-colors">Portal Login</a>
-          </div>
-          <div className="mt-6 md:mt-0">
-            &copy; {new Date().getFullYear()} Reward Mate. All rights reserved.
+            <a href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-400 transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-slate-400 transition-colors">Cookie Policy</a>
           </div>
         </div>
       </footer>
