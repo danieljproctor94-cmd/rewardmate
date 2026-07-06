@@ -740,15 +740,20 @@ export default function Landing() {
           className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-slate-900/95 backdrop-blur-md border border-white/10 rounded-full py-3 px-5 pr-6 shadow-[0_10px_50px_rgba(0,0,0,0.3)] flex items-center gap-3.5 transition-all duration-500 ease-out text-white ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
         >
           {/* Circular map box */}
-          <div className="h-9 w-9 rounded-full shrink-0 relative">
+          <div className="h-9 w-9 shrink-0 relative">
             <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-extrabold border border-white shadow-sm z-10">
               ✓
             </span>
-            <img 
-              src="https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?auto=format&fit=crop&w=100&h=100&q=80" 
-              className="h-9 w-9 rounded-full object-cover border border-white/10 shadow-sm brightness-[0.9] contrast-[1.1]" 
-              alt="GPS Verified Location Map"
-            />
+            <div className="h-9 w-9 rounded-full overflow-hidden bg-[#e8eaed] border border-white/10 shadow-sm">
+              <svg className="h-full w-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="36" fill="#e8eaed" />
+                <path d="M0 12h36M0 24h36M12 0v36M24 0v36" stroke="#ffffff" strokeWidth="2" />
+                <path d="M-5 18l46-6M18-5l-6 46" stroke="#dadce0" strokeWidth="1.5" />
+                <ellipse cx="18" cy="27" rx="3.5" ry="1.2" fill="#3c4043" opacity="0.35" />
+                <path d="M18 9c-3.3 0-6 2.7-6 6 0 4.2 6 11 6 11s6-6.8 6-11c0-3.3-2.7-6-6-6z" fill="#ea4335" />
+                <circle cx="18" cy="15" r="2" fill="#ffffff" />
+              </svg>
+            </div>
           </div>
           
           <div className="space-y-0.5 pr-2">
