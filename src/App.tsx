@@ -8,6 +8,7 @@ import { Toaster, toast } from 'sonner';
 import Landing from './pages/public/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import AdvertiserRegister from './pages/AdvertiserRegister';
 
 export default function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/register/advertiser" element={<AdvertiserRegister />} />
             <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
@@ -61,6 +63,7 @@ export default function App() {
             {/* Fallback to landing, but let path queries redirect inside dev */}
             <Route path="/login" element={<Navigate to={window.location.search.includes('domain=app') ? '/login' : '/'} replace />} />
             <Route path="/register" element={<Navigate to={window.location.search.includes('domain=app') ? '/register' : '/'} replace />} />
+            <Route path="/register/advertiser" element={<Navigate to={window.location.search.includes('domain=app') ? '/register/advertiser' : '/'} replace />} />
             <Route path="/dashboard" element={<Navigate to={window.location.search.includes('domain=app') ? '/dashboard' : '/'} replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>

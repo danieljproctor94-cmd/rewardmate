@@ -262,7 +262,7 @@ export default function Landing() {
                 <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Turn brand partnerships into automated sales, tracked leads, and scaled profit.
                 </p>
-                <a href={getAppUrl('/register?role=advertiser')} className="inline-flex items-center text-xs font-bold transition-all pt-2 text-[#38bdf8] hover:text-white">
+                <a href={getAppUrl('/register/advertiser')} className="inline-flex items-center text-xs font-bold transition-all pt-2 text-[#38bdf8] hover:text-white">
                   Grow brand &rarr;
                 </a>
               </div>
@@ -527,7 +527,7 @@ export default function Landing() {
                 </div>
               </div>
               <a 
-                href={getAppUrl('/register?role=advertiser')}
+                href={getAppUrl('/register/advertiser')}
                 className="mt-8 w-full bg-[#0052FF] text-white hover:bg-blue-700 py-3 rounded-full text-center font-bold text-sm transition-all"
               >
                 Start Listing Campaigns
@@ -558,7 +558,7 @@ export default function Landing() {
                 </div>
               </div>
               <a 
-                href={getAppUrl('/register?role=advertiser')}
+                href={getAppUrl('/register/advertiser')}
                 className="mt-8 w-full bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 py-3 rounded-full text-center font-bold text-sm transition-all"
               >
                 Inquire Enterprise
@@ -618,7 +618,7 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
-              href={getAppUrl('/register?role=advertiser')}
+              href={getAppUrl('/register/advertiser')}
               className="bg-[#0052FF] text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:shadow-lg hover:shadow-blue-500/20 text-sm w-full sm:w-auto"
             >
               Become an Advertiser
@@ -676,7 +676,7 @@ export default function Landing() {
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Solutions</h4>
             <ul className="space-y-2.5 text-xs text-slate-500">
-              <li><a href={getAppUrl('/register?role=advertiser')} className="hover:text-white transition-colors">Advertisers</a></li>
+              <li><a href={getAppUrl('/register/advertiser')} className="hover:text-white transition-colors">Advertisers</a></li>
               <li><a href={getAppUrl('/register?role=publisher')} className="hover:text-white transition-colors">Affiliate Partners</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Agencies</a></li>
               <li><a href="#" className="hover:text-white transition-colors">API Integration</a></li>
