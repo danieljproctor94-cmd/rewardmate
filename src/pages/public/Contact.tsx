@@ -191,8 +191,7 @@ export default function Contact() {
                 <div>
                   <h4 className="font-extrabold text-sm text-slate-900">Direct Support</h4>
                   <p className="text-slate-500 text-xs sm:text-sm mt-0.5 leading-relaxed">
-                    1300 888 CPA (Inside Australia)<br />
-                    +61 2 9999 8888 (International)
+                    5450 2766
                   </p>
                 </div>
               </div>
