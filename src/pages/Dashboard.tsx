@@ -139,7 +139,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       {/* Top Navbar */}
       <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="RewardMate Logo" />
           <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
         </div>
 
@@ -531,7 +531,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
       {/* Top Navbar */}
       <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="RewardMate Logo" />
           <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
         </div>
 
@@ -917,7 +917,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       {/* Top Navbar */}
       <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="RewardMate Logo" />
           <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
         </div>
 

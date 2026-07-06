@@ -65,7 +65,7 @@ export default function Login() {
         <div className="absolute bottom-[10%] left-[-10%] w-[300px] h-[300px] rounded-full opacity-10 blur-[70px] pointer-events-none bg-blue-900" />
 
         <a href={getLandingUrl('/')} className="flex items-center space-x-3 cursor-pointer relative z-10">
-          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <img src="/rewardmate-logo-cropped.png" className="h-7 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
         </a>
 
         <div className="relative z-10 space-y-6 max-w-lg">
@@ -102,7 +102,7 @@ export default function Login() {
           
           <div className="text-center lg:text-left">
             <a href={getLandingUrl('/')} className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer">
-              <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
+              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="RewardMate Logo" />
             </a>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
