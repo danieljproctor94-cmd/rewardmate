@@ -258,7 +258,7 @@ export default function Landing() {
                 <Briefcase className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-lg leading-snug text-white">Advertisers & Brands</h3>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Advertisers</h3>
                 <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Turn brand partnerships into automated sales, tracked leads, and scaled profit.
                 </p>
@@ -274,7 +274,7 @@ export default function Landing() {
                 <User className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-lg leading-snug text-white">Publishers & Affiliates</h3>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Affiliate Partners</h3>
                 <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Monetise your digital traffic and content with high-paying CPA campaigns.
                 </p>
@@ -290,7 +290,7 @@ export default function Landing() {
                 <Presentation className="h-5 w-5 text-[#38bdf8]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-lg leading-snug text-white">Agencies & Networks</h3>
+                <h3 className="font-extrabold text-lg leading-snug text-white">Agencies</h3>
                 <p className="text-xs sm:text-sm leading-relaxed text-slate-400">
                   Scale client portfolios using tracking systems that simplify marketing operations.
                 </p>
