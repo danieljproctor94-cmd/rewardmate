@@ -29,31 +29,32 @@ export default function Landing() {
     <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden">
       
       {/* Top Banner (Revolut Announcement style) */}
-      <div className="bg-[#0047FF] text-white text-center py-2.5 px-4 text-xs font-bold tracking-wide flex items-center justify-center gap-1.5 z-[60] relative">
-        <span>Australia's premier performance affiliate network.</span>
-        <a href={getAppUrl('/register')} className="underline hover:text-blue-100 transition-colors flex items-center gap-0.5">
-          Open an account →
+      <div className="bg-[#0047FF] text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-wide flex items-center justify-center gap-1 z-[60] relative">
+        <span className="hidden sm:inline">Australia's premier performance affiliate network.</span>
+        <span className="sm:hidden">Australia's leading affiliate network.</span>
+        <a href={getAppUrl('/register')} className="underline hover:text-blue-100 transition-colors flex items-center gap-0.5 ml-1">
+          Open account →
         </a>
       </div>
 
       {/* Premium Header */}
-      <header className="absolute top-8 left-0 w-full z-50 bg-transparent">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img src="/rewardmate-logo-cropped.png" className="h-9 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+      <header className="absolute top-2 sm:top-6 left-0 w-full z-50 bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+          <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
-          <div className="flex items-center space-x-4">
-            <a href={getAppUrl('/login')} className="text-sm font-bold text-white/90 hover:text-white transition-colors">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <a href={getAppUrl('/login')} className="text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-colors">
               Login
             </a>
             <a 
               href={getAppUrl('/register')}
-              className="bg-white text-[#0052FF] px-6 py-2.5 rounded-full text-sm font-bold hover:bg-white/95 hover:shadow-xl transition-all"
+              className="bg-white text-[#0052FF] px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold hover:bg-white/95 hover:shadow-xl transition-all"
             >
               Register
             </a>
