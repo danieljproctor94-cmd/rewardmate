@@ -688,7 +688,7 @@ export default function Landing() {
       {/* Social Proof Popup Notification */}
       {notification && (
         <div 
-          className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-white border border-slate-100 rounded-2xl p-4.5 shadow-2xl flex items-start gap-4 transition-all duration-500 ease-out ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
+          className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-white border border-slate-100 rounded-full py-3 px-5 pr-6 shadow-2xl flex items-center gap-3.5 transition-all duration-500 ease-out ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
         >
           {/* Circular avatar box */}
           <div className="h-9 w-9 rounded-full shrink-0 relative">
@@ -700,7 +700,7 @@ export default function Landing() {
             />
           </div>
           
-          <div className="space-y-0.5 pr-6">
+          <div className="space-y-0.5 pr-2">
             <p className="text-xs font-bold text-slate-800 leading-snug">
               {notification.text}
             </p>
@@ -711,7 +711,7 @@ export default function Landing() {
 
           <button 
             onClick={() => setShowNotification(false)} 
-            className="text-slate-400 hover:text-slate-600 shrink-0 ml-auto -mt-1 p-0.5 hover:bg-slate-50 rounded-lg transition-colors"
+            className="text-slate-400 hover:text-slate-600 shrink-0 ml-auto p-1 hover:bg-slate-50 rounded-full transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
