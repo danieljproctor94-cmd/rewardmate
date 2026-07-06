@@ -27,7 +27,7 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#0d0f17] text-white">
-        <div className="h-8 w-8 rounded-full border-4 border-emerald-500/30 border-t-emerald-500 animate-spin"></div>
+        <div className="h-8 w-8 rounded-full border-4 border-blue-600/30 border-t-blue-600 animate-spin"></div>
       </div>
     );
   }
@@ -139,18 +139,18 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
             <Layers className="h-5 w-5 text-slate-900" />
           </div>
           <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-emerald-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
+            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
           </span>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-right">
             <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Wallet Balance</div>
-            <div className="text-sm font-extrabold text-emerald-400">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
+            <div className="text-sm font-extrabold text-blue-400">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
           </div>
           <button 
             onClick={signOut}
@@ -169,7 +169,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Total Spend</span>
-              <DollarSign className="h-5 w-5 text-emerald-400" />
+              <DollarSign className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-3xl font-extrabold text-white">${totalSpend.toFixed(2)}</div>
             <p className="text-[11px] text-slate-500 mt-2">Deducted from budget for approved conversions</p>
@@ -177,7 +177,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Active Campaigns</span>
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
+              <TrendingUp className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-3xl font-extrabold text-white">{activeCampaigns}</div>
             <p className="text-[11px] text-slate-500 mt-2">Out of {campaigns.length} campaigns listed</p>
@@ -185,7 +185,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Acquisition Wallet</span>
-              <MousePointer className="h-5 w-5 text-emerald-400" />
+              <MousePointer className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-3xl font-extrabold text-white">${Number(profile.wallet_balance).toFixed(2)}</div>
             <p className="text-[11px] text-slate-500 mt-2">Available for campaign allocation</p>
@@ -196,13 +196,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         <div className="flex space-x-4 border-b border-white/[0.05]">
           <button 
             onClick={() => setActiveTab('campaigns')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaigns' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaigns' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             My Campaigns
           </button>
           <button 
             onClick={() => setActiveTab('wallet')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Deposit & Wallet
           </button>
@@ -218,7 +218,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               </div>
               <button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-10 px-5 rounded-xl flex items-center gap-1.5"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-10 px-5 rounded-xl flex items-center gap-1.5"
               >
                 <Plus className="h-4 w-4" /> Create Offer
               </button>
@@ -238,7 +238,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       <div className="flex items-center gap-3">
                         <h4 className="text-base font-bold text-white">{camp.name}</h4>
                         <span className={`text-[10px] font-extrabold rounded-full px-2.5 py-0.5 border ${
-                          camp.status === 'active' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                          camp.status === 'active' ? 'bg-blue-500/10 border-blue-600/30 text-blue-400' :
                           camp.status === 'pending_approval' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
                           'bg-red-500/10 border-red-500/30 text-red-400'
                         }`}>
@@ -247,7 +247,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       </div>
                       <p className="text-xs text-slate-400 line-clamp-2 max-w-xl">{camp.description}</p>
                       <div className="text-[11px] text-slate-500 pt-1">
-                        URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-emerald-400 underline">{camp.landing_page_url}</a>
+                        URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-blue-400 underline">{camp.landing_page_url}</a>
                       </div>
                     </div>
 
@@ -286,14 +286,14 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       placeholder="e.g. 500"
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(e.target.value)}
-                      className="w-full bg-[#151926] border border-white/5 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-white focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#151926] border border-white/5 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-white focus:outline-none focus:border-blue-600 transition-colors"
                       required
                     />
                   </div>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 text-slate-950 font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-emerald-400 transition-colors"
+                  className="w-full bg-blue-600 text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 transition-colors"
                 >
                   Deposit Sandbox Funds
                 </button>
@@ -309,7 +309,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
                   <span className="text-sm text-slate-400">Available Balance</span>
-                  <span className="text-base font-extrabold text-emerald-400">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
+                  <span className="text-base font-extrabold text-blue-400">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
                   <span className="text-sm text-slate-400">Pending Campaign Allocations</span>
@@ -352,7 +352,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   placeholder="e.g. Woolworths Credit Card Promo"
                   value={campName}
                   onChange={(e) => setCampName(e.target.value)}
-                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
@@ -364,7 +364,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   value={campDesc}
                   onChange={(e) => setCampDesc(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl p-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl p-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
@@ -376,7 +376,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   placeholder="https://www.company.com/promotion"
                   value={campUrl}
                   onChange={(e) => setCampUrl(e.target.value)}
-                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
@@ -387,7 +387,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   <select
                     value={campPayoutType}
                     onChange={(e) => setCampPayoutType(e.target.value as 'cpa' | 'cpc')}
-                    className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                   >
                     <option value="cpa">CPA (Cost per Acquisition)</option>
                     <option value="cpc">CPC (Cost per Click)</option>
@@ -401,7 +401,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     placeholder="e.g. 50.00"
                     value={campPayoutAmount}
                     onChange={(e) => setCampPayoutAmount(e.target.value)}
-                    className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                     required
                   />
                 </div>
@@ -414,7 +414,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   placeholder="e.g. 2000"
                   value={campBudget}
                   onChange={(e) => setCampBudget(e.target.value)}
-                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-[#0d0f17] border border-white/5 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
                   required
                 />
               </div>
@@ -422,7 +422,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-emerald-500 text-slate-950 font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-emerald-400 disabled:opacity-50"
+                className="w-full bg-blue-600 text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 disabled:opacity-50"
               >
                 {loading ? <div className="h-5 w-5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" /> : 'Submit for Approval'}
               </button>
@@ -535,18 +535,18 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
             <Layers className="h-5 w-5 text-slate-900" />
           </div>
           <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-emerald-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
+            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
           </span>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-right">
             <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Available Earnings</div>
-            <div className="text-sm font-extrabold text-emerald-400">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
+            <div className="text-sm font-extrabold text-blue-400">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
           </div>
           <button 
             onClick={signOut}
@@ -565,7 +565,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Total Earnings</span>
-              <DollarSign className="h-5 w-5 text-emerald-400" />
+              <DollarSign className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-2xl font-extrabold text-white">${totalEarnings.toFixed(2)}</div>
             <p className="text-[10px] text-slate-500 mt-1">From approved conversions</p>
@@ -573,7 +573,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Conversions</span>
-              <CheckCircle className="h-5 w-5 text-emerald-400" />
+              <CheckCircle className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-2xl font-extrabold text-white">{convCount}</div>
             <p className="text-[10px] text-slate-500 mt-1">Approved & pending leads</p>
@@ -581,7 +581,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Clicks</span>
-              <MousePointer className="h-5 w-5 text-emerald-400" />
+              <MousePointer className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-2xl font-extrabold text-white">{clickCount}</div>
             <p className="text-[10px] text-slate-500 mt-1">Total click logs tracked</p>
@@ -589,7 +589,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
           <div className="premium-glass-panel p-6">
             <div className="flex justify-between items-center text-slate-500 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">EPC</span>
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
+              <TrendingUp className="h-5 w-5 text-blue-400" />
             </div>
             <div className="text-2xl font-extrabold text-white">${epc.toFixed(2)}</div>
             <p className="text-[10px] text-slate-500 mt-1">Earnings per click average</p>
@@ -600,25 +600,25 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
         <div className="flex space-x-6 border-b border-white/[0.05]">
           <button 
             onClick={() => setActiveTab('offers')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'offers' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'offers' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Find Offers ({campaigns.length})
           </button>
           <button 
             onClick={() => setActiveTab('my-links')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'my-links' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'my-links' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             My Affiliate Links ({myLinks.length})
           </button>
           <button 
             onClick={() => setActiveTab('clicks-conv')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'clicks-conv' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'clicks-conv' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Traffic & Conversion logs
           </button>
           <button 
             onClick={() => setActiveTab('wallet')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Withdraw Wallet
           </button>
@@ -645,7 +645,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                     <div className="flex items-center gap-6 shrink-0">
                       <div className="text-right">
                         <div className="text-xs text-slate-500">Payout Rate</div>
-                        <div className="text-sm font-extrabold text-emerald-400">${Number(camp.payout_amount).toFixed(2)} AUD</div>
+                        <div className="text-sm font-extrabold text-blue-400">${Number(camp.payout_amount).toFixed(2)} AUD</div>
                         <div className="text-[10px] text-slate-500 uppercase tracking-wider">{camp.payout_type}</div>
                       </div>
                       
@@ -656,7 +656,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                       ) : (
                         <button
                           onClick={() => handleGenerateLink(camp.id)}
-                          className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-10 px-5 rounded-xl transition-all"
+                          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-10 px-5 rounded-xl transition-all"
                         >
                           Generate Link
                         </button>
@@ -691,7 +691,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                       </div>
                       <div className="text-right">
                         <div className="text-xs text-slate-500">Payout Rate</div>
-                        <div className="text-xs font-bold text-emerald-400">${Number(link.campaign?.payout_amount).toFixed(2)} AUD ({link.campaign?.payout_type.toUpperCase()})</div>
+                        <div className="text-xs font-bold text-blue-400">${Number(link.campaign?.payout_amount).toFixed(2)} AUD ({link.campaign?.payout_type.toUpperCase()})</div>
                       </div>
                     </div>
 
@@ -711,7 +711,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                         {isMock && (
                           <button
                             onClick={() => handleSimulateClickAndConversion(link)}
-                            className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs h-11 px-4 rounded-xl flex items-center gap-1.5 shrink-0"
+                            className="bg-blue-500/10 hover:bg-blue-600/20 border border-blue-600/30 text-blue-400 font-bold text-xs h-11 px-4 rounded-xl flex items-center gap-1.5 shrink-0"
                           >
                             <Play className="h-4 w-4" /> Simulate Traffic
                           </button>
@@ -730,7 +730,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
             {/* Click Log */}
             <div className="premium-glass-panel p-6 space-y-4">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <MousePointer className="h-4 w-4 text-emerald-400" /> Click Log history
+                <MousePointer className="h-4 w-4 text-blue-400" /> Click Log history
               </h3>
               <div className="max-h-[350px] overflow-y-auto space-y-3">
                 {clicks.length === 0 ? (
@@ -754,7 +754,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
             {/* Conversions Log */}
             <div className="premium-glass-panel p-6 space-y-4">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-400" /> Conversion Transactions
+                <CheckCircle className="h-4 w-4 text-blue-400" /> Conversion Transactions
               </h3>
               <div className="max-h-[350px] overflow-y-auto space-y-3">
                 {conversions.length === 0 ? (
@@ -767,9 +767,9 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                         <div className="text-[10px] text-slate-500 mt-0.5">TxID: {conv.transaction_id}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xs font-bold text-emerald-400">+${Number(conv.payout).toFixed(2)}</div>
+                        <div className="text-xs font-bold text-blue-400">+${Number(conv.payout).toFixed(2)}</div>
                         <span className={`text-[9px] font-extrabold uppercase rounded px-1.5 py-0.5 ${
-                          conv.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400' :
+                          conv.status === 'approved' ? 'bg-blue-500/10 text-blue-400' :
                           conv.status === 'pending' ? 'bg-amber-500/10 text-amber-400' :
                           'bg-red-500/10 text-red-400'
                         }`}>
@@ -802,14 +802,14 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
                       placeholder="e.g. 100"
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
-                      className="w-full bg-[#151926] border border-white/5 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-white focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full bg-[#151926] border border-white/5 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-white focus:outline-none focus:border-blue-600 transition-colors"
                       required
                     />
                   </div>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 text-slate-950 font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-emerald-400 transition-colors"
+                  className="w-full bg-blue-600 text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 transition-colors"
                 >
                   Confirm Sandbox Withdrawal
                 </button>
@@ -825,7 +825,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
                   <span className="text-sm text-slate-400">Available Balance</span>
-                  <span className="text-base font-extrabold text-emerald-400">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
+                  <span className="text-base font-extrabold text-blue-400">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
                   <span className="text-sm text-slate-400">Pending Approvals</span>
@@ -925,18 +925,18 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       {/* Top Navbar */}
       <nav className="border-b border-b-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center">
             <Shield className="h-5 w-5 text-slate-900" />
           </div>
           <span className="font-bold tracking-tight text-white">
-            Reward<span className="text-emerald-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
+            Reward<span className="text-blue-400">Mate</span> <span className="text-xs font-semibold text-slate-500 bg-slate-900 border border-white/[0.05] px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
           </span>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-right hidden sm:block">
             <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Logged In As</div>
-            <div className="text-sm font-extrabold text-emerald-400">{profile.full_name}</div>
+            <div className="text-sm font-extrabold text-blue-400">{profile.full_name}</div>
           </div>
           <button 
             onClick={signOut}
@@ -978,13 +978,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         <div className="flex space-x-6 border-b border-white/[0.05]">
           <button 
             onClick={() => setActiveTab('campaign-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaign-approvals' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaign-approvals' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Pending Campaign Approvals ({pendingCamps})
           </button>
           <button 
             onClick={() => setActiveTab('conversion-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'conversion-approvals' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'conversion-approvals' ? 'border-blue-600 text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Pending Conversion Audits ({pendingConvs})
           </button>
@@ -1013,7 +1013,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       </div>
                       <p className="text-xs text-slate-400 max-w-xl leading-relaxed">{camp.description}</p>
                       <div className="text-[10px] text-slate-500">
-                        URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-emerald-400 underline">{camp.landing_page_url}</a>
+                        URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-blue-400 underline">{camp.landing_page_url}</a>
                       </div>
                     </div>
 
@@ -1027,7 +1027,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveCampaign(camp.id)}
-                          className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
                         >
                           <Check className="h-4 w-4" /> Approve
                         </button>
@@ -1072,13 +1072,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     <div className="flex items-center gap-6 shrink-0">
                       <div className="text-right">
                         <div className="text-xs text-slate-500">Payout Commission</div>
-                        <div className="text-sm font-extrabold text-emerald-400">${Number(conv.payout).toFixed(2)} AUD</div>
+                        <div className="text-sm font-extrabold text-blue-400">${Number(conv.payout).toFixed(2)} AUD</div>
                       </div>
 
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveConversion(conv.id)}
-                          className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
                         >
                           <Check className="h-4 w-4" /> Credit Publisher
                         </button>
