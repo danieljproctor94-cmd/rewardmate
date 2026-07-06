@@ -85,76 +85,74 @@ export default function Landing() {
             </a>
           </div>
         </div>
-      </header>
-
-      {/* Revolut Style Hero Section */}
-      <section className="relative bg-gradient-to-tr from-[#0038FF] via-[#0052FF] to-[#3b82f6] text-white pt-36 pb-24 md:pt-48 md:pb-40 overflow-hidden">
+      </header>      {/* Dark Centered Hero Section */}
+      <section className="relative bg-[#070913] text-white pt-40 pb-24 md:pt-48 md:pb-32 overflow-hidden">
+        
+        {/* Radial Glow Overlays (using brand digital blue) */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[80px] pointer-events-none" />
+        <div className="absolute top-[10%] right-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-25 blur-[90px] pointer-events-none" />
         
         {/* Soft Background Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px]" />
         
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10">
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10 space-y-8">
           
-          {/* Left Text Column */}
-          <div className="lg:col-span-7 flex flex-col justify-center text-left space-y-6">
-            
-            <div className="inline-flex items-center space-x-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/15 transition-all cursor-default w-fit">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold text-white tracking-wider uppercase">Australia's leading affiliate network</span>
+          {/* Top Pill Badge */}
+          <div className="inline-flex items-center space-x-2 bg-[#0052FF]/10 border border-[#0052FF]/20 rounded-full px-4.5 py-1.5 transition-all cursor-default mx-auto">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-bold text-[#38bdf8] tracking-widest uppercase">Australia's Premier Affiliate Network</span>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+            Scale Your Performance.<br />
+            <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Pay Only For Results.</span>
+          </h1>
+
+          {/* Description */}
+          <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's most transparent tracking network.
+          </p>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <a 
+              href={getAppUrl('/register')}
+              className="bg-[#0052FF] text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(0,82,255,0.3)] hover:shadow-[0_0_25px_rgba(0,82,255,0.5)] text-sm w-full sm:w-auto"
+            >
+              Start Earning Now &rarr;
+            </a>
+            <a 
+              href={getAppUrl('/login')}
+              className="bg-transparent border border-white/10 text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-all text-sm w-full sm:w-auto"
+            >
+              Simulate Sandbox Demo
+            </a>
+          </div>
+
+          {/* Divider */}
+          <div className="w-full h-px bg-white/5 pt-8" />
+
+          {/* Bottom Metrics Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 text-center max-w-4xl mx-auto">
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">5,000+</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Active Affiliates</div>
             </div>
-
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
-              Affiliate marketing<br />
-              <span className="text-white/80">and much more</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-white/90 max-w-xl leading-relaxed">
-              Whether you are at home or on the go, let Reward Mate exceed your performance expectations. Drive risk-free sales or monetize your traffic with a tap.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4 pt-4">
-              <a 
-                href={getAppUrl('/register')}
-                className="bg-slate-950 text-white h-12 px-8 rounded-full text-sm font-bold flex items-center justify-center hover:bg-slate-900 hover:scale-[1.02] shadow-xl transition-all"
-              >
-                Join Reward Mate
-              </a>
-              <a 
-                href={getAppUrl('/login')}
-                className="bg-white/10 border border-white/20 text-white h-12 px-8 rounded-full text-sm font-bold flex items-center justify-center hover:bg-white/20 hover:border-white/30 transition-all"
-              >
-                Simulate Sandbox Demo
-              </a>
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">250+</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Premium Brands</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">$12M+</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Paid Commissions</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">99.9%</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Tracking Accuracy</div>
             </div>
           </div>
 
-          {/* Right Phone Mockup Column */}
-          <div className="lg:col-span-5 flex justify-center items-center relative py-6">
-            {/* Phone Container */}
-            <div className="relative w-[300px] aspect-[9/18] rounded-[48px] border-[5px] border-white/40 shadow-2xl p-1 bg-slate-950 flex flex-col justify-between overflow-hidden">
-              {/* Camera Notch */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-32 h-4.5 bg-black rounded-full z-20" />
-              
-              {/* Partner Portrait Image */}
-              <img 
-                src="/hero_partner_portrait.png" 
-                className="absolute inset-0 w-full h-full object-cover rounded-[38px] z-0 pointer-events-none" 
-                alt="Reward Mate Partner Portrait"
-              />
-
-              {/* Revolut Payout Stats Overlay Card */}
-              <div className="absolute bottom-8 left-4 right-4 bg-black/40 backdrop-blur-md border border-white/10 rounded-[28px] p-5 text-white flex flex-col items-center shadow-2xl z-10">
-                <div className="text-[10px] font-bold text-white/80 uppercase tracking-widest mb-1">Personal</div>
-                <div className="text-3xl font-black text-white tracking-tight mb-3">6012 $</div>
-                <a 
-                  href={getAppUrl('/login')}
-                  className="bg-white text-[#0052FF] font-bold text-xs px-6 py-2 rounded-full shadow-lg hover:bg-white/95 transition-colors"
-                >
-                  Payouts
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
