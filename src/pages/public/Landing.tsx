@@ -7,7 +7,7 @@ export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isHeroDark, setIsHeroDark] = useState(true);
-  const [notification, setNotification] = useState<{ text: string; subText: string; type: string } | null>(null);
+  const [notification, setNotification] = useState<{ text: string; subText: string; type: string; avatar: string } | null>(null);
   const [showNotification, setShowNotification] = useState(false);
 
   const schema = {
@@ -40,25 +40,33 @@ export default function Landing() {
       'Newcastle, NSW', 'Wollongong, NSW', 'Geelong, VIC', 'Canberra, ACT'
     ];
     const roles = [
-      'Affiliate Partner', 'Publisher', 'Content Creator', 'Media Buyer', 
-      'Advertiser', 'SaaS Brand', 'E-commerce Store'
+      'Affiliate Partner', 'Affiliate', 'Publisher', 'Advertiser', 'Brand'
     ];
     const times = [
       'just now', '2 minutes ago', '5 minutes ago', '12 minutes ago', 
       '25 minutes ago', '45 minutes ago', '1 hour ago', '2 hours ago', 
       '3 hours ago', '5 hours ago'
     ];
+    const avatarUrls = [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&h=100&q=80'
+    ];
 
     const generateRandomNotification = () => {
       const isAggregated = Math.random() > 0.5;
       const location = locations[Math.floor(Math.random() * locations.length)];
+      const avatar = avatarUrls[Math.floor(Math.random() * avatarUrls.length)];
       
       if (isAggregated) {
         const count = Math.floor(Math.random() * 15) + 3;
         return {
           text: `${count} new affiliates joined today from ${location}`,
           subText: 'Verified Sign-up Activity',
-          type: 'aggregate'
+          type: 'aggregate',
+          avatar
         };
       } else {
         const role = roles[Math.floor(Math.random() * roles.length)];
@@ -66,7 +74,8 @@ export default function Landing() {
         return {
           text: `A new ${role} from ${location} joined`,
           subText: time,
-          type: 'individual'
+          type: 'individual',
+          avatar
         };
       }
     };
@@ -682,9 +691,13 @@ export default function Landing() {
           className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-white border border-slate-100 rounded-2xl p-4.5 shadow-2xl flex items-start gap-4 transition-all duration-500 ease-out ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
         >
           {/* Circular avatar box */}
-          <div className="h-9 w-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 relative">
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-emerald-500 animate-pulse border border-white" />
-            <User className="h-4.5 w-4.5 text-[#0052FF]" />
+          <div className="h-9 w-9 rounded-full shrink-0 relative">
+            <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse border-2 border-white z-10" />
+            <img 
+              src={notification.avatar} 
+              className="h-9 w-9 rounded-full object-cover border border-slate-100 shadow-sm" 
+              alt="User Avatar"
+            />
           </div>
           
           <div className="space-y-0.5 pr-6">
