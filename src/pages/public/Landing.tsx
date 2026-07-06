@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
@@ -63,23 +63,21 @@ export default function Landing() {
 
       <header className="absolute top-10 sm:top-12 left-0 w-full z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-12">
-            <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
-            </div>
-            <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-              <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            </nav>
+          <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
           </div>
+          <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
             <a href={getAppUrl('/login')} className="text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-colors">
               Login
             </a>
             <a 
               href={getAppUrl('/register')}
-              className="bg-white text-[#0052FF] px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold hover:bg-white/95 hover:shadow-xl transition-all"
+              className="bg-white text-black px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold hover:bg-white/95 hover:shadow-xl transition-all"
             >
               Register
             </a>
@@ -156,16 +154,85 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Corporate Partner Logos */}
-      <section id="logos-section" className="py-12 border-b border-slate-100 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">Trusted by Australia's biggest performance brands</p>
-          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20 opacity-60 grayscale hover:opacity-85 transition-opacity">
-            <div className="text-lg font-black text-slate-800 tracking-tighter">AMEX</div>
-            <div className="text-lg font-black text-slate-800 tracking-tighter">Origin Energy</div>
-            <div className="text-lg font-black text-slate-800 tracking-tighter">Canva</div>
-            <div className="text-lg font-black text-slate-800 tracking-tighter">Afterpay</div>
+      {/* Cards and Trusted Brands transitional section */}
+      <section className="relative py-20 bg-gradient-to-b from-[#f8fafc] to-[#eff6ff] overflow-hidden border-b border-slate-100">
+        
+        {/* Soft background orbit lines mimicking the mockup */}
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-blue-200/50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-indigo-200/30" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1400px] rounded-full border border-purple-200/20" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          {/* Three Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            
+            {/* Advertisers */}
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                <Briefcase className="h-5 w-5 text-[#0052FF]" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-extrabold text-slate-900 text-lg">Advertisers</h3>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  Turn partnerships into profit, whether you're a new brand or scaling fast.
+                </p>
+                <a href={getAppUrl('/register?role=advertiser')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                  Start growing &rarr;
+                </a>
+              </div>
+            </div>
+
+            {/* Affiliate Partners */}
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                <User className="h-5 w-5 text-[#0052FF]" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-extrabold text-slate-900 text-lg">Affiliate Partners</h3>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  Monetise your content or platform through strategic brand partnerships.
+                </p>
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                  Start earning &rarr;
+                </a>
+              </div>
+            </div>
+
+            {/* Agencies */}
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                <Presentation className="h-5 w-5 text-[#0052FF]" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-extrabold text-slate-900 text-lg">Agencies</h3>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                  Accelerate your clients' growth with tech that simplifies affiliate marketing.
+                </p>
+                <a href={getAppUrl('/register?role=publisher')} className="inline-flex items-center text-xs font-bold text-[#0052FF] hover:underline pt-2">
+                  Start growing &rarr;
+                </a>
+              </div>
+            </div>
+
           </div>
+
+          {/* Trusted Brands Logo Cloud */}
+          <div className="text-center pt-8 border-t border-slate-100/60">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8">Trusted by Leading Brands</p>
+            <div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-50 grayscale hover:opacity-75 transition-opacity">
+              <div className="text-sm font-extrabold text-slate-800 tracking-tight">SAMSUNG</div>
+              <div className="text-sm font-extrabold text-slate-800 tracking-tight">lululemon</div>
+              <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Calvin Klein</div>
+              <div className="text-sm font-black text-slate-800 tracking-tighter uppercase italic">DeLonghi</div>
+              <div className="text-sm font-black text-slate-800 tracking-wider">adidas</div>
+              <div className="text-sm font-bold text-slate-800 tracking-tight">Aussie Broadband</div>
+              <div className="text-sm font-extrabold text-slate-800 uppercase tracking-tighter">My Muscle Chef</div>
+              <div className="text-sm font-bold text-slate-800 tracking-wide uppercase">Spotlight</div>
+            </div>
+          </div>
+
         </div>
       </section>
 
