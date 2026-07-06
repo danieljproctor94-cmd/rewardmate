@@ -133,18 +133,18 @@ export default function Landing() {
               alt="Reward Mate Logo" 
             />
           </div>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-bold transition-all text-white/90">
-            <a href="#features" className="transition-colors hover:text-white">Features</a>
-            <a href="#pricing" className="transition-colors hover:text-white">Pricing</a>
+          <nav className="hidden md:flex items-center space-x-3 text-sm font-bold transition-all text-white/90">
+            <a href="#features" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Features</a>
+            <a href="#pricing" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Pricing</a>
             
             {/* Resources Dropdown */}
             <div className="relative">
               <button 
                 onClick={() => setIsResourcesOpen(!isResourcesOpen)}
-                className={`flex items-center gap-1 py-1.5 px-3 rounded-full text-sm font-bold transition-all ${
+                className={`flex items-center gap-1 py-1.5 px-3.5 rounded-full text-sm font-bold transition-all ${
                   isResourcesOpen 
                     ? 'bg-white/10 text-white' 
-                    : 'hover:text-white'
+                    : 'hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <span>Resources</span>
@@ -206,7 +206,7 @@ export default function Landing() {
               )}
             </div>
 
-            <a href="#" className="transition-colors hover:text-white">Who we are</a>
+            <a href="#" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Who we are</a>
           </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
             <a 
