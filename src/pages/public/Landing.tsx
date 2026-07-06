@@ -226,7 +226,7 @@ export default function Landing() {
       </header>
       
       {/* Centered Hero Section */}
-      <section className="relative pt-28 pb-16 sm:pt-40 sm:pb-24 md:pt-48 md:pb-32 overflow-hidden bg-[#070913] text-white">
+      <section className="relative pt-36 pb-20 sm:pt-40 sm:pb-24 md:pt-48 md:pb-32 overflow-hidden bg-[#070913] text-white">
         
         {/* Radial Glow Overlays (using brand digital blue) */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[90px] pointer-events-none" />
@@ -235,7 +235,7 @@ export default function Landing() {
         {/* Soft Background Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-8 sm:space-y-12">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 text-center relative z-10 space-y-10 sm:space-y-12">
  
           {/* Heading and Description */}
           <div className="space-y-4 sm:space-y-6">
@@ -250,7 +250,7 @@ export default function Landing() {
           </div>
  
           {/* Three Integrated Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-6 text-left max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 sm:pt-6 text-left max-w-5xl mx-auto">
             
             {/* Advertisers */}
             <div className="rounded-3xl p-6 sm:p-8 flex items-start gap-4 transition-all duration-300 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white hover:bg-white/[0.06] hover:border-white/20 hover:scale-[1.02]">
