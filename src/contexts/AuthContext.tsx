@@ -59,7 +59,7 @@ const DEFAULT_MOCK_PROFILES: Profile[] = [
   {
     id: 'mock-admin-id',
     email: 'admin@rewardmate.com.au',
-    full_name: 'Super Admin (RewardMate)',
+    full_name: 'Super Admin (Reward Mate)',
     avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
     user_type: 'admin',
     approval_status: 'approved',

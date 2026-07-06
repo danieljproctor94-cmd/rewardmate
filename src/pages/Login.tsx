@@ -17,8 +17,8 @@ export default function Login() {
   const [role, setRole] = useState<'advertiser' | 'publisher'>('publisher');
 
   useSEO({
-    title: isRegister ? "Sign Up | RewardMate Affiliate Portal" : "Sign In | RewardMate Affiliate Portal",
-    description: "Access your RewardMate performance dashboard. Register or log in to manage your CPA campaigns, track link clicks, and claim affiliate payouts.",
+    title: isRegister ? "Sign Up | Reward Mate Affiliate Portal" : "Sign In | Reward Mate Affiliate Portal",
+    description: "Access your Reward Mate performance dashboard. Register or log in to manage your CPA campaigns, track link clicks, and claim affiliate payouts.",
     noIndex: false
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -72,7 +72,7 @@ export default function Login() {
         <div className="absolute bottom-[10%] left-[-10%] w-[300px] h-[300px] rounded-full opacity-10 blur-[70px] pointer-events-none bg-blue-900" />
 
         <a href={getLandingUrl('/')} className="flex items-center space-x-3 cursor-pointer relative z-10">
-          <img src="/rewardmate-logo-cropped.png" className="h-7 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <img src="/rewardmate-logo-cropped.png" className="h-7 sm:h-8 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
         </a>
 
         <div className="relative z-10 space-y-6 max-w-lg">
@@ -99,7 +99,7 @@ export default function Login() {
         </div>
 
         <div className="text-white/60 text-xs relative z-10">
-          &copy; {new Date().getFullYear()} RewardMate. All rights reserved.
+          &copy; {new Date().getFullYear()} Reward Mate. All rights reserved.
         </div>
       </div>
 
@@ -109,14 +109,14 @@ export default function Login() {
           
           <div className="text-center lg:text-left">
             <a href={getLandingUrl('/')} className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer">
-              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="RewardMate Logo" />
+              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
             </a>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               {isRegister ? 'Create Your Account' : 'Welcome Back'}
             </h1>
             <p className="text-slate-500 text-sm mt-2">
-              {isRegister ? 'Join as an Advertiser or Publisher to get started' : 'Sign in to access your RewardMate portal'}
+              {isRegister ? 'Join as an Advertiser or Publisher to get started' : 'Sign in to access your Reward Mate portal'}
             </p>
           </div>
 
@@ -234,7 +234,7 @@ export default function Login() {
               </>
             ) : (
               <>
-                New to RewardMate?{' '}
+                New to Reward Mate?{' '}
                 <button onClick={() => setIsRegister(true)} className="text-[#0052FF] hover:underline">
                   Create Account
                 </button>

@@ -107,7 +107,7 @@ function ClickRedirect() {
         }
         
         // General fallback
-        toast.success(`Tracking link clicked! Redirecting to RewardMate Australia...`);
+        toast.success(`Tracking link clicked! Redirecting to Reward Mate Australia...`);
         setTimeout(() => {
           window.location.replace('https://www.rewardmate.com.au');
         }, 1500);

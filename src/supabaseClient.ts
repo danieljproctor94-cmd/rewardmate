@@ -11,7 +11,7 @@ export const isSupabaseConfigured = !!(
 
 if (!isSupabaseConfigured) {
   console.warn(
-    'RewardMate: Supabase environment variables are missing or placeholders. The application will run in local simulated sandbox mode using localStorage.'
+    'Reward Mate: Supabase environment variables are missing or placeholders. The application will run in local simulated sandbox mode using localStorage.'
   );
 }
 

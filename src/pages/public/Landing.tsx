@@ -10,7 +10,7 @@ export default function Landing() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "RewardMate",
+    "name": "Reward Mate",
     "url": "https://rewardmate.com.au",
     "logo": "https://rewardmate.com.au/rewardmate-logo-cropped.png",
     "description": "Australia's leading affiliate marketing network connecting high-intent publishers with premier advertisers on a risk-free CPA basis.",
@@ -25,15 +25,15 @@ export default function Landing() {
   };
 
   useSEO({
-    title: "RewardMate | Australia's Leading Affiliate & CPA Network",
-    description: "RewardMate connects premium Australian publishers with premier brands. Acquire customers on a 100% risk-free CPA affiliate basis or earn top revenues today.",
+    title: "Reward Mate | Australia's Leading Affiliate & CPA Network",
+    description: "Reward Mate connects premium Australian publishers with premier brands. Acquire customers on a 100% risk-free CPA affiliate basis or earn top revenues today.",
     schema
   });
 
   const faqs = [
     {
-      q: "What is RewardMate?",
-      a: "RewardMate is Australia's leading affiliate marketing network. We connect brands looking for risk-free sales (Advertisers) with creators, media buyers, and website owners (Publishers) who promote those brands for a commission."
+      q: "What is Reward Mate?",
+      a: "Reward Mate is Australia's leading affiliate marketing network. We connect brands looking for risk-free sales (Advertisers) with creators, media buyers, and website owners (Publishers) who promote those brands for a commission."
     },
     {
       q: "How does the tracking work?",
@@ -65,7 +65,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center space-x-12">
             <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
             </div>
             <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
               <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -109,7 +109,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-white/90 max-w-xl leading-relaxed">
-              Whether you are at home or on the go, let RewardMate exceed your performance expectations. Drive risk-free sales or monetize your traffic with a tap.
+              Whether you are at home or on the go, let Reward Mate exceed your performance expectations. Drive risk-free sales or monetize your traffic with a tap.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
@@ -117,7 +117,7 @@ export default function Landing() {
                 href={getAppUrl('/register')}
                 className="bg-slate-950 text-white h-12 px-8 rounded-full text-sm font-bold flex items-center justify-center hover:bg-slate-900 hover:scale-[1.02] shadow-xl transition-all"
               >
-                Join RewardMate
+                Join Reward Mate
               </a>
               <a 
                 href={getAppUrl('/login')}
@@ -139,7 +139,7 @@ export default function Landing() {
               <img 
                 src="/hero_partner_portrait.png" 
                 className="absolute inset-0 w-full h-full object-cover rounded-[38px] z-0 pointer-events-none" 
-                alt="RewardMate Partner Portrait"
+                alt="Reward Mate Partner Portrait"
               />
 
               {/* Revolut Payout Stats Overlay Card */}
@@ -422,7 +422,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-4">Frequently Asked Questions</h2>
-            <p className="text-slate-500">Everything you need to know about setting up and running RewardMate.</p>
+            <p className="text-slate-500">Everything you need to know about setting up and running Reward Mate.</p>
           </div>
 
           <div className="space-y-4">
@@ -479,7 +479,7 @@ export default function Landing() {
       <footer className="py-12 border-t border-slate-100 bg-slate-50 text-slate-500">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
           <div className="flex items-center space-x-3 mb-6 md:mb-0">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain" alt="RewardMate Logo" />
+            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain" alt="Reward Mate Logo" />
             <span className="text-slate-400 text-xs">| Australia's Affiliate Leader</span>
           </div>
           <div className="flex space-x-6">
@@ -489,7 +489,7 @@ export default function Landing() {
             <a href={getAppUrl('/login')} className="hover:text-[#0052FF] transition-colors">Portal Login</a>
           </div>
           <div className="mt-6 md:mt-0">
-            &copy; {new Date().getFullYear()} RewardMate. All rights reserved.
+            &copy; {new Date().getFullYear()} Reward Mate. All rights reserved.
           </div>
         </div>
       </footer>

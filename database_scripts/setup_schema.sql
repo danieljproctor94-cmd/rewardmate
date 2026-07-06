@@ -1,4 +1,4 @@
--- RewardMate Supabase Schema Setup
+-- Reward Mate Supabase Schema Setup
 
 -- Enable UUID extension if not enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
