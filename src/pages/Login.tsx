@@ -157,8 +157,8 @@ export default function Login() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setRole('advertiser')}
-                      className={`h-14 rounded-xl border flex flex-col justify-center items-center font-bold text-xs transition-all ${role === 'advertiser' ? 'border-[#0052FF] bg-blue-50 text-[#0052FF]' : 'border-slate-200 bg-[#f8fafc] text-slate-500 hover:border-slate-300'}`}
+                      onClick={() => navigate('/register/advertiser')}
+                      className="h-14 rounded-xl border flex flex-col justify-center items-center font-bold text-xs border-slate-200 bg-[#f8fafc] text-slate-500 hover:border-slate-300 transition-all"
                     >
                       <Layers className="h-5 w-5 mb-1" />
                       Advertiser / Brand
