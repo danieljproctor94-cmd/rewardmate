@@ -80,11 +80,11 @@ export default function Landing() {
       
       timer1 = setTimeout(() => {
         setShowNotification(false);
-        timer2 = setTimeout(showNext, 12000);
-      }, 5000);
+        timer2 = setTimeout(showNext, 4000);
+      }, 4000);
     };
 
-    const initialTimer = setTimeout(showNext, 5000);
+    const initialTimer = setTimeout(showNext, 2000);
 
     return () => {
       clearTimeout(initialTimer);
