@@ -678,7 +678,7 @@ export default function Landing() {
       {/* Social Proof Popup Notification */}
       {notification && (
         <div 
-          className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] bg-white border border-slate-100 rounded-full py-3 px-5 pr-6 shadow-2xl flex items-center gap-3.5 transition-all duration-500 ease-out ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
+          className={`fixed bottom-6 left-6 z-50 max-w-sm w-[calc(100vw-3rem)] backdrop-blur-xl border rounded-full py-3 px-5 pr-6 shadow-2xl flex items-center gap-3.5 transition-all duration-500 ease-out ${isHeroDark ? 'bg-white/[0.03] border-white/10 text-white' : 'bg-white/70 border-slate-200/60 text-slate-800'} ${showNotification ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0 pointer-events-none'}`}
         >
           {/* Circular map box */}
           <div className="h-9 w-9 rounded-full shrink-0 relative">
@@ -687,23 +687,23 @@ export default function Landing() {
             </span>
             <img 
               src="https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?auto=format&fit=crop&w=100&h=100&q=80" 
-              className="h-9 w-9 rounded-full object-cover border border-slate-200 shadow-sm brightness-[0.9] contrast-[1.1]" 
+              className={`h-9 w-9 rounded-full object-cover border shadow-sm brightness-[0.9] contrast-[1.1] ${isHeroDark ? 'border-white/10' : 'border-slate-200/50'}`} 
               alt="GPS Verified Location Map"
             />
           </div>
           
           <div className="space-y-0.5 pr-2">
-            <p className="text-xs font-bold text-slate-800 leading-snug">
+            <p className={`text-xs font-bold leading-snug transition-all ${isHeroDark ? 'text-white' : 'text-slate-800'}`}>
               {notification.text}
             </p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+            <p className={`text-[10px] font-semibold uppercase tracking-wider transition-all ${isHeroDark ? 'text-slate-400' : 'text-slate-500'}`}>
               {notification.subText}
             </p>
           </div>
 
           <button 
             onClick={() => setShowNotification(false)} 
-            className="text-slate-400 hover:text-slate-600 shrink-0 ml-auto p-1 hover:bg-slate-50 rounded-full transition-colors"
+            className={`text-slate-400 shrink-0 ml-auto p-1 rounded-full transition-colors ${isHeroDark ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-slate-100 hover:text-slate-600'}`}
           >
             <X className="h-3.5 w-3.5" />
           </button>
