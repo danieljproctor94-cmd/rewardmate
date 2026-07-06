@@ -87,13 +87,13 @@ export default function Landing() {
       <section className="relative bg-[#070913] text-white pt-40 pb-24 md:pt-48 md:pb-32 overflow-hidden">
         
         {/* Radial Glow Overlays (using brand digital blue) */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[80px] pointer-events-none" />
-        <div className="absolute top-[10%] right-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-25 blur-[90px] pointer-events-none" />
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[90px] pointer-events-none" />
+        <div className="absolute top-[20%] right-0 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-25 blur-[95px] pointer-events-none" />
         
         {/* Soft Background Grid Overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px]" />
         
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10 space-y-8">
+        <div className="max-w-6xl mx-auto px-6 text-center relative z-10 space-y-12">
           
           {/* Top Pill Badge */}
           <div className="inline-flex items-center space-x-2 bg-[#0052FF]/10 border border-[#0052FF]/20 rounded-full px-4.5 py-1.5 transition-all cursor-default mx-auto">
@@ -101,80 +101,28 @@ export default function Landing() {
             <span className="text-[10px] sm:text-xs font-bold text-[#38bdf8] tracking-widest uppercase">Australia's Premier Affiliate Network</span>
           </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] max-w-4xl mx-auto">
-            Scale Your Performance.<br />
-            <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Pay Only For Results.</span>
-          </h1>
+          {/* Heading and Description */}
+          <div className="space-y-6">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+              Scale Your Performance.<br />
+              <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Pay Only For Results.</span>
+            </h1>
 
-          {/* Description */}
-          <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's independent network.
-          </p>
-
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a 
-              href={getAppUrl('/register')}
-              className="bg-[#0052FF] text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(0,82,255,0.3)] hover:shadow-[0_0_25px_rgba(0,82,255,0.5)] text-sm w-full sm:w-auto"
-            >
-              Start Earning Now &rarr;
-            </a>
-            <a 
-              href={getAppUrl('/login')}
-              className="bg-transparent border border-white/10 text-white font-bold h-12 px-8 rounded-full flex items-center justify-center hover:bg-white/5 transition-all text-sm w-full sm:w-auto"
-            >
-              Simulate Sandbox Demo
-            </a>
+            <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's independent network.
+            </p>
           </div>
 
-          {/* Divider */}
-          <div className="w-full h-px bg-white/5 pt-8" />
-
-          {/* Bottom Metrics Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 text-center max-w-4xl mx-auto">
-            <div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white">5,000+</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Active Affiliates</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white">250+</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Premium Brands</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white">$12M+</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Paid Commissions</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white">99.9%</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Tracking Accuracy</div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Cards and Trusted Brands transitional section */}
-      <section className="relative py-20 bg-gradient-to-b from-[#f8fafc] to-[#eff6ff] overflow-hidden border-b border-slate-100">
-        
-        {/* Soft background orbit lines mimicking the mockup */}
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-blue-200/50" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[1100px] rounded-full border border-indigo-200/30" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1400px] rounded-full border border-purple-200/20" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          {/* Three Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          {/* Three Integrated Cards (White Background) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 text-left max-w-5xl mx-auto">
             
             {/* Advertisers */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
               <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                 <Briefcase className="h-5 w-5 text-[#0052FF]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg">Advertisers</h3>
+                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Advertisers</h3>
                 <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
                   Turn partnerships into profit, whether you're a new brand or scaling fast.
                 </p>
@@ -185,12 +133,12 @@ export default function Landing() {
             </div>
 
             {/* Affiliate Partners */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
               <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                 <User className="h-5 w-5 text-[#0052FF]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg">Affiliate Partners</h3>
+                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Affiliate Partners</h3>
                 <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
                   Monetise your content or platform through strategic brand partnerships.
                 </p>
@@ -201,12 +149,12 @@ export default function Landing() {
             </div>
 
             {/* Agencies */}
-            <div className="bg-white border border-slate-100/80 rounded-3xl p-8 shadow-lg flex items-start gap-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+            <div className="bg-white border border-slate-100/80 rounded-3xl p-6 sm:p-8 shadow-xl flex items-start gap-4 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
               <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
                 <Presentation className="h-5 w-5 text-[#0052FF]" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-extrabold text-slate-900 text-lg">Agencies</h3>
+                <h3 className="font-extrabold text-slate-900 text-lg leading-snug">Agencies</h3>
                 <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
                   Accelerate your clients' growth with tech that simplifies affiliate marketing.
                 </p>
@@ -218,21 +166,23 @@ export default function Landing() {
 
           </div>
 
-          {/* Trusted Brands Logo Cloud */}
-          <div className="text-center pt-8 border-t border-slate-100/60">
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8">Trusted by Leading Brands</p>
-            <div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-50 grayscale hover:opacity-75 transition-opacity">
-              <div className="text-sm font-extrabold text-slate-800 tracking-tight">SAMSUNG</div>
-              <div className="text-sm font-extrabold text-slate-800 tracking-tight">lululemon</div>
-              <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Calvin Klein</div>
-              <div className="text-sm font-black text-slate-800 tracking-tighter uppercase italic">DeLonghi</div>
-              <div className="text-sm font-black text-slate-800 tracking-wider">adidas</div>
-              <div className="text-sm font-bold text-slate-800 tracking-tight">Aussie Broadband</div>
-              <div className="text-sm font-extrabold text-slate-800 uppercase tracking-tighter">My Muscle Chef</div>
-              <div className="text-sm font-bold text-slate-800 tracking-wide uppercase">Spotlight</div>
-            </div>
-          </div>
+        </div>
+      </section>
 
+      {/* Trusted Brands Logo Cloud section */}
+      <section id="logos-section" className="py-12 border-b border-slate-100 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8">Trusted by Leading Brands</p>
+          <div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-50 grayscale hover:opacity-75 transition-opacity">
+            <div className="text-sm font-extrabold text-slate-800 tracking-tight">SAMSUNG</div>
+            <div className="text-sm font-extrabold text-slate-800 tracking-tight">lululemon</div>
+            <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Calvin Klein</div>
+            <div className="text-sm font-black text-slate-800 tracking-tighter uppercase italic">DeLonghi</div>
+            <div className="text-sm font-black text-slate-800 tracking-wider">adidas</div>
+            <div className="text-sm font-bold text-slate-800 tracking-tight">Aussie Broadband</div>
+            <div className="text-sm font-extrabold text-slate-800 uppercase tracking-tighter">My Muscle Chef</div>
+            <div className="text-sm font-bold text-slate-800 tracking-wide uppercase">Spotlight</div>
+          </div>
         </div>
       </section>
 
