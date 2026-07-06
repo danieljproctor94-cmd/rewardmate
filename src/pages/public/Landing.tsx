@@ -109,7 +109,7 @@ export default function Landing() {
 
           {/* Description */}
           <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's most transparent tracking network.
+            Connecting premium Australian advertisers with elite publishers. Drive risk-free sales, leads, and conversions with the country's independent network.
           </p>
 
           {/* Buttons */}
