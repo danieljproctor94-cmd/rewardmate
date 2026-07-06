@@ -63,7 +63,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 text-white font-sans selection:bg-blue-500/20 bg-[#070913]">
+    <div className="min-h-screen lg:h-screen w-full grid lg:grid-cols-2 text-white font-sans selection:bg-blue-500/20 bg-[#070913] overflow-x-hidden relative">
       
       {/* Left panel: Info/Branding (Premium dark blue hero-matched panel) */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#070913] border-r border-white/5 relative overflow-hidden text-white">
@@ -108,14 +108,14 @@ export default function Login() {
       </div>
 
       {/* Right panel: Login forms */}
-      <div className="flex items-center justify-center p-6 sm:p-12 relative overflow-y-auto bg-[#070913]">
+      <div className="flex items-center justify-center p-4 sm:p-12 relative overflow-y-auto overflow-x-hidden bg-[#070913] h-full w-full">
         
         {/* Glow Effects */}
         <div className="absolute top-[-10%] right-[-10%] w-[350px] h-[350px] rounded-full bg-[radial-gradient(circle,#002699_0%,transparent_70%)] opacity-20 blur-[80px] pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-15 blur-[90px] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
-        <div className="w-full max-w-md bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 space-y-6 shadow-2xl relative z-10 animate-in fade-in duration-500">
+        <div className="w-full max-w-md bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-10 space-y-6 shadow-2xl relative z-10 animate-in fade-in duration-500">
           
           <div className="text-center lg:text-left">
             <a href={getLandingUrl('/')} className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer">
