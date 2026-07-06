@@ -188,7 +188,7 @@ export default function About() {
               </div>
               <h3 className="font-extrabold text-lg text-slate-900">Supporting Australian Business</h3>
               <p className="text-slate-500 text-sm leading-relaxed">
-                As an Australian-owned network, we dedicate support lines to regional brands and local content publishers trying to build business locally.
+                As a Queensland-owned and operated network, we dedicate support lines to regional brands and local content publishers trying to build business locally.
               </p>
             </div>
           </div>

@@ -155,7 +155,7 @@ export default function Contact() {
             <div className="space-y-4">
               <h2 className="text-2xl font-extrabold text-slate-900">Get in Touch</h2>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Whether you're an advertiser looking to launch, a publisher seeking premium offers, or need technical campaign assistance, our Sydney-based team is ready to support you.
+                Whether you're an advertiser looking to launch, a publisher seeking premium offers, or need technical campaign assistance, our Queensland-based team is ready to support you.
               </p>
             </div>
 
@@ -167,8 +167,7 @@ export default function Contact() {
                 <div>
                   <h4 className="font-extrabold text-sm text-slate-900">Headquarters</h4>
                   <p className="text-slate-500 text-xs sm:text-sm mt-0.5 leading-relaxed">
-                    Level 24, 300 George Street<br />
-                    Sydney, NSW 2000, Australia
+                    Noosaville QLD
                   </p>
                 </div>
               </div>
@@ -206,7 +205,7 @@ export default function Contact() {
                   <h4 className="font-extrabold text-sm text-slate-900">Operating Hours</h4>
                   <p className="text-slate-500 text-xs sm:text-sm mt-0.5 leading-relaxed">
                     Monday &ndash; Friday, 9:00 AM &ndash; 5:00 PM AEST<br />
-                    Excluding NSW public holidays.
+                    Excluding QLD public holidays.
                   </p>
                 </div>
               </div>
