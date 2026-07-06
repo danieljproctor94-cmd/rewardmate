@@ -26,7 +26,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="glow-mesh-bg min-h-screen text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden">
+    <div className="dark bg-[#0d0f17] glow-mesh-bg min-h-screen text-slate-100 font-sans selection:bg-emerald-500/30 overflow-x-hidden">
       
       {/* Premium Header */}
       <header className="fixed top-0 left-0 w-full z-50 bg-[#0d0f17]/80 backdrop-blur-md border-b border-white/[0.05]">

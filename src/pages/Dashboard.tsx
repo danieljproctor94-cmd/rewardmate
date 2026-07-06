@@ -135,7 +135,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const totalSpend = campaigns.reduce((acc, c) => acc + Number(c.spend), 0);
 
   return (
-    <div className="min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
+    <div className="dark min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -531,7 +531,7 @@ function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any
   const epc = clickCount > 0 ? (totalEarnings / clickCount) : 0.00;
 
   return (
-    <div className="min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
+    <div className="dark min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
       {/* Top Navbar */}
       <nav className="border-b border-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -921,7 +921,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const networkVolume = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
 
   return (
-    <div className="min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
+    <div className="dark min-h-screen bg-[#0d0f17] text-slate-100 flex flex-col">
       {/* Top Navbar */}
       <nav className="border-b border-b-white/[0.05] bg-[#090b12] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">

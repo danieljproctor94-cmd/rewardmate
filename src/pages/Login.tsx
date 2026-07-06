@@ -55,7 +55,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 text-slate-100 font-sans selection:bg-emerald-500/30 bg-[#0d0f17]">
+    <div className="dark min-h-screen grid lg:grid-cols-2 text-slate-100 font-sans selection:bg-emerald-500/30 bg-[#0d0f17]">
       
       {/* Left panel: Info/Branding */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-tr from-[#0a0c13] via-[#111624] to-[#151d30] border-r border-white/[0.05] relative overflow-hidden">
