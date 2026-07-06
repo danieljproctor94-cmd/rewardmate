@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Layers, Mail, Lock, User, Briefcase, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { getLandingUrl } from '../lib/domain';
 
 export default function Login() {
   const { signIn, signUp, isMock } = useAuth();
@@ -63,9 +64,9 @@ export default function Login() {
         <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] rounded-full opacity-20 blur-[80px] pointer-events-none bg-white" />
         <div className="absolute bottom-[10%] left-[-10%] w-[300px] h-[300px] rounded-full opacity-10 blur-[70px] pointer-events-none bg-blue-900" />
 
-        <div className="flex items-center space-x-3 cursor-pointer relative z-10" onClick={() => navigate('/')}>
-          <img src="/rewardmate-logo-cropped.png" className="h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
-        </div>
+        <a href={getLandingUrl('/')} className="flex items-center space-x-3 cursor-pointer relative z-10">
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+        </a>
 
         <div className="relative z-10 space-y-6 max-w-lg">
           <h2 className="text-4xl md:text-5xl font-extrabold leading-tight text-white">
@@ -100,9 +101,9 @@ export default function Login() {
         <div className="w-full max-w-md space-y-8 animate-in fade-in duration-500">
           
           <div className="text-center lg:text-left">
-            <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer" onClick={() => navigate('/')}>
-              <img src="/rewardmate-logo-cropped.png" className="h-8 w-auto object-contain" alt="RewardMate Logo" />
-            </div>
+            <a href={getLandingUrl('/')} className="flex items-center justify-center lg:justify-start space-x-3 mb-6 lg:hidden cursor-pointer">
+              <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
+            </a>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               {isRegister ? 'Create Your Account' : 'Welcome Back'}

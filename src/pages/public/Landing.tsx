@@ -41,7 +41,7 @@ export default function Landing() {
       <header className="absolute top-2 sm:top-6 left-0 w-full z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+            <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-7 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
           </div>
           <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -454,7 +454,7 @@ export default function Landing() {
       <footer className="py-12 border-t border-slate-100 bg-slate-50 text-slate-500">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
           <div className="flex items-center space-x-3 mb-6 md:mb-0">
-            <img src="/rewardmate-logo-cropped.png" className="h-7 w-auto object-contain" alt="RewardMate Logo" />
+            <img src="/rewardmate-logo-cropped.png" className="h-5 sm:h-6 w-auto object-contain" alt="RewardMate Logo" />
             <span className="text-slate-400 text-xs">| Australia's Affiliate Leader</span>
           </div>
           <div className="flex space-x-6">
