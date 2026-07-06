@@ -251,14 +251,14 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8">Trusted by Leading Brands</p>
           <div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-50 grayscale hover:opacity-75 transition-opacity">
-            <div className="text-sm font-extrabold text-slate-800 tracking-tight">SAMSUNG</div>
-            <div className="text-sm font-extrabold text-slate-800 tracking-tight">lululemon</div>
-            <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Calvin Klein</div>
-            <div className="text-sm font-black text-slate-800 tracking-tighter uppercase italic">DeLonghi</div>
-            <div className="text-sm font-black text-slate-800 tracking-wider">adidas</div>
-            <div className="text-sm font-bold text-slate-800 tracking-tight">Aussie Broadband</div>
-            <div className="text-sm font-extrabold text-slate-800 uppercase tracking-tighter">My Muscle Chef</div>
-            <div className="text-sm font-bold text-slate-800 tracking-wide uppercase">Spotlight</div>
+            <div className="text-sm font-extrabold text-slate-800 tracking-widest uppercase">ACME CORP</div>
+            <div className="text-sm font-black text-slate-800 tracking-tight lowercase">globex</div>
+            <div className="text-sm font-bold text-slate-800 tracking-wide">Initech</div>
+            <div className="text-sm font-extrabold text-slate-800 tracking-tighter italic">hooli</div>
+            <div className="text-sm font-black text-slate-800 tracking-widest uppercase">APEX</div>
+            <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Omni Group</div>
+            <div className="text-sm font-medium text-slate-800 tracking-widest uppercase">NEXUS</div>
+            <div className="text-sm font-bold text-slate-800 tracking-wide uppercase italic">VEER</div>
           </div>
         </div>
       </section>
