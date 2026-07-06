@@ -61,17 +61,18 @@ export default function Landing() {
         </a>
       </div>
 
-      {/* Premium Header */}
       <header className="absolute top-10 sm:top-12 left-0 w-full z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+          <div className="flex items-center space-x-12">
+            <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-8 w-auto object-contain brightness-0 invert" alt="RewardMate Logo" />
+            </div>
+            <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+              <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+            </nav>
           </div>
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-bold text-white/90">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-          </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
             <a href={getAppUrl('/login')} className="text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-colors">
               Login
