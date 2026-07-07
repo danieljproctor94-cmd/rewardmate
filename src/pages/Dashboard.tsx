@@ -145,24 +145,24 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const totalSpend = campaigns.reduce((acc, c) => acc + Number(c.spend), 0);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#070913] text-white flex flex-col font-sans selection:bg-[#0052FF]/30">
       {/* Top Navbar */}
-      <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
+      <nav className="border-b border-white/5 bg-[#05070f] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
-          <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+          <span className="text-xs font-semibold text-[#0052FF] bg-[#0052FF]/10 border border-[#0052FF]/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Advertiser</span>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-right">
-            <div className="text-xs text-slate-600 font-bold uppercase tracking-wider">Wallet Balance</div>
+            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Wallet Balance</div>
             <div className="text-sm font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
           </div>
           <button 
             onClick={signOut}
-            className="flex items-center text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 px-3 py-2 rounded-xl"
+            className="flex items-center text-xs font-bold text-slate-350 hover:text-white transition-colors bg-white/[0.04] border border-white/5 px-3 py-2 rounded-xl cursor-pointer"
           >
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            <LogOut className="h-4 w-4 mr-2 text-slate-500" /> Sign Out
           </button>
         </div>
       </nav>
@@ -172,43 +172,43 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="flex justify-between items-center text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Total Spend</span>
               <DollarSign className="h-5 w-5 text-[#0052FF]" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-900">${totalSpend.toFixed(2)}</div>
-            <p className="text-[11px] text-slate-600 mt-2">Deducted from budget for approved conversions</p>
+            <div className="text-3xl font-extrabold text-white">${totalSpend.toFixed(2)}</div>
+            <p className="text-[11px] text-slate-500 mt-2">Deducted from budget for approved conversions</p>
           </div>
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="flex justify-between items-center text-slate-400 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Active Campaigns</span>
               <TrendingUp className="h-5 w-5 text-[#0052FF]" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-900">{activeCampaigns}</div>
-            <p className="text-[11px] text-slate-600 mt-2">Out of {campaigns.length} campaigns listed</p>
+            <div className="text-3xl font-extrabold text-white">{activeCampaigns}</div>
+            <p className="text-[11px] text-slate-500 mt-2">Out of {campaigns.length} campaigns listed</p>
           </div>
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="flex justify-between items-center text-slate-455 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider">Acquisition Wallet</span>
               <MousePointer className="h-5 w-5 text-[#0052FF]" />
             </div>
-            <div className="text-3xl font-extrabold text-slate-900">${Number(profile.wallet_balance).toFixed(2)}</div>
-            <p className="text-[11px] text-slate-600 mt-2">Available for campaign allocation</p>
+            <div className="text-3xl font-extrabold text-white">${Number(profile.wallet_balance).toFixed(2)}</div>
+            <p className="text-[11px] text-slate-500 mt-2">Available for campaign allocation</p>
           </div>
         </div>
 
         {/* Tab Selector */}
-        <div className="flex space-x-4 border-b border-slate-200/80">
+        <div className="flex space-x-4 border-b border-white/5">
           <button 
             onClick={() => setActiveTab('campaigns')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaigns' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'campaigns' ? 'border-[#0052FF] text-[#0052FF]' : 'border-transparent text-slate-400 hover:text-white'}`}
           >
             My Campaigns
           </button>
           <button 
             onClick={() => setActiveTab('wallet')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'wallet' ? 'border-[#0052FF] text-[#0052FF]' : 'border-transparent text-slate-400 hover:text-white'}`}
           >
             Deposit & Wallet
           </button>
@@ -219,52 +219,52 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Campaign Directory</h3>
-                <p className="text-xs text-slate-600">Submit, pause, and monitor performance offers</p>
+                <h3 className="text-lg font-bold text-white">Campaign Directory</h3>
+                <p className="text-xs text-slate-400">Submit, pause, and monitor performance offers</p>
               </div>
               <button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-10 px-5 rounded-xl flex items-center gap-1.5"
+                className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-10 px-5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow shadow-blue-500/10"
               >
                 <Plus className="h-4 w-4" /> Create Offer
               </button>
             </div>
 
             {campaigns.length === 0 ? (
-              <div className="premium-glass-panel p-12 text-center text-slate-600 space-y-3">
-                <AlertCircle className="h-10 w-10 text-slate-600 mx-auto" />
+              <div className="bg-[#0c1024] border border-white/[0.04] p-12 text-center text-slate-505 rounded-2xl space-y-3">
+                <AlertCircle className="h-10 w-10 text-slate-505 mx-auto" />
                 <p className="font-bold text-sm">No campaigns created yet.</p>
-                <p className="text-xs max-w-sm mx-auto">Click "Create Offer" to submit your first campaign for Admin approval.</p>
+                <p className="text-xs max-w-sm mx-auto text-slate-500">Click "Create Offer" to submit your first campaign for Admin approval.</p>
               </div>
             ) : (
               <div className="grid gap-4">
                 {campaigns.map((camp) => (
-                  <div key={camp.id} className="premium-glass-panel p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div key={camp.id} className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <h4 className="text-base font-bold text-slate-900">{camp.name}</h4>
+                        <h4 className="text-base font-bold text-white">{camp.name}</h4>
                         <span className={`text-[10px] font-extrabold rounded-full px-2.5 py-0.5 border ${
-                          camp.status === 'active' ? 'bg-blue-500/10 border-blue-600/30 text-[#0052FF]' :
-                          camp.status === 'pending_approval' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
+                          camp.status === 'active' ? 'bg-[#0052FF]/10 border-[#0052FF]/30 text-[#0052FF]' :
+                          camp.status === 'pending_approval' ? 'bg-amber-500/10 border-amber-500/30 text-amber-450' :
                           'bg-red-500/10 border-red-500/30 text-red-400'
                         }`}>
                           {camp.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-600 line-clamp-2 max-w-xl">{camp.description}</p>
-                      <div className="text-[11px] text-slate-600 pt-1">
+                      <p className="text-xs text-slate-400 line-clamp-2 max-w-xl leading-relaxed">{camp.description}</p>
+                      <div className="text-[11px] text-slate-500 pt-1">
                         URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-[#0052FF] underline">{camp.landing_page_url}</a>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-8 text-right shrink-0">
                       <div>
-                        <div className="text-xs text-slate-600">Payout Rate</div>
-                        <div className="text-sm font-bold text-slate-900">${Number(camp.payout_amount).toFixed(2)} AUD <span className="text-[10px] text-slate-600 uppercase">{camp.payout_type}</span></div>
+                        <div className="text-xs text-slate-500 font-semibold">Payout Rate</div>
+                        <div className="text-sm font-bold text-white">${Number(camp.payout_amount).toFixed(2)} AUD <span className="text-[10px] text-slate-500 uppercase">{camp.payout_type}</span></div>
                       </div>
                       <div>
-                        <div className="text-xs text-slate-600">Spend / Budget</div>
-                        <div className="text-sm font-bold text-slate-900">${Number(camp.spend).toFixed(2)} / ${Number(camp.total_budget).toFixed(2)}</div>
+                        <div className="text-xs text-slate-500 font-semibold">Spend / Budget</div>
+                        <div className="text-sm font-bold text-white">${Number(camp.spend).toFixed(2)} / ${Number(camp.total_budget).toFixed(2)}</div>
                       </div>
                     </div>
                   </div>
@@ -275,57 +275,57 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         )}
 
         {activeTab === 'wallet' && (
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="premium-glass-panel p-8 space-y-6">
+          <div className="grid md:grid-cols-2 gap-8 font-sans">
+            <div className="bg-[#0c1024] border border-white/[0.04] p-8 rounded-2xl space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Deposit Budget</h3>
-                <p className="text-xs text-slate-600">Add funds to allocate to your affiliate campaigns.</p>
+                <h3 className="text-lg font-bold text-white">Deposit Budget</h3>
+                <p className="text-xs text-slate-400">Add funds to allocate to your affiliate campaigns.</p>
               </div>
 
               <form onSubmit={handleDeposit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Amount (AUD)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Amount (AUD)</label>
                   <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600" />
+                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
                     <input 
                       type="number" 
                       placeholder="e.g. 500"
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-colors"
+                      className="w-full bg-[#070913] border border-white/10 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-white focus:outline-none focus:border-[#0052FF] transition-all"
                       required
                     />
                   </div>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 transition-colors"
+                  className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-600 transition-colors shadow shadow-blue-500/10 cursor-pointer"
                 >
                   Deposit Sandbox Funds
                 </button>
               </form>
             </div>
 
-            <div className="premium-glass-panel p-8 space-y-6">
+            <div className="bg-[#0c1024] border border-white/[0.04] p-8 rounded-2xl space-y-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Wallet Overview</h3>
-                <p className="text-xs text-slate-600">Summary of advertiser credit balance.</p>
+                <h3 className="text-lg font-bold text-white">Wallet Overview</h3>
+                <p className="text-xs text-slate-400">Summary of advertiser credit balance.</p>
               </div>
 
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
-                  <span className="text-sm text-slate-600">Available Balance</span>
+                <div className="flex justify-between items-center py-3 border-b border-white/5">
+                  <span className="text-sm text-slate-400">Available Balance</span>
                   <span className="text-base font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
                 </div>
-                <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
-                  <span className="text-sm text-slate-600">Pending Campaign Allocations</span>
-                  <span className="text-sm font-bold text-slate-900">
+                <div className="flex justify-between items-center py-3 border-b border-white/5">
+                  <span className="text-sm text-slate-400">Pending Campaign Allocations</span>
+                  <span className="text-sm font-bold text-white">
                     ${campaigns.filter(c => c.status === 'pending_approval').reduce((acc, c) => acc + Number(c.total_budget), 0).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
-                  <span className="text-sm text-slate-600">Total Capital Spent</span>
-                  <span className="text-sm font-bold text-slate-900">${totalSpend.toFixed(2)}</span>
+                  <span className="text-sm text-slate-400">Total Capital Spent</span>
+                  <span className="text-sm font-bold text-white">${totalSpend.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -336,91 +336,91 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 
       {/* Campaign Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-50 border border-slate-200/50 border border-slate-200 rounded-2xl w-full max-w-lg p-8 space-y-6 max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="bg-[#0c1024] border border-white/[0.08] rounded-2xl w-full max-w-lg p-8 space-y-6 max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200 shadow-2xl">
             <button 
               onClick={() => setShowCreateModal(false)}
-              className="absolute right-6 top-6 text-slate-600 hover:text-white transition-colors"
+              className="absolute right-6 top-6 text-slate-500 hover:text-white transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
 
             <div>
               <h3 className="text-xl font-bold text-white">List New Campaign</h3>
-              <p className="text-xs text-slate-600">Submit your affiliate deal parameters for verification.</p>
+              <p className="text-xs text-slate-400">Submit your affiliate deal parameters for verification.</p>
             </div>
 
             <form onSubmit={handleCreateCampaign} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Campaign Name</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campaign Name</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Woolworths Credit Card Promo"
                   value={campName}
                   onChange={(e) => setCampName(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white"
+                  className="w-full bg-[#070913] border border-white/10 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Description</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</label>
                 <textarea 
                   placeholder="Summarize the offer criteria, target audience, and traffic restrictions..."
                   value={campDesc}
                   onChange={(e) => setCampDesc(e.target.value)}
                   rows={3}
-                  className="w-full bg-[#0d0f17] border border-slate-200 rounded-xl p-4 text-xs font-medium text-white focus:outline-none focus:border-blue-600"
+                  className="w-full bg-[#070913] border border-white/10 rounded-xl p-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Landing Page URL</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Landing Page URL</label>
                 <input 
                   type="url" 
                   placeholder="https://www.company.com/promotion"
                   value={campUrl}
                   onChange={(e) => setCampUrl(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white"
+                  className="w-full bg-[#070913] border border-white/10 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Payout Type</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Type</label>
                   <select
                     value={campPayoutType}
                     onChange={(e) => setCampPayoutType(e.target.value as 'cpa' | 'cpc')}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white"
+                    className="w-full bg-[#070913] border border-white/10 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                   >
                     <option value="cpa">CPA (Cost per Acquisition)</option>
                     <option value="cpc">CPC (Cost per Click)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Payout Payout ($)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout ($)</label>
                   <input 
                     type="number" 
                     step="0.01"
                     placeholder="e.g. 50.00"
                     value={campPayoutAmount}
                     onChange={(e) => setCampPayoutAmount(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white"
+                    className="w-full bg-[#070913] border border-white/10 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Campaign Budget ($)</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campaign Budget ($)</label>
                 <input 
                   type="number" 
                   placeholder="e.g. 2000"
                   value={campBudget}
                   onChange={(e) => setCampBudget(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white"
+                  className="w-full bg-[#070913] border border-white/10 rounded-xl h-11 px-4 text-xs font-medium text-white focus:outline-none focus:border-[#0052FF]"
                   required
                 />
               </div>
@@ -428,9 +428,9 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 disabled:opacity-50"
+                className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-600 disabled:opacity-50 cursor-pointer shadow shadow-blue-500/10 transition-colors"
               >
-                {loading ? <div className="h-5 w-5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" /> : 'Submit for Approval'}
+                {loading ? <div className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" /> : 'Submit for Approval'}
               </button>
             </form>
           </div>
@@ -553,24 +553,24 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const networkVolume = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#070913] text-white flex flex-col font-sans selection:bg-[#0052FF]/30">
       {/* Top Navbar */}
-      <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
+      <nav className="border-b border-white/5 bg-[#05070f] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
-          <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
+          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+          <span className="text-xs font-semibold text-[#0052FF] bg-[#0052FF]/10 border border-[#0052FF]/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Super Admin</span>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-right hidden sm:block">
-            <div className="text-xs text-slate-600 font-bold uppercase tracking-wider">Logged In As</div>
-            <div className="text-sm font-extrabold text-[#0052FF]">{profile.full_name}</div>
+            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Logged In As</div>
+            <div className="text-sm font-extrabold text-white">{profile.full_name}</div>
           </div>
           <button 
             onClick={signOut}
-            className="flex items-center text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 px-3 py-2 rounded-xl"
+            className="flex items-center text-xs font-bold text-slate-350 hover:text-white transition-colors bg-white/[0.04] border border-white/5 px-3 py-2 rounded-xl cursor-pointer"
           >
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            <LogOut className="h-4 w-4 mr-2 text-slate-500" /> Sign Out
           </button>
         </div>
       </nav>
@@ -580,45 +580,45 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
-          <div className="premium-glass-panel p-6">
-            <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Network Payout Volume</div>
-            <div className="text-2xl font-extrabold text-slate-900">${networkVolume.toFixed(2)} AUD</div>
-            <p className="text-[10px] text-slate-600 mt-1">Approved payouts across network</p>
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Network Payout Volume</div>
+            <div className="text-2xl font-extrabold text-[#0052FF]">${networkVolume.toFixed(2)} AUD</div>
+            <p className="text-[10px] text-slate-500 mt-1">Approved payouts across network</p>
           </div>
-          <div className="premium-glass-panel p-6">
-            <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Network Traffic Clicks</div>
-            <div className="text-2xl font-extrabold text-slate-900">{clicks.length} Clicks</div>
-            <p className="text-[10px] text-slate-600 mt-1">Raw visitor redirects logged</p>
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Network Traffic Clicks</div>
+            <div className="text-2xl font-extrabold text-white">{clicks.length} Clicks</div>
+            <p className="text-[10px] text-slate-500 mt-1">Raw visitor redirects logged</p>
           </div>
-          <div className="premium-glass-panel p-6">
-            <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Pending Offer Reviews</div>
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pending Offer Reviews</div>
             <div className="text-2xl font-extrabold text-amber-400">{pendingCamps} Campaigns</div>
-            <p className="text-[10px] text-slate-600 mt-1">Requires admin approval</p>
+            <p className="text-[10px] text-slate-550 mt-1">Requires admin approval</p>
           </div>
-          <div className="premium-glass-panel p-6">
-            <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Pending Lead Approvals</div>
+          <div className="bg-[#0c1024] border border-white/[0.04] rounded-2xl p-6 shadow-md">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pending Lead Approvals</div>
             <div className="text-2xl font-extrabold text-amber-400">{pendingConvs} Leads</div>
-            <p className="text-[10px] text-slate-600 mt-1">Requires audit to credit wallet</p>
+            <p className="text-[10px] text-slate-555 mt-1">Requires audit to credit wallet</p>
           </div>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex space-x-6 border-b border-slate-200/80 font-sans">
+        <div className="flex space-x-6 border-b border-white/5 font-sans">
           <button 
             onClick={() => setActiveTab('campaign-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'campaign-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'campaign-approvals' ? 'border-[#0052FF] text-[#0052FF]' : 'border-transparent text-slate-400 hover:text-white'}`}
           >
             Pending Campaign Approvals ({pendingCamps})
           </button>
           <button 
             onClick={() => setActiveTab('conversion-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'conversion-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'conversion-approvals' ? 'border-[#0052FF] text-[#0052FF]' : 'border-transparent text-slate-400 hover:text-white'}`}
           >
             Pending Conversion Audits ({pendingConvs})
           </button>
           <button 
             onClick={() => setActiveTab('users-mgmt')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'users-mgmt' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'users-mgmt' ? 'border-[#0052FF] text-[#0052FF]' : 'border-transparent text-slate-400 hover:text-white'}`}
           >
             User Management ({profiles.length})
           </button>
@@ -628,46 +628,46 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {activeTab === 'campaign-approvals' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Advertiser Offer Approvals</h3>
-              <p className="text-xs text-slate-600 font-medium">Verify that the target landing pages comply with program criteria.</p>
+              <h3 className="text-lg font-bold text-white">Advertiser Offer Approvals</h3>
+              <p className="text-xs text-slate-400 font-medium">Verify that the target landing pages comply with program criteria.</p>
             </div>
 
             {campaigns.filter(c => c.status === 'pending_approval').length === 0 ? (
-              <div className="premium-glass-panel p-12 text-center text-slate-600">
+              <div className="bg-[#0c1024] border border-white/[0.04] p-12 text-center text-slate-500 rounded-2xl">
                 <p className="font-bold text-sm">No campaigns pending review.</p>
               </div>
             ) : (
               <div className="grid gap-4">
                 {campaigns.filter(c => c.status === 'pending_approval').map((camp) => (
-                  <div key={camp.id} className="premium-glass-panel p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div key={camp.id} className="bg-[#0c1024] border border-white/[0.04] p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-base font-bold text-slate-900">{camp.name}</h4>
-                        <span className="text-[10px] text-slate-600 font-semibold bg-slate-900 border border-slate-200/80 rounded-full px-2 py-0.5">By {camp.advertiser_name}</span>
+                        <h4 className="text-base font-bold text-white">{camp.name}</h4>
+                        <span className="text-[10px] text-slate-400 font-semibold bg-[#070913] border border-white/5 rounded-full px-2 py-0.5">By {camp.advertiser_name}</span>
                       </div>
-                      <p className="text-xs text-slate-600 max-w-xl leading-relaxed">{camp.description}</p>
-                      <div className="text-[10px] text-slate-600">
+                      <p className="text-xs text-slate-400 max-w-xl leading-relaxed">{camp.description}</p>
+                      <div className="text-[10px] text-slate-500">
                         URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-[#0052FF] underline">{camp.landing_page_url}</a>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-6 shrink-0">
                       <div className="text-right">
-                        <div className="text-xs text-slate-600">Payout / Budget</div>
-                        <div className="text-sm font-extrabold text-white">${Number(camp.payout_amount).toFixed(2)} AUD ({camp.payout_type.toUpperCase()})</div>
-                        <div className="text-[10px] text-slate-600">Budget: ${Number(camp.total_budget).toFixed(2)}</div>
+                        <div className="text-xs text-slate-500">Payout / Budget</div>
+                        <div className="text-sm font-extrabold text-[#0052FF]">${Number(camp.payout_amount).toFixed(2)} AUD ({camp.payout_type.toUpperCase()})</div>
+                        <div className="text-[10px] text-slate-500">Budget: ${Number(camp.total_budget).toFixed(2)}</div>
                       </div>
 
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveCampaign(camp.id)}
-                          className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-colors shadow shadow-blue-500/10"
                         >
                           <Check className="h-4 w-4" /> Approve
                         </button>
                         <button
                           onClick={() => handleRejectCampaign(camp.id)}
-                          className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-all"
                         >
                           <X className="h-4 w-4" /> Reject
                         </button>
@@ -683,42 +683,42 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {activeTab === 'conversion-approvals' && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Conversion Audit Panel</h3>
-              <p className="text-xs text-slate-600">Auditing pending leads. Approving transfers the commission from Advertiser balance directly to Publisher wallet.</p>
+              <h3 className="text-lg font-bold text-white">Conversion Audit Panel</h3>
+              <p className="text-xs text-slate-400">Auditing pending leads. Approving transfers the commission from Advertiser balance directly to Publisher wallet.</p>
             </div>
 
             {conversions.filter(c => c.status === 'pending').length === 0 ? (
-              <div className="premium-glass-panel p-12 text-center text-slate-600">
+              <div className="bg-[#0c1024] border border-white/[0.04] p-12 text-center text-slate-500 rounded-2xl">
                 <p className="font-bold text-sm">No conversions pending approval.</p>
               </div>
             ) : (
               <div className="grid gap-4">
                 {conversions.filter(c => c.status === 'pending').map((conv) => (
-                  <div key={conv.id} className="premium-glass-panel p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div key={conv.id} className="bg-[#0c1024] border border-white/[0.04] p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
                     <div className="space-y-1">
-                      <h4 className="text-base font-bold text-slate-900">{conv.campaign_name || conv.campaign?.name}</h4>
-                      <div className="text-xs text-slate-600">
-                        Publisher: <span className="font-bold text-white">{conv.publisher_name}</span>
+                      <h4 className="text-base font-bold text-white">{conv.campaign_name || conv.campaign?.name}</h4>
+                      <div className="text-xs text-slate-400">
+                        Publisher: <span className="font-bold text-slate-350">{conv.publisher_name}</span>
                       </div>
-                      <div className="text-[10px] text-slate-600">TxID: {conv.transaction_id}</div>
+                      <div className="text-[10px] text-slate-550 font-mono">TxID: {conv.transaction_id}</div>
                     </div>
 
                     <div className="flex items-center gap-6 shrink-0">
                       <div className="text-right">
-                        <div className="text-xs text-slate-600">Payout Commission</div>
+                        <div className="text-xs text-slate-500">Payout Commission</div>
                         <div className="text-sm font-extrabold text-[#0052FF]">${Number(conv.payout).toFixed(2)} AUD</div>
                       </div>
 
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApproveConversion(conv.id)}
-                          className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-colors shadow shadow-blue-500/10"
                         >
                           <Check className="h-4 w-4" /> Credit Publisher
                         </button>
                         <button
                           onClick={() => handleRejectConversion(conv.id)}
-                          className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1"
+                          className="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-all"
                         >
                           <X className="h-4 w-4" /> Decline
                         </button>
@@ -734,15 +734,15 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {activeTab === 'users-mgmt' && (
           <div className="space-y-6 animate-in fade-in duration-300 font-sans">
             <div>
-              <h3 className="text-lg font-bold text-slate-900">User Management</h3>
-              <p className="text-xs text-slate-500">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
+              <h3 className="text-lg font-bold text-white">User Management</h3>
+              <p className="text-xs text-slate-400">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-[#0c1024] rounded-2xl border border-white/[0.04] shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <tr className="bg-white/[0.02] border-b border-white/[0.04] text-[10px] font-black uppercase tracking-wider text-slate-400">
                       <th className="py-4 px-6">Member Profile</th>
                       <th className="py-4 px-6">Type</th>
                       <th className="py-4 px-6">Country</th>
@@ -751,7 +751,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       <th className="py-4 px-6 text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs">
+                  <tbody className="divide-y divide-white/[0.04] text-xs">
                     {profiles.map((p) => {
                       const country = (() => {
                         if (p.email.endsWith('.au')) return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
@@ -782,36 +782,36 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                         : conversions.filter(c => c.campaign?.advertiser_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
 
                       return (
-                        <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                        <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center space-x-3">
-                              <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs">
+                              <div className="h-8 w-8 rounded-full bg-blue-500/10 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-[#0052FF]/20 select-none">
                                 {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <div className="font-bold text-slate-800">{p.full_name || 'No Name'}</div>
+                                <div className="font-bold text-white">{p.full_name || 'No Name'}</div>
                                 <div className="text-[10px] text-slate-500">{p.email}</div>
                               </div>
                             </div>
                           </td>
                           <td className="py-4 px-6">
                             <span className={`text-[9px] font-extrabold uppercase rounded px-2.5 py-0.5 tracking-wider ${
-                              p.user_type === 'admin' ? 'bg-purple-100 text-purple-800' :
-                              p.user_type === 'advertiser' ? 'bg-amber-100 text-amber-800' :
-                              'bg-blue-100 text-blue-800'
+                              p.user_type === 'admin' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                              p.user_type === 'advertiser' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                              'bg-[#0052FF]/10 text-[#0052FF] border border-[#0052FF]/20'
                             }`}>
                               {p.user_type}
                             </span>
                           </td>
                           <td className="py-4 px-6">
-                            <span className="flex items-center gap-1.5 font-semibold text-slate-600">
+                            <span className="flex items-center gap-1.5 font-semibold text-slate-400">
                               <span>{country.flag}</span>
                               <span>{country.code}</span>
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-slate-500 font-medium">{lastLoggedIn}</td>
+                          <td className="py-4 px-6 text-slate-400 font-medium">{lastLoggedIn}</td>
                           <td className="py-4 px-6 text-right">
-                            <div className="font-bold text-slate-800">
+                            <div className="font-bold text-white">
                               {p.user_type === 'publisher' ? `+$${financeVol.toFixed(2)}` : p.user_type === 'advertiser' ? `-$${financeVol.toFixed(2)}` : '-'}
                             </div>
                             <div className="text-[10px] text-slate-500 font-medium">
@@ -823,7 +823,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                               {!isSelf && p.user_type !== 'admin' && (
                                 <button
                                   onClick={() => impersonateUser?.(p)}
-                                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                  className="bg-white/[0.04] border border-white/5 hover:bg-white/[0.08] text-slate-300 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
                                 >
                                   Login As
                                 </button>
@@ -831,13 +831,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                               {!isSelf && (
                                 <button
                                   onClick={() => handleRemoveUser(p.id)}
-                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
+                                  className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-500/20"
                                 >
                                   Remove
                                 </button>
                               )}
                               {isSelf && (
-                                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                                <span className="text-[10px] font-bold text-slate-500 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/5">
                                   You (Active)
                                 </span>
                               )}
