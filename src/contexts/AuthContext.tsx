@@ -89,6 +89,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Migrate legacy "David Proctor" to "Daniel Proctor" in localStorage
+  useEffect(() => {
+    const MESSAGES_KEY = 'rewardmate_mock_messages';
+    
+    // 1. Migrate mock profiles
+    const storedProfiles = localStorage.getItem(MOCK_PROFILES_KEY);
+    if (storedProfiles) {
+      try {
+        const profiles = JSON.parse(storedProfiles);
+        let updated = false;
+        const newProfiles = profiles.map((p: any) => {
+          if (p.full_name && p.full_name.includes('David')) {
+            updated = true;
+            return { ...p, full_name: p.full_name.replace(/David/g, 'Daniel') };
+          }
+          return p;
+        });
+        if (updated) {
+          localStorage.setItem(MOCK_PROFILES_KEY, JSON.stringify(newProfiles));
+        }
+      } catch (e) {}
+    }
+
+    // 2. Migrate mock messages
+    const storedMessages = localStorage.getItem(MESSAGES_KEY);
+    if (storedMessages) {
+      try {
+        const messages = JSON.parse(storedMessages);
+        let updated = false;
+        const newMessages = messages.map((m: any) => {
+          let msgUpdated = false;
+          let sender_name = m.sender_name;
+          let receiver_name = m.receiver_name;
+          if (sender_name && sender_name.includes('David')) {
+            sender_name = sender_name.replace(/David/g, 'Daniel');
+            msgUpdated = true;
+          }
+          if (receiver_name && receiver_name.includes('David')) {
+            receiver_name = receiver_name.replace(/David/g, 'Daniel');
+            msgUpdated = true;
+          }
+          if (msgUpdated) {
+            updated = true;
+            return { ...m, sender_name, receiver_name };
+          }
+          return m;
+        });
+        if (updated) {
+          localStorage.setItem(MESSAGES_KEY, JSON.stringify(newMessages));
+        }
+      } catch (e) {}
+    }
+
+    // 3. Migrate currently logged in user profile if cached
+    const storedUser = localStorage.getItem('rewardmate_mock_user');
+    if (storedUser) {
+      try {
+        const u = JSON.parse(storedUser);
+        if (u.full_name && u.full_name.includes('David')) {
+          const newU = { ...u, full_name: u.full_name.replace(/David/g, 'Daniel') };
+          localStorage.setItem('rewardmate_mock_user', JSON.stringify(newU));
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   // Initialize Mock Profiles
   useEffect(() => {
     if (isMock) {
