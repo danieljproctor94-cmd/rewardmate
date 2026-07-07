@@ -27,6 +27,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
   const [linkSearchText, setLinkSearchText] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
 
   const loadData = async () => {
     try {
@@ -109,6 +111,15 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const convCount = conversions.length;
   const epc = clickCount > 0 ? (totalEarnings / clickCount) : 0.00;
   const cr = clickCount > 0 ? ((convCount / clickCount) * 100) : 0.00;
+
+  // Real Account Statistics Calculations
+  const programAcceptanceRate = campaigns.length > 0 
+    ? Math.round((myLinks.length / campaigns.length) * 100)
+    : 0;
+
+  const affiliateRating = clickCount > 0
+    ? Math.min(100, Math.round(cr * 10) || Math.min(25, clickCount * 2))
+    : 0;
 
   // Real Order Value estimation (assuming 10% average commission fee)
   const estimatedSaleValue = totalEarnings * 10;
@@ -201,6 +212,26 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
   const commissionsLinePath = getBezierPath(commissionsPoints);
   const commissionsAreaPath = commissionsPoints.length > 0 ? `${commissionsLinePath} L 1000 175 L 0 175 Z` : '';
+
+  // Dynamic Notifications based on Conversions
+  const liveNotifications = conversions.map(c => ({
+    id: c.id,
+    title: c.status === 'approved' ? 'Commission Approved' : c.status === 'rejected' ? 'Conversion Rejected' : 'Conversion Pending',
+    text: `Campaign: ${c.campaign_name || 'Offer'}. Payout: $${Number(c.payout).toFixed(2)} AUD.`,
+    time: new Date(c.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+    type: c.status
+  }));
+
+  // Dynamic Messages
+  const liveMessages = [
+    {
+      id: 'welcome',
+      sender: 'David Proctor (Admin)',
+      subject: 'Welcome to Reward Mate Australia!',
+      preview: 'Your publisher application has been approved. Start building links!',
+      time: new Date(profile.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+    }
+  ];
 
   // Link generator search filtering
   const filteredCampaigns = campaigns.filter(c => 
@@ -411,22 +442,96 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Ask AI</span>
             </button>
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setShowMessages(!showMessages);
+                  setShowNotifications(false);
+                }}
+                title="Messages"
+                className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <Mail className="h-4.5 w-4.5" />
+                {liveMessages.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                    {liveMessages.length}
+                  </span>
+                )}
+              </button>
 
-            {/* Mail Icon */}
-            <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
-              <Mail className="h-4.5 w-4.5" />
-              <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
-                99
-              </span>
-            </button>
+              {showMessages && (
+                <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-800 font-sans">Messages ({liveMessages.length})</span>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {liveMessages.length === 0 ? (
+                      <div className="text-center py-6 text-xs text-slate-400 font-sans">No messages.</div>
+                    ) : (
+                      liveMessages.map(m => (
+                        <div key={m.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-left space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-800">{m.sender}</span>
+                            <span className="text-[9px] text-slate-400 font-semibold">{m.time}</span>
+                          </div>
+                          <div className="text-[10px] font-bold text-[#0052FF] truncate font-sans">{m.subject}</div>
+                          <p className="text-[10px] text-slate-600 font-sans leading-tight">{m.preview}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Notification Bell */}
-            <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
-              <Bell className="h-4.5 w-4.5" />
-              <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
-                99
-              </span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setShowMessages(false);
+                }}
+                title="Notifications"
+                className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <Bell className="h-4.5 w-4.5" />
+                {liveNotifications.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                    {liveNotifications.length}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-800 font-sans">Notifications ({liveNotifications.length})</span>
+                    {liveNotifications.length > 0 && (
+                      <button onClick={() => toast.success('Notifications cleared')} className="text-[10px] text-[#0052FF] font-bold hover:underline cursor-pointer">Clear all</button>
+                    )}
+                  </div>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {liveNotifications.length === 0 ? (
+                      <div className="text-center py-6 text-xs text-slate-400 font-sans">No new notifications.</div>
+                    ) : (
+                      liveNotifications.map(n => (
+                        <div key={n.id} className="p-2 rounded-xl bg-slate-50 border border-slate-100 space-y-0.5 text-left">
+                          <div className="flex items-center justify-between">
+                            <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                              n.type === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : n.type === 'rejected' ? 'bg-red-500/10 text-red-600' : 'bg-amber-500/10 text-amber-600'
+                            }`}>
+                              {n.title}
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-semibold">{n.time}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-650 font-medium font-sans leading-tight">{n.text}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Help Question Mark */}
             <button className="flex items-center space-x-1 p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
@@ -638,10 +743,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   <div className="space-y-2 font-sans">
                     <div className="flex items-center justify-between text-xs font-semibold">
                       <span className="text-slate-500">Affiliate rating</span>
-                      <strong className="text-slate-850">74%</strong>
+                      <strong className="text-slate-850">{affiliateRating}%</strong>
                     </div>
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#0052FF] rounded-full" style={{ width: '74%' }}></div>
+                      <div className="h-full bg-[#0052FF] rounded-full transition-all duration-500" style={{ width: `${affiliateRating}%` }}></div>
                     </div>
                   </div>
 
@@ -649,10 +754,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   <div className="space-y-2 font-sans">
                     <div className="flex items-center justify-between text-xs font-semibold">
                       <span className="text-slate-500">Program acceptance</span>
-                      <strong className="text-slate-850">58%</strong>
+                      <strong className="text-slate-850">{programAcceptanceRate}%</strong>
                     </div>
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#0052FF] rounded-full" style={{ width: '58%' }}></div>
+                      <div className="h-full bg-[#0052FF] rounded-full transition-all duration-500" style={{ width: `${programAcceptanceRate}%` }}></div>
                     </div>
                   </div>
                 </div>
