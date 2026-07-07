@@ -29,6 +29,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [selectedCampaignForModal, setSelectedCampaignForModal] = useState<Campaign | null>(null);
 
   const loadData = async () => {
     try {
@@ -573,6 +574,96 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">Dashboard</h1>
               </div>
 
+              {/* Featured Brands Carousel */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-sans">Featured Brand Campaigns</h2>
+                  <div className="flex space-x-1.5">
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById('brands-carousel-container');
+                        if (el) el.scrollBy({ left: -240, behavior: 'smooth' });
+                      }}
+                      className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById('brands-carousel-container');
+                        if (el) el.scrollBy({ left: 240, behavior: 'smooth' });
+                      }}
+                      className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div 
+                  id="brands-carousel-container" 
+                  className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1 scroll-smooth"
+                >
+                  {campaigns.map((camp) => {
+                    const alreadyPartnered = myLinks.some(link => link.campaign_id === camp.id);
+                    const initials = camp.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+                    const colors = [
+                      'from-blue-600 to-indigo-600',
+                      'from-orange-500 to-red-500',
+                      'from-pink-500 to-purple-500',
+                      'from-emerald-500 to-teal-500',
+                      'from-cyan-500 to-blue-500'
+                    ];
+                    const grad = colors[camp.id.charCodeAt(camp.id.length - 1) % colors.length] || colors[0];
+
+                    return (
+                      <div 
+                        key={camp.id}
+                        onClick={() => setSelectedCampaignForModal(camp)}
+                        className="w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between"
+                      >
+                        <div>
+                          {/* Payout & Status badge */}
+                          <div className="flex items-center justify-between mb-3.5">
+                            <span className="text-[10px] font-black uppercase bg-[#0052FF]/5 text-[#0052FF] px-2 py-0.5 rounded-md border border-[#0052FF]/10">
+                              ${camp.payout_amount.toFixed(2)} {camp.payout_type.toUpperCase()}
+                            </span>
+                            {alreadyPartnered && (
+                              <span className="text-[9px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/10">
+                                Active
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Brand Identity */}
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm shadow-sm`}>
+                              {initials}
+                            </div>
+                            <div className="truncate">
+                              <h4 className="text-xs font-black text-slate-800 truncate font-sans group-hover:text-[#0052FF] transition-colors">{camp.name}</h4>
+                              <span className="text-[9px] font-bold text-slate-400 font-sans uppercase tracking-wider">{camp.advertiser_name || 'Partner Brand'}</span>
+                            </div>
+                          </div>
+
+                          <p className="text-[10px] text-slate-500 font-sans line-clamp-2 leading-relaxed mb-4">
+                            {camp.description}
+                          </p>
+                        </div>
+
+                        <button className="w-full py-2.5 bg-slate-50 hover:bg-[#0052FF] text-slate-700 hover:text-white rounded-xl text-[10px] font-extrabold transition-all border border-slate-100 hover:border-[#0052FF] cursor-pointer">
+                          {alreadyPartnered ? 'View details' : 'Apply now'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Chart Card */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -1057,6 +1148,104 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         </main>
       </div>
 
+      {/* Brand Partnership details Modal */}
+      {selectedCampaignForModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-in scale-in duration-205 border border-slate-100">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
+                  {selectedCampaignForModal.name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-800 leading-none mb-1">{selectedCampaignForModal.name}</h3>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{selectedCampaignForModal.advertiser_name || 'Partner Brand'}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedCampaignForModal(null)}
+                className="h-8 w-8 rounded-lg hover:bg-slate-50 flex items-center justify-center text-slate-450 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[380px] overflow-y-auto no-scrollbar">
+              <div className="space-y-1">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</h4>
+                <p className="text-xs text-slate-650 font-sans leading-relaxed">{selectedCampaignForModal.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-y border-slate-100 py-3.5">
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Commission Rate</h4>
+                  <div className="text-sm font-extrabold text-[#0052FF] mt-0.5">${selectedCampaignForModal.payout_amount.toFixed(2)} AUD</div>
+                </div>
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Type</h4>
+                  <div className="text-sm font-extrabold text-slate-800 mt-0.5 uppercase">{selectedCampaignForModal.payout_type === 'cpa' ? 'Cost Per Action (CPA)' : selectedCampaignForModal.payout_type === 'cpc' ? 'Cost Per Click (CPC)' : 'Revenue Share'}</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campaign Guidelines</h4>
+                <div className="space-y-1.5 font-sans">
+                  <div className="flex items-center text-[11px] text-slate-650 font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                    <span>Allowed Traffic: Blogs, Social, Email</span>
+                  </div>
+                  <div className="flex items-center text-[11px] text-slate-650 font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                    <span>Cookie Duration: 30 Days</span>
+                  </div>
+                  <div className="flex items-center text-[11px] text-slate-650 font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 mr-2"></span>
+                    <span>No SEM/Trademark search bidding allowed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              {myLinks.some(l => l.campaign_id === selectedCampaignForModal.id) ? (
+                <>
+                  <div className="text-[10px] font-bold text-slate-500 font-sans">You are partnered.</div>
+                  <button 
+                    onClick={() => {
+                      const link = myLinks.find(l => l.campaign_id === selectedCampaignForModal.id);
+                      if (link) handleCopyLink(link.code);
+                    }}
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+                  >
+                    Copy Tracking Link
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setSelectedCampaignForModal(null)}
+                    className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-extrabold transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      await handleGenerateLink(selectedCampaignForModal.id);
+                      setSelectedCampaignForModal(null);
+                    }}
+                    className="px-5 py-2.5 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+                  >
+                    Apply & Join Program
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

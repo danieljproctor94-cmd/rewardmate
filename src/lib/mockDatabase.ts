@@ -93,10 +93,38 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
     landing_page_url: 'https://www.koganmobile.com.au/plans',
     payout_type: 'cpc',
     payout_amount: 0.80,
-    status: 'pending_approval',
+    status: 'active',
     total_budget: 2000.00,
     spend: 0.00,
     created_at: new Date().toISOString()
+  },
+  {
+    id: 'campaign-4',
+    advertiser_id: 'mock-advertiser-id',
+    advertiser_name: 'David Proctor (Advertiser)',
+    name: 'Woolworths Everyday Mobile',
+    description: 'Promote Everyday Mobile by Woolworths prepaid SIMs. Excellent value and network coverage.',
+    landing_page_url: 'https://www.everydaymobile.com.au',
+    payout_type: 'cpa',
+    payout_amount: 45.00,
+    status: 'active',
+    total_budget: 8000.00,
+    spend: 1200.00,
+    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'campaign-5',
+    advertiser_id: 'mock-advertiser-id',
+    advertiser_name: 'David Proctor (Advertiser)',
+    name: 'Bupa Health Insurance Cover',
+    description: 'Promote Bupa domestic health insurance. High payout for every approved customer policy switcher.',
+    landing_page_url: 'https://www.bupa.com.au/health-insurance',
+    payout_type: 'cpa',
+    payout_amount: 120.00,
+    status: 'active',
+    total_budget: 15000.00,
+    spend: 3600.00,
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
