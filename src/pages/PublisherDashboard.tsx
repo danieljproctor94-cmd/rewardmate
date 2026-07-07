@@ -151,27 +151,56 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         return clickDate.toDateString() === d.toDateString();
       }).length;
 
-      const convsOnDay = conversions.filter(c => {
+      const commissionsOnDay = conversions.filter(c => {
         const convDate = new Date(c.created_at);
-        return convDate.toDateString() === d.toDateString();
-      }).length;
-
-      // Base heights (max 100%)
-      const activeHeight = Math.min(100, Math.max(5, clicksOnDay * 12 + convsOnDay * 25));
-      const prevHeight = Math.max(2, (clicksOnDay * 4 + convsOnDay * 8));
+        return convDate.toDateString() === d.toDateString() && c.status === 'approved';
+      }).reduce((s, c) => s + Number(c.payout), 0);
 
       data.push({
-        label: i % 4 === 0 ? labelStr : '', 
-        active: activeHeight,
-        prev: prevHeight,
+        label: i % 5 === 0 ? labelStr : '', 
         clicks: clicksOnDay,
-        conversions: convsOnDay
+        commissions: commissionsOnDay
       });
     }
     return data;
   };
 
   const chartData = getRealChartData();
+
+  // Helper for generating cubic bezier wave paths for responsive SVG rendering
+  const getBezierPath = (pts: {x: number, y: number}[]) => {
+    if (pts.length === 0) return '';
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i + 1];
+      const cpX1 = p0.x + (p1.x - p0.x) / 3;
+      const cpY1 = p0.y;
+      const cpX2 = p0.x + 2 * (p1.x - p0.x) / 3;
+      const cpY2 = p1.y;
+      d += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  };
+
+  const maxClicks = Math.max(...chartData.map(d => d.clicks), 1);
+  const maxCommissions = Math.max(...chartData.map(d => d.commissions), 1);
+
+  const clicksPoints = chartData.map((d, idx) => ({
+    x: (idx / 29) * 1000,
+    y: d.clicks === 0 ? 175 : 165 - (d.clicks / maxClicks) * 140
+  }));
+
+  const commissionsPoints = chartData.map((d, idx) => ({
+    x: (idx / 29) * 1000,
+    y: d.commissions === 0 ? 175 : 165 - (d.commissions / maxCommissions) * 140
+  }));
+
+  const clicksLinePath = getBezierPath(clicksPoints);
+  const clicksAreaPath = clicksPoints.length > 0 ? `${clicksLinePath} L 1000 175 L 0 175 Z` : '';
+
+  const commissionsLinePath = getBezierPath(commissionsPoints);
+  const commissionsAreaPath = commissionsPoints.length > 0 ? `${commissionsLinePath} L 1000 175 L 0 175 Z` : '';
 
   // Link generator search filtering
   const filteredCampaigns = campaigns.filter(c => 
@@ -443,31 +472,26 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                   <div>
                     <h3 className="text-base font-bold text-slate-800">Performance overview</h3>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs font-semibold font-sans">
-                      <div className="flex items-center gap-1.5 text-slate-500">
-                        <span className="h-3.5 w-3.5 rounded bg-[#0052FF]"></span>
-                        <span>Last 30 days <strong className="text-slate-800">${totalEarnings.toFixed(2)}</strong></span>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 mt-2 text-xs font-semibold font-sans">
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <span className="h-3 w-3 rounded-full bg-[#0052FF]"></span>
+                        <span>Commissions: <strong className="text-slate-900 font-extrabold">${totalEarnings.toFixed(2)} AUD</strong></span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-500">
-                        <span className="h-3.5 w-3.5 rounded bg-slate-200"></span>
-                        <span>Previous period <strong className="text-slate-800">${(totalEarnings * 0.48).toFixed(2)}</strong></span>
-                      </div>
-                      <div className="text-emerald-600 flex items-center font-bold">
-                        {getTrendString(totalEarnings, totalEarnings * 0.48)}
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <span className="h-3 w-3 rounded-full bg-[#38bdf8]"></span>
+                        <span>Clicks: <strong className="text-slate-900 font-extrabold">{clickCount}</strong></span>
                       </div>
                     </div>
                   </div>
                   
                   <div>
-                    <select className="border border-slate-250 rounded-xl px-3.5 py-1.5 text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-[#0052FF] cursor-pointer shadow-sm font-sans">
-                      <option>Commission</option>
-                      <option>Clicks</option>
-                      <option>Conversions</option>
-                    </select>
+                    <div className="border border-slate-200 rounded-xl px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-505 bg-slate-50 font-sans">
+                      Last 30 Days Trend
+                    </div>
                   </div>
                 </div>
 
-                {/* Flex Dual Bar Chart */}
+                {/* Responsive SVG Wave Chart */}
                 <div className="relative pt-4">
                   {/* Grid overlay */}
                   <div className="absolute inset-0 flex flex-col justify-between pointer-events-none h-48 border-b border-slate-100">
@@ -477,37 +501,52 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     <div className="w-full border-t border-slate-50"></div>
                   </div>
 
-                  {/* Bars row */}
-                  <div className="overflow-x-auto -mx-6 px-6 lg:mx-0 lg:px-0 no-scrollbar">
-                    <div className="h-48 flex items-end justify-between px-2 relative z-10 w-full min-w-[600px] pb-1">
-                      {chartData.map((item, index) => (
-                        <div key={index} className="flex flex-col items-center flex-1 group">
-                          <div className="flex items-end gap-1 h-36 mb-2">
-                            <div 
-                              className="w-2.5 bg-[#0052FF] rounded-t transition-all duration-500 hover:bg-blue-650 relative group-hover:scale-y-105 origin-bottom" 
-                              style={{ height: `${item.active}%` }}
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-900 text-white text-[9px] py-1 px-1.5 rounded pointer-events-none whitespace-nowrap shadow-xl z-20 font-sans border border-slate-800">
-                                Clicks: {item.clicks} | Leads: {item.conversions}
-                              </div>
-                            </div>
-                            <div 
-                              className="w-2.5 bg-slate-200 rounded-t transition-all duration-500 hover:bg-slate-300 relative group-hover:scale-y-105 origin-bottom" 
-                              style={{ height: `${item.prev}%` }}
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-900 text-white text-[9px] py-1 px-1.5 rounded pointer-events-none whitespace-nowrap shadow-xl z-20 font-sans border border-slate-800">
-                                Prev Period baseline
-                              </div>
-                            </div>
-                          </div>
-                          {item.label && (
-                            <span className="text-[10px] font-bold text-slate-400 mt-1 select-none font-sans">
-                              {item.label}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                  <div className="h-48 relative z-10 w-full">
+                    <svg viewBox="0 0 1000 180" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.15" />
+                          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.00" />
+                        </linearGradient>
+                        <linearGradient id="commissionsGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0052FF" stopOpacity="0.15" />
+                          <stop offset="100%" stopColor="#0052FF" stopOpacity="0.00" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Clicks Wave Area */}
+                      {clicksAreaPath && (
+                        <path d={clicksAreaPath} fill="url(#clicksGrad)" />
+                      )}
+
+                      {/* Commissions Wave Area */}
+                      {commissionsAreaPath && (
+                        <path d={commissionsAreaPath} fill="url(#commissionsGrad)" />
+                      )}
+
+                      {/* Clicks Stroke Line */}
+                      {clicksLinePath && (
+                        <path d={clicksLinePath} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
+                      )}
+
+                      {/* Commissions Stroke Line */}
+                      {commissionsLinePath && (
+                        <path d={commissionsLinePath} fill="none" stroke="#0052FF" strokeWidth="2.5" strokeLinecap="round" />
+                      )}
+                    </svg>
+                  </div>
+
+                  {/* Day Labels at bottom */}
+                  <div className="w-full flex justify-between px-1 mt-3">
+                    {chartData.map((item, index) => (
+                      <div key={index} className="flex-1 text-center">
+                        {item.label && (
+                          <span className="text-[9px] font-bold text-slate-400 select-none font-sans">
+                            {item.label}
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
