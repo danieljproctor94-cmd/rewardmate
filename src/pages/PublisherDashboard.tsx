@@ -18,7 +18,7 @@ import {
 export const formatUserId = (id: string | undefined): string => {
   if (!id) return '';
   const cleanId = id.replace('mock-user-', '').replace('db-user-', '').replace(/-/g, '');
-  return `RM-${cleanId.substring(0, 6).toUpperCase()}`;
+  return cleanId.substring(0, 6).toUpperCase();
 };
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
@@ -522,29 +522,31 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
         {/* Sidebar Footer */}
         <div className={`border-t border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'p-2' : 'p-4'}`}>
-          {!isSidebarCollapsed && (
-            <div className="flex items-center space-x-2 mb-3 text-slate-550 font-bold select-none">
-              <div className="h-6 w-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-white">
-                RM
-              </div>
-              <span className="text-[10px] tracking-wider font-semibold">v1.0</span>
-            </div>
-          )}
-          {/* Collapse Toggle Button */}
-          <button 
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="w-full flex items-center justify-center text-xs font-bold text-slate-400 hover:text-white transition-all bg-white/0 hover:bg-white/5 h-10 rounded-xl cursor-pointer mb-2 border border-dashed border-white/10 hover:border-white/20 shrink-0"
-            title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}
-          >
+          <div className={`flex ${isSidebarCollapsed ? 'flex-col items-center gap-2 mb-2' : 'items-center justify-between mb-4'}`}>
             {isSidebarCollapsed ? (
-              <ChevronRight className="h-4.5 w-4.5 text-slate-400" />
+              <button 
+                onClick={() => setIsSidebarCollapsed(false)}
+                className="h-8 w-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5"
+                title="Expand Menu"
+              >
+                <ChevronRight className="h-4.5 w-4.5" />
+              </button>
             ) : (
-              <div className="flex items-center justify-between w-full px-2.5">
-                <span className="text-[9px] uppercase tracking-wider text-slate-405">Collapse Menu</span>
-                <ChevronLeft className="h-4 w-4" />
-              </div>
+              <>
+                <div className="flex items-center space-x-2 text-slate-500 font-bold select-none">
+                  <span className="text-[10px] tracking-wider font-semibold uppercase text-slate-455">v1.0</span>
+                </div>
+                
+                <button 
+                  onClick={() => setIsSidebarCollapsed(true)}
+                  className="h-8 w-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5"
+                  title="Collapse Menu"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </>
             )}
-          </button>
+          </div>
 
           <button 
             onClick={signOut}
