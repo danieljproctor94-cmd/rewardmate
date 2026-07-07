@@ -605,11 +605,18 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         toast.success('User profile approved successfully!');
         loadData();
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
           .update({ approval_status: 'approved' })
-          .eq('id', userId);
+          .eq('id', userId)
+          .select();
         if (error) throw error;
+
+        if (!data || data.length === 0) {
+          toast.warning('Database policy blocked update. Please execute the updated RLS policy in your Supabase SQL editor.');
+          return;
+        }
+
         toast.success('User profile approved successfully!');
         loadData();
       }

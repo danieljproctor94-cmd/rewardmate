@@ -31,8 +31,11 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to profiles" ON public.profiles
     FOR SELECT USING (true);
 
-CREATE POLICY "Allow users to update their own profiles" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Allow users to update their own profiles or admin updates" ON public.profiles
+    FOR UPDATE USING (
+        auth.uid() = id OR 
+        coalesce(auth.jwt() -> 'user_metadata' ->> 'user_type', '') = 'admin'
+    );
 
 -- 2. Campaigns/Offers Table (Created by Advertisers, approved by Admin)
 CREATE TABLE public.campaigns (
