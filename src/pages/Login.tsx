@@ -73,12 +73,17 @@ export default function Login() {
     try {
       if (isRegister) {
         await signUp(email, password, fullName, role);
-        toast.success('Registration successful! Redirecting to dashboard...');
+        if (isMock) {
+          toast.success('Registration successful! Redirecting to dashboard...');
+          navigate('/dashboard');
+        } else {
+          setIsRegister(false);
+        }
       } else {
         await signIn(email, password);
         toast.success('Signed in successfully!');
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
     } catch (err) {
       // handled in context
     } finally {
