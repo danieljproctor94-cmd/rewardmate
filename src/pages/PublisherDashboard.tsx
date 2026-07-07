@@ -266,28 +266,28 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       )}
 
       {/* Desktop Sidebar (Fixed Left Column - Never Scrolls with Content) */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-150/70 flex-col justify-between shrink-0 h-full z-20">
+      <aside className="hidden lg:flex w-64 bg-[#090b16] border-r border-white/5 flex-col justify-between shrink-0 h-full z-20">
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-slate-100 bg-white">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
+          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
+            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
           </div>
 
           {/* Real Publisher Profile Card */}
           <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50 transition-all cursor-pointer group">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
               <div className="flex items-center space-x-3">
-                <div className="h-9 w-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-purple-500/10">
+                <div className="h-9 w-9 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-[#0052FF]/10">
                   {avatarChar}
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-slate-800 group-hover:text-[#0052FF] transition-colors leading-tight font-sans">
+                  <div className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight font-sans">
                     {publisherName}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-semibold font-sans">ID: {publisherId}</div>
+                  <div className="text-[10px] text-slate-400 font-semibold font-sans">ID: {publisherId}</div>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+              <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-slate-350 transition-colors" />
             </div>
           </div>
 
@@ -321,16 +321,16 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   onClick={handleTabClick}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer group ${
                     isActive 
-                      ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2' 
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2' 
+                      : 'text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-[#0052FF]' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
                     <span>{item.label}</span>
                   </div>
                   {item.hasSub && (
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-350 group-hover:text-slate-500" />
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-350" />
                   )}
                 </button>
               );
@@ -339,15 +339,15 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 bg-white">
-          <div className="flex items-center justify-between">
+        <div className="p-4 border-t border-white/5 bg-[#090b16]">
+          <div className="flex items-center justify-between text-slate-400">
             <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-full bg-slate-50 border border-slate-150 flex items-center justify-center font-bold text-[10px] text-[#0052FF] select-none shadow-sm">
+              <div className="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-[10px] text-white select-none shadow-sm">
                 RM
               </div>
-              <span className="text-[10px] font-bold text-slate-400 tracking-wider">v2.1.0 PRO</span>
+              <span className="text-[10px] font-bold text-slate-500 tracking-wider">v2.1.0 PRO</span>
             </div>
-            <button className="h-6 w-6 rounded-md hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+            <button className="h-6 w-6 rounded-md hover:bg-white/5 flex items-center justify-center text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">
               <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>

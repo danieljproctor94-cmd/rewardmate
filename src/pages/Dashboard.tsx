@@ -148,25 +148,25 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     <div className="flex h-screen overflow-hidden w-full bg-[#f8fafc] text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-150/70 flex-col justify-between shrink-0 h-full z-20">
+      <aside className="hidden lg:flex w-64 bg-[#090b16] border-r border-white/5 flex-col justify-between shrink-0 h-full z-20">
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-slate-100 bg-white">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
+          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
+            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
           </div>
 
           {/* Profile Card */}
           <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/45 hover:bg-slate-50 transition-all cursor-pointer group">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-xs">
+                <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs">
                   {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-800 leading-none mb-1">
+                  <div className="text-xs font-bold text-slate-200 leading-none mb-1">
                     {profile.full_name || 'Advertiser'}
                   </div>
-                  <div className="text-[9px] text-slate-500 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
+                  <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
                 </div>
               </div>
             </div>
@@ -178,32 +178,32 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               onClick={() => setActiveTab('campaigns')}
               className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'campaigns' 
-                  ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400 group-hover:text-slate-600" />
+              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>My Campaigns</span>
             </button>
             <button
               onClick={() => setActiveTab('wallet')}
               className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'wallet' 
-                  ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <DollarSign className="h-4.5 w-4.5 mr-3 text-slate-400 group-hover:text-slate-600" />
+              <DollarSign className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>Deposit & Wallet</span>
             </button>
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 bg-white">
+        <div className="p-4 border-t border-white/5 bg-[#090b16]">
           <button 
             onClick={signOut}
-            className="w-full flex items-center justify-center text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors bg-slate-50 hover:bg-slate-100 h-10 rounded-xl cursor-pointer"
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
           >
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
           </button>
@@ -627,25 +627,25 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     <div className="flex h-screen overflow-hidden w-full bg-[#f8fafc] text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-slate-150/70 flex-col justify-between shrink-0 h-full z-20">
+      <aside className="hidden lg:flex w-64 bg-[#090b16] border-r border-white/5 flex-col justify-between shrink-0 h-full z-20">
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-slate-100 bg-white">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
+          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
+            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
           </div>
 
           {/* Profile Card */}
           <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/45 hover:bg-slate-50 transition-all cursor-pointer group">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
               <div className="flex items-center space-x-3">
                 <div className="h-8 w-8 rounded-full bg-purple-650 text-white flex items-center justify-center font-extrabold text-xs">
                   {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-800 leading-none mb-1">
+                  <div className="text-xs font-bold text-slate-200 leading-none mb-1">
                     {profile.full_name || 'Administrator'}
                   </div>
-                  <div className="text-[9px] text-slate-500 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
+                  <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
                 </div>
               </div>
             </div>
@@ -657,43 +657,43 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               onClick={() => setActiveTab('campaign-approvals')}
               className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'campaign-approvals' 
-                  ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400 group-hover:text-slate-600" />
+              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>Offer Approvals ({pendingCamps})</span>
             </button>
             <button
               onClick={() => setActiveTab('conversion-approvals')}
               className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'conversion-approvals' 
-                  ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Check className="h-4.5 w-4.5 mr-3 text-slate-400 group-hover:text-slate-600" />
+              <Check className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>Conversion Audits ({pendingConvs})</span>
             </button>
             <button
               onClick={() => setActiveTab('users-mgmt')}
               className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'users-mgmt' 
-                  ? 'bg-[#0052FF]/5 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Users className="h-4.5 w-4.5 mr-3 text-slate-400 group-hover:text-slate-600" />
+              <Users className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>User Management</span>
             </button>
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 bg-white">
+        <div className="p-4 border-t border-white/5 bg-[#090b16]">
           <button 
             onClick={signOut}
-            className="w-full flex items-center justify-center text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors bg-slate-50 hover:bg-slate-100 h-10 rounded-xl cursor-pointer"
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
           >
             <LogOut className="h-4 w-4 mr-2" /> Sign Out
           </button>
