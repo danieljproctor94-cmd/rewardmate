@@ -110,7 +110,7 @@ export default function Login() {
 
         <div className="relative z-10 space-y-6 max-w-lg">
           <h2 className="text-4xl md:text-5xl font-extrabold leading-tight text-white">
-            Australia's Most <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Network.</span>
+            Australia's Leading <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Network.</span>
           </h2>
           <p className="text-slate-400 text-base leading-relaxed">
             Acquire high-intent customers on a risk-free cost-per-acquisition basis, or generate premium revenues from your digital content.
