@@ -10,7 +10,7 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, ChevronDown, Bell, Mail, HelpCircle, ArrowRight
+  ChevronRight, ChevronDown, Bell, Mail, HelpCircle, ArrowRight, Menu, X
 } from 'lucide-react';
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
@@ -21,6 +21,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [clicks, setClicks] = useState<Click[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Link Generator State
   const [selectedCampaignId, setSelectedCampaignId] = useState('');
@@ -185,8 +186,88 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   return (
     <div className="min-h-screen bg-[#070913] text-white flex font-sans w-full selection:bg-[#0052FF]/30">
       
-      {/* 1. LEFT SIDEBAR PANEL (Deep Black matching Footer theme) */}
-      <aside className="w-64 bg-[#05070f] text-slate-300 flex flex-col justify-between shrink-0 border-r border-white/5 z-20">
+      {/* 1. LEFT SIDEBAR PANEL (Deep Black matching Footer theme      {/* 1. MOBILE SIDEBAR DRAWER (Sliding panel) */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-black/65 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
+          
+          {/* Drawer Panel */}
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#05070f] border-r border-white/5 pt-5 pb-4 transition-all duration-300 animate-in slide-in-from-left">
+            <div className="absolute right-4 top-4">
+              <button 
+                onClick={() => setMobileMenuOpen(false)}
+                className="h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
+            {/* Logo */}
+            <div className="px-6 pb-5 flex items-center border-b border-white/5">
+              <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+            </div>
+
+            {/* Profile Card */}
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/[0.02]">
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none">
+                    {avatarChar}
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white leading-none mb-1">{publisherName}</div>
+                    <div className="text-[9px] text-slate-500 font-bold">ID: {publisherId}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation stack */}
+            <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: FolderKanban },
+                { id: 'offers', label: 'Partners', icon: Users },
+                { id: 'my-links', label: 'Traffic Sources', icon: Globe },
+                { id: 'clicks-conv', label: 'Reporting', icon: BarChart3 },
+                { id: 'wallet', label: 'Finance', icon: DollarSign },
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id as any);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-[#0052FF]/10 text-[#0052FF] border-l-4 border-[#0052FF] pl-2.5' 
+                        : 'text-slate-400 hover:bg-white/[0.02] hover:text-white'
+                    }`}
+                  >
+                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-[#0052FF]' : 'text-slate-550'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-white/5 bg-[#05070f]">
+              <div className="flex items-center space-x-2.5 text-xs text-slate-500 font-bold">
+                <span className="h-2 w-2 rounded-full bg-[#0052FF] animate-pulse"></span>
+                <span>Reward Mate Portal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar (hidden on mobile, visible on desktop) */}
+      <aside className="hidden lg:flex w-64 bg-[#05070f] text-slate-300 flex flex-col justify-between shrink-0 border-r border-white/5 z-20">
         <div className="flex flex-col">
           {/* Logo Header */}
           <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#05070f]">
@@ -246,11 +327,11 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-[#0052FF]' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-[#0052FF]' : 'text-slate-350'}`} />
                     <span>{item.label}</span>
                   </div>
                   {item.hasSub && (
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-650 group-hover:text-slate-450" />
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-300" />
                   )}
                 </button>
               );
@@ -279,23 +360,26 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       {/* 2. MAIN LAYOUT CONTAINER */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#070913]">
         
-        {/* TOP NAVIGATION HEADER (Matching Landing page color scheme) */}
+        {/* TOP NAVIGATION HEADER */}
         <header className="h-16 bg-[#05070f] border-b border-white/5 px-6 flex items-center justify-between text-white z-10">
           <div className="flex items-center">
-            <span className="text-xs font-semibold text-[#0052FF] bg-[#0052FF]/10 border border-[#0052FF]/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Publisher Portal
-            </span>
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-1 mr-3 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
 
           <div className="flex items-center space-x-5">
-            {/* Nexus Pro Pill */}
-            <div className="relative group cursor-pointer">
-              <div className="bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 transition-all text-white border border-white/5">
-                <span className="h-2 w-2 rounded-full bg-[#0052FF] animate-ping"></span>
-                <span>Nexus Pro</span>
-                <span className="text-xs font-bold text-[#0052FF]">+</span>
-              </div>
-            </div>
+            {/* Ask AI Pill button */}
+            <button 
+              onClick={() => toast.info('AI assistant launch is coming soon!')}
+              className="bg-[#0052FF] hover:bg-blue-600 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 transition-all text-white border border-white/5 cursor-pointer shadow shadow-blue-500/10"
+            >
+              <span className="h-2 w-2 rounded-full bg-emerald-450 animate-pulse"></span>
+              <span>Ask AI</span>
+            </button>
 
             {/* Mail Icon with 99+ Badge */}
             <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
