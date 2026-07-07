@@ -12,7 +12,8 @@ import type { Campaign, Click, Conversion } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
-  TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell
+  TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -60,6 +61,7 @@ export default function Dashboard() {
 // 1. ADVERTISER DASHBOARD
 // ----------------------------------------------------
 function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages'>('campaigns');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -215,75 +217,110 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
-      <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
+      <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+          <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+            <img 
+              src="/rewardmate-logo-cropped.png" 
+              className={`h-6 transition-all ${isSidebarCollapsed ? 'w-6 object-cover object-left rounded' : 'w-auto object-contain'}`} 
+              alt="Reward Mate Logo" 
+            />
           </div>
 
           {/* Profile Card */}
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
+          <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
+            <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs">
+                <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs shrink-0">
                   {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-200 leading-none mb-1">
-                    {profile.full_name || 'Advertiser'}
+                {!isSidebarCollapsed && (
+                  <div className="truncate">
+                    <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
+                      {profile.full_name || 'Advertiser'}
+                    </div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
                   </div>
-                  <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
-                </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Navigation Links stack */}
-          <nav className="px-3 space-y-1.5 pt-2">
+          <nav className={`space-y-1.5 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
             <button
               onClick={() => setActiveTab('campaigns')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title="My Campaigns"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'campaigns' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>My Campaigns</span>
+              <FolderKanban className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>My Campaigns</span>}
             </button>
             <button
               onClick={() => setActiveTab('wallet')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title="Deposit & Wallet"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'wallet' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <DollarSign className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>Deposit & Wallet</span>
+              <DollarSign className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Deposit & Wallet</span>}
             </button>
             <button
               onClick={() => setActiveTab('messages')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title="Messages"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'messages' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Mail className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>Messages</span>
+              <Mail className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Messages</span>}
             </button>
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/5 bg-[#090b16]">
+        <div className={`border-t border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'p-2' : 'p-4'}`}>
+          {!isSidebarCollapsed && (
+            <div className="flex items-center space-x-2 mb-3 text-slate-550 font-bold select-none">
+              <div className="h-6 w-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-white">
+                RM
+              </div>
+              <span className="text-[10px] tracking-wider font-semibold">v1.0</span>
+            </div>
+          )}
+          {/* Collapse Toggle Button */}
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-400 hover:text-white transition-all bg-white/0 hover:bg-white/5 h-10 rounded-xl cursor-pointer mb-2 border border-dashed border-white/10 hover:border-white/20 shrink-0"
+            title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="h-4.5 w-4.5 text-slate-400" />
+            ) : (
+              <div className="flex items-center justify-between w-full px-2.5">
+                <span className="text-[9px] uppercase tracking-wider text-slate-405">Collapse Menu</span>
+                <ChevronLeft className="h-4 w-4" />
+              </div>
+            )}
+          </button>
+
           <button 
             onClick={signOut}
+            title="Sign Out"
             className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
           >
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            <LogOut className={`h-4 w-4 shrink-0 ${isSidebarCollapsed ? '' : 'mr-2'}`} />
+            {!isSidebarCollapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
@@ -710,6 +747,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 // ----------------------------------------------------
 function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const { impersonateUser } = useAuth();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages'>('campaign-approvals');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
@@ -1018,86 +1056,122 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
-      <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
+      <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+          <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+            <img 
+              src="/rewardmate-logo-cropped.png" 
+              className={`h-6 transition-all ${isSidebarCollapsed ? 'w-6 object-cover object-left rounded' : 'w-auto object-contain'}`} 
+              alt="Reward Mate Logo" 
+            />
           </div>
 
           {/* Profile Card */}
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
+          <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
+            <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-purple-650 text-white flex items-center justify-center font-extrabold text-xs">
+                <div className="h-8 w-8 rounded-full bg-purple-650 text-white flex items-center justify-center font-extrabold text-xs shrink-0">
                   {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-200 leading-none mb-1">
-                    {profile.full_name || 'Administrator'}
+                {!isSidebarCollapsed && (
+                  <div className="truncate">
+                    <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
+                      {profile.full_name || 'Administrator'}
+                    </div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
                   </div>
-                  <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
-                </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Navigation Links stack */}
-          <nav className="px-3 space-y-1.5 pt-2">
+          <nav className={`space-y-1.5 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
             <button
               onClick={() => setActiveTab('campaign-approvals')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title={`Offer Approvals (${pendingCamps})`}
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'campaign-approvals' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <FolderKanban className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>Offer Approvals ({pendingCamps})</span>
+              <FolderKanban className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Offer Approvals ({pendingCamps})</span>}
             </button>
             <button
               onClick={() => setActiveTab('conversion-approvals')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title={`Conversion Audits (${pendingConvs})`}
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'conversion-approvals' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Check className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>Conversion Audits ({pendingConvs})</span>
+              <Check className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Conversion Audits ({pendingConvs})</span>}
             </button>
             <button
               onClick={() => setActiveTab('users-mgmt')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title="User Management"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'users-mgmt' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Users className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>User Management</span>
+              <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>User Management</span>}
             </button>
             <button
               onClick={() => setActiveTab('messages')}
-              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              title="Messages"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'messages' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Mail className="h-4.5 w-4.5 mr-3 text-slate-400" />
-              <span>Messages</span>
+              <Mail className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Messages</span>}
             </button>
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/5 bg-[#090b16]">
+        <div className={`border-t border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'p-2' : 'p-4'}`}>
+          {!isSidebarCollapsed && (
+            <div className="flex items-center space-x-2 mb-3 text-slate-550 font-bold select-none">
+              <div className="h-6 w-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-white">
+                RM
+              </div>
+              <span className="text-[10px] tracking-wider font-semibold">v1.0</span>
+            </div>
+          )}
+          {/* Collapse Toggle Button */}
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-400 hover:text-white transition-all bg-white/0 hover:bg-white/5 h-10 rounded-xl cursor-pointer mb-2 border border-dashed border-white/10 hover:border-white/20 shrink-0"
+            title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="h-4.5 w-4.5 text-slate-400" />
+            ) : (
+              <div className="flex items-center justify-between w-full px-2.5">
+                <span className="text-[9px] uppercase tracking-wider text-slate-405">Collapse Menu</span>
+                <ChevronLeft className="h-4 w-4" />
+              </div>
+            )}
+          </button>
+
           <button 
             onClick={signOut}
+            title="Sign Out"
             className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
           >
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            <LogOut className={`h-4 w-4 shrink-0 ${isSidebarCollapsed ? '' : 'mr-2'}`} />
+            {!isSidebarCollapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>

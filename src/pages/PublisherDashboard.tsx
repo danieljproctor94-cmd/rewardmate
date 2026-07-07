@@ -12,7 +12,7 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, Bell, Mail, HelpCircle, ArrowRight, Menu, X
+  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X
 } from 'lucide-react';
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
@@ -32,6 +32,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [selectedCampaignForModal, setSelectedCampaignForModal] = useState<Campaign | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const loadData = async () => {
     try {
@@ -431,33 +432,41 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       )}
 
       {/* Desktop Sidebar (Fixed Left Column - Never Scrolls with Content) */}
-      <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
+      <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
-            <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+          <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+            <img 
+              src="/rewardmate-logo-cropped.png" 
+              className={`h-6 transition-all ${isSidebarCollapsed ? 'w-6 object-cover object-left rounded' : 'w-auto object-contain'}`} 
+              alt="Reward Mate Logo" 
+            />
           </div>
 
           {/* Real Publisher Profile Card */}
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white">
+          <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
+            <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-9 w-9 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-[#0052FF]/10">
+                <div className="h-9 w-9 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-[#0052FF]/10 shrink-0">
                   {avatarChar}
                 </div>
-                <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight font-sans">
-                    {publisherName}
+                {!isSidebarCollapsed && (
+                  <div className="space-y-0.5 truncate">
+                    <div className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight font-sans truncate">
+                      {publisherName}
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-semibold font-sans">ID: {publisherId}</div>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-semibold font-sans">ID: {publisherId}</div>
-                </div>
+                )}
               </div>
-              <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-slate-350 transition-colors" />
+              {!isSidebarCollapsed && (
+                <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-slate-350 transition-colors" />
+              )}
             </div>
           </div>
 
           {/* Navigation Links stack */}
-          <nav className="px-3 space-y-1 pt-2">
+          <nav className={`space-y-1 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
             {[
               { id: 'dashboard', label: 'Dashboard', icon: FolderKanban },
               { id: 'offers', label: 'Partners', icon: Users, hasSub: true },
@@ -485,17 +494,18 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <button
                   key={item.id}
                   onClick={handleTabClick}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer group ${
+                  title={item.label}
+                  className={`w-full flex items-center py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer group ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3'} ${
                     isActive 
                       ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2' 
                       : 'text-slate-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
-                    <span>{item.label}</span>
+                  <div className="flex items-center space-x-3 truncate">
+                    <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
+                    {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
                   </div>
-                  {item.hasSub && (
+                  {!isSidebarCollapsed && item.hasSub && (
                     <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-350" />
                   )}
                 </button>
@@ -505,20 +515,39 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/5 bg-[#090b16]">
-          <div className="flex items-center justify-between text-slate-400">
-            <div className="flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-[10px] text-white select-none shadow-sm">
+        <div className={`border-t border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'p-2' : 'p-4'}`}>
+          {!isSidebarCollapsed && (
+            <div className="flex items-center space-x-2 mb-3 text-slate-550 font-bold select-none">
+              <div className="h-6 w-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[9px] text-white">
                 RM
               </div>
-              <span className="text-[10px] font-bold text-slate-500 tracking-wider">v2.1.0 PRO</span>
+              <span className="text-[10px] tracking-wider font-semibold">v1.0</span>
             </div>
-            <button className="h-6 w-6 rounded-md hover:bg-white/5 flex items-center justify-center text-slate-500 hover:text-slate-300 transition-colors cursor-pointer">
-              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-          </div>
+          )}
+          {/* Collapse Toggle Button */}
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-400 hover:text-white transition-all bg-white/0 hover:bg-white/5 h-10 rounded-xl cursor-pointer mb-2 border border-dashed border-white/10 hover:border-white/20 shrink-0"
+            title={isSidebarCollapsed ? "Expand Menu" : "Collapse Menu"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="h-4.5 w-4.5 text-slate-400" />
+            ) : (
+              <div className="flex items-center justify-between w-full px-2.5">
+                <span className="text-[9px] uppercase tracking-wider text-slate-405">Collapse Menu</span>
+                <ChevronLeft className="h-4 w-4" />
+              </div>
+            )}
+          </button>
+
+          <button 
+            onClick={signOut}
+            title="Sign Out"
+            className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
+          >
+            <LogOut className={`h-4 w-4 shrink-0 ${isSidebarCollapsed ? '' : 'mr-2'}`} />
+            {!isSidebarCollapsed && <span>Sign Out</span>}
+          </button>
         </div>
       </aside>
 
