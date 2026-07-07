@@ -747,11 +747,10 @@ export default function Landing() {
             <div className="h-9 w-9 rounded-full overflow-hidden bg-[#e8eaed] border border-white/10 shadow-sm">
               <svg className="h-full w-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="36" height="36" fill="#e8eaed" />
-                <path d="M0 12h36M0 24h36M12 0v36M24 0v36" stroke="#ffffff" strokeWidth="2" />
-                <path d="M-5 18l46-6M18-5l-6 46" stroke="#dadce0" strokeWidth="1.5" />
-                <ellipse cx="18" cy="27" rx="3.5" ry="1.2" fill="#3c4043" opacity="0.35" />
-                <path d="M18 9c-3.3 0-6 2.7-6 6 0 4.2 6 11 6 11s6-6.8 6-11c0-3.3-2.7-6-6-6z" fill="#ea4335" />
-                <circle cx="18" cy="15" r="2" fill="#ffffff" />
+                <path d="M0 0h14l6 10l-10 20H0Z" fill="#d2ece0" opacity="0.7" />
+                <path d="M22 0c3 6 8 8 14 10v6c-8-2-11-6-14-10Z" fill="#d0e1fd" opacity="0.8" />
+                <path d="M0 14h36M0 26h36M14 0v36M26 0v36" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M-5 20l46-8M20-5l-6 46" stroke="#dadce0" strokeWidth="1.2" />
               </svg>
             </div>
           </div>
