@@ -262,9 +262,18 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
   if (!isSupabaseConfigured) {
     return getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
   }
-  const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      console.log('No live campaigns found. Using default mock campaigns as fallback.');
+      return DEFAULT_CAMPAIGNS;
+    }
+    return data;
+  } catch (err) {
+    console.error('Error loading campaigns from Supabase:', err);
+    return DEFAULT_CAMPAIGNS;
+  }
 };
 
 export const createCampaign = async (campaign: Omit<Campaign, 'id' | 'spend' | 'created_at'>): Promise<Campaign> => {

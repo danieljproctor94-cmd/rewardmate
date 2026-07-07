@@ -36,7 +36,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
               channels: channels,
               traffic: traffic,
               onboarding_completed: true,
-              approval_status: 'pending'
+              approval_status: p.approval_status === 'approved' ? 'approved' : 'pending'
             };
           }
           return p;
@@ -53,7 +53,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
           const { error } = await supabase
             .from('profiles')
             .update({
-              approval_status: 'pending',
+              approval_status: profile?.approval_status === 'approved' ? 'approved' : 'pending',
               full_name: profile?.full_name || businessName,
               business_name: businessName,
               website: website,
@@ -75,7 +75,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
           const { error: fallbackErr } = await supabase
             .from('profiles')
             .update({
-              approval_status: 'pending',
+              approval_status: profile?.approval_status === 'approved' ? 'approved' : 'pending',
               full_name: profile?.full_name || businessName,
             } as any)
             .eq('id', profile?.id);
@@ -165,8 +165,14 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
             <ClipboardList className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Publisher Onboarding</h1>
-            <p className="text-xs text-slate-500">Provide details to apply for active network membership.</p>
+            <h1 className="text-sm sm:text-base font-extrabold text-slate-900 leading-none mb-1">
+              {profile?.approval_status === 'approved' ? 'Complete Your Account Setup' : 'Publisher Onboarding'}
+            </h1>
+            <p className="text-[11px] text-slate-500 font-medium">
+              {profile?.approval_status === 'approved' 
+                ? 'Your application is approved! Please complete these final setup details to access your dashboard.' 
+                : 'Provide details to apply for active network membership.'}
+            </p>
           </div>
         </div>
 

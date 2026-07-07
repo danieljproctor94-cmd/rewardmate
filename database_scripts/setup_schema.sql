@@ -180,7 +180,10 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', ''),
     COALESCE(new.raw_user_meta_data->>'avatar_url', ''),
     COALESCE(new.raw_user_meta_data->>'user_type', 'publisher'),
-    'approved', -- Auto-approve for demo
+    CASE 
+      WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') = 'publisher' THEN 'pending'
+      ELSE 'approved'
+    END,
     CASE 
       WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') = 'advertiser' THEN 1000.00 -- Initial advertiser demo funds
       ELSE 0.00
