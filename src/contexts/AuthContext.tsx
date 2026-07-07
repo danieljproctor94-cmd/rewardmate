@@ -25,6 +25,9 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateBalance: (amount: number, type: 'deposit' | 'withdrawal' | 'payout' | 'spend') => Promise<void>;
   isMock: boolean;
+  impersonateUser?: (targetProfile: any) => void;
+  stopImpersonating?: () => void;
+  isImpersonating?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,6 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const isMock = !isSupabaseConfigured;
+  const [originalAdminProfile, setOriginalAdminProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const origProfileStr = localStorage.getItem('rewardmate_original_admin_profile');
+    if (origProfileStr) {
+      setOriginalAdminProfile(JSON.parse(origProfileStr));
+    }
+  }, []);
 
   // Initialize Mock Profiles
   useEffect(() => {
@@ -307,6 +318,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const impersonateUser = (targetProfile: any) => {
+    if (!originalAdminProfile) {
+      setOriginalAdminProfile(profile);
+      localStorage.setItem('rewardmate_original_admin_profile', JSON.stringify(profile));
+      localStorage.setItem('rewardmate_original_admin_user', JSON.stringify(user));
+    }
+    setUser({ id: targetProfile.id, email: targetProfile.email });
+    setProfile(targetProfile);
+    toast.success(`Now impersonating: ${targetProfile.full_name || targetProfile.email}`);
+  };
+
+  const stopImpersonating = () => {
+    const origProfileStr = localStorage.getItem('rewardmate_original_admin_profile');
+    const origUserStr = localStorage.getItem('rewardmate_original_admin_user');
+    if (origProfileStr && origUserStr) {
+      const origProfile = JSON.parse(origProfileStr);
+      const origUser = JSON.parse(origUserStr);
+      setUser(origUser);
+      setProfile(origProfile);
+      setOriginalAdminProfile(null);
+      localStorage.removeItem('rewardmate_original_admin_profile');
+      localStorage.removeItem('rewardmate_original_admin_user');
+      toast.success(`Returned to administrator profile`);
+    } else if (originalAdminProfile) {
+      setUser({ id: originalAdminProfile.id, email: originalAdminProfile.email });
+      setProfile(originalAdminProfile);
+      setOriginalAdminProfile(null);
+      toast.success(`Returned to administrator profile`);
+    } else {
+      toast.error('No admin session history found.');
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -318,7 +362,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signOut,
       updateBalance,
-      isMock
+      isMock,
+      impersonateUser,
+      stopImpersonating,
+      isImpersonating: !!originalAdminProfile
     }}>
       {children}
     </AuthContext.Provider>

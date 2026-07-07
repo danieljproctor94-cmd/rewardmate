@@ -13,7 +13,7 @@ import About from './pages/public/About';
 import Contact from './pages/public/Contact';
 
 export default function App() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isImpersonating, stopImpersonating, profile } = useAuth();
   const isApp = isAppDomain();
 
   if (loading) {
@@ -26,6 +26,20 @@ export default function App() {
 
   return (
     <>
+      {isImpersonating && (
+        <div className="bg-[#1e293b] border-b border-slate-700 text-white py-2 px-4 shadow-md sticky top-0 z-50 flex items-center justify-between font-sans text-xs">
+          <div className="flex items-center gap-2 mx-auto">
+            <span className="h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+            <span>Impersonating user: <strong>{profile?.full_name || profile?.email}</strong> ({profile?.user_type})</span>
+            <button
+              onClick={stopImpersonating}
+              className="ml-4 bg-[#0052FF] hover:bg-blue-600 text-white font-extrabold px-3.5 py-1 rounded-xl transition-all cursor-pointer shadow-sm text-[10px] uppercase tracking-wider"
+            >
+              Exit Impersonation
+            </button>
+          </div>
+        </div>
+      )}
       <Toaster 
         position="top-center" 
         closeButton

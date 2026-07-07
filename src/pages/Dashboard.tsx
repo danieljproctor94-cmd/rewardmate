@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import PublisherDashboard from './PublisherDashboard';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
   getCampaigns, createCampaign, updateCampaignStatus, 
-  getAffiliateLinks, generateAffiliateLink, logClick, 
-  getClicks, getConversions, updateConversionStatus, createConversion
+  getClicks, getConversions, updateConversionStatus
 } from '../lib/mockDatabase';
-import type { Campaign, AffiliateLink, Click, Conversion } from '../lib/mockDatabase';
+import type { Campaign, Click, Conversion } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
-  LogOut, DollarSign, MousePointer, CheckCircle, Plus, Copy, 
-  Play, TrendingUp, Check, X, AlertCircle 
+  LogOut, DollarSign, MousePointer, Plus, 
+  TrendingUp, Check, X, AlertCircle 
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -439,423 +440,17 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   );
 }
 
-// ----------------------------------------------------
-// 2. PUBLISHER DASHBOARD
-// ----------------------------------------------------
-function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
-  const { isMock } = useAuth();
-  const [activeTab, setActiveTab] = useState<'offers' | 'my-links' | 'clicks-conv' | 'wallet'>('offers');
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [myLinks, setMyLinks] = useState<AffiliateLink[]>([]);
-  const [clicks, setClicks] = useState<Click[]>([]);
-  const [conversions, setConversions] = useState<Conversion[]>([]);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-
-  const loadData = async () => {
-    try {
-      const camps = await getCampaigns();
-      setCampaigns(camps.filter(c => c.status === 'active'));
-      
-      const links = await getAffiliateLinks(profile.id);
-      setMyLinks(links);
-
-      const clickLogs = await getClicks(profile.id);
-      setClicks(clickLogs);
-
-      const convs = await getConversions('publisher', profile.id);
-      setConversions(convs);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [profile.id]);
-
-  const handleGenerateLink = async (campaignId: string) => {
-    try {
-      await generateAffiliateLink(profile.id, campaignId);
-      toast.success('Affiliate tracking link generated successfully!');
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
-
-  const handleCopyLink = (code: string) => {
-    const trackingUrl = `${window.location.origin}/click/${code}`;
-    navigator.clipboard.writeText(trackingUrl);
-    toast.success('Tracking Link copied to clipboard!');
-  };
-
-  // Click & Conversion Simulator tool
-  const handleSimulateClickAndConversion = async (link: AffiliateLink) => {
-    try {
-      // 1. Log click
-      await logClick(link.code);
-
-      // 2. Roll 70% conversion chance for demonstration
-      const triggerConv = Math.random() < 0.7;
-      if (triggerConv) {
-        const campaignPayout = link.campaign?.payout_amount || 25.00;
-        await createConversion(`click-${Date.now()}`, campaignPayout);
-        toast.success(`Click & Conversion Simulated! Payout of $${campaignPayout.toFixed(2)} logged.`);
-      } else {
-        toast.info('Click Simulated! (This hit did not convert).');
-      }
-      
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
-
-  const handleWithdraw = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!withdrawAmount || Number(withdrawAmount) <= 0) {
-      toast.error('Please enter a valid withdrawal amount.');
-      return;
-    }
-    if (Number(withdrawAmount) > Number(profile.wallet_balance)) {
-      toast.error('Withdrawal amount exceeds your current wallet balance.');
-      return;
-    }
-
-    try {
-      await updateBalance(Number(withdrawAmount), 'withdrawal');
-      setWithdrawAmount('');
-      toast.success('Withdrawal request processed!');
-    } catch (err) {}
-  };
-
-  // Metrics
-  const totalEarnings = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
-  const clickCount = clicks.length;
-  const convCount = conversions.length;
-  const epc = clickCount > 0 ? (totalEarnings / clickCount) : 0.00;
-
-  return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col">
-      {/* Top Navbar */}
-      <nav className="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <img src="/rewardmate-logo-cropped.png" className="h-6 sm:h-7 w-auto object-contain brightness-0" alt="Reward Mate Logo" />
-          <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider ml-2">Publisher</span>
-        </div>
-
-        <div className="flex items-center space-x-6">
-          <div className="text-right">
-            <div className="text-xs text-slate-600 font-bold uppercase tracking-wider">Available Earnings</div>
-            <div className="text-sm font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
-          </div>
-          <button 
-            onClick={signOut}
-            className="flex items-center text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100 px-3 py-2 rounded-xl"
-          >
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Container */}
-      <main className="flex-1 p-6 md:p-12 max-w-7xl w-full mx-auto space-y-8">
-        
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Total Earnings</span>
-              <DollarSign className="h-5 w-5 text-[#0052FF]" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">${totalEarnings.toFixed(2)}</div>
-            <p className="text-[10px] text-slate-600 mt-1">From approved conversions</p>
-          </div>
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Conversions</span>
-              <CheckCircle className="h-5 w-5 text-[#0052FF]" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">{convCount}</div>
-            <p className="text-[10px] text-slate-600 mt-1">Approved & pending leads</p>
-          </div>
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">Clicks</span>
-              <MousePointer className="h-5 w-5 text-[#0052FF]" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">{clickCount}</div>
-            <p className="text-[10px] text-slate-600 mt-1">Total click logs tracked</p>
-          </div>
-          <div className="premium-glass-panel p-6">
-            <div className="flex justify-between items-center text-slate-600 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider">EPC</span>
-              <TrendingUp className="h-5 w-5 text-[#0052FF]" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">${epc.toFixed(2)}</div>
-            <p className="text-[10px] text-slate-600 mt-1">Earnings per click average</p>
-          </div>
-        </div>
-
-        {/* Tabs Bar */}
-        <div className="flex space-x-6 border-b border-slate-200/80">
-          <button 
-            onClick={() => setActiveTab('offers')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'offers' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
-          >
-            Find Offers ({campaigns.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('my-links')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'my-links' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
-          >
-            My Affiliate Links ({myLinks.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('clicks-conv')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'clicks-conv' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
-          >
-            Traffic & Conversion logs
-          </button>
-          <button 
-            onClick={() => setActiveTab('wallet')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wallet' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
-          >
-            Withdraw Wallet
-          </button>
-        </div>
-
-        {/* Tab Contents */}
-        {activeTab === 'offers' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Browse Active Affiliate Campaigns</h3>
-              <p className="text-xs text-slate-600 font-medium">Join networks and copy your tracking URLs instantly.</p>
-            </div>
-
-            <div className="grid gap-4">
-              {campaigns.map((camp) => {
-                const joined = myLinks.some(l => l.campaign_id === camp.id);
-                return (
-                  <div key={camp.id} className="premium-glass-panel p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="space-y-1">
-                      <h4 className="text-base font-bold text-slate-900">{camp.name}</h4>
-                      <p className="text-xs text-slate-600 max-w-xl leading-relaxed">{camp.description}</p>
-                    </div>
-
-                    <div className="flex items-center gap-6 shrink-0">
-                      <div className="text-right">
-                        <div className="text-xs text-slate-600">Payout Rate</div>
-                        <div className="text-sm font-extrabold text-[#0052FF]">${Number(camp.payout_amount).toFixed(2)} AUD</div>
-                        <div className="text-[10px] text-slate-600 uppercase tracking-wider">{camp.payout_type}</div>
-                      </div>
-                      
-                      {joined ? (
-                        <span className="text-xs bg-slate-900 border border-slate-200/80 text-slate-600 font-bold px-4 py-2.5 rounded-xl">
-                          Link Generated
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleGenerateLink(camp.id)}
-                          className="bg-[#0052FF] hover:bg-blue-700 text-white font-bold text-xs h-10 px-5 rounded-xl transition-all"
-                        >
-                          Generate Link
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'my-links' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Your Affiliate Channels</h3>
-              <p className="text-xs text-slate-600">Copy link and start driving traffic. Click "Simulate Click" to generate dummy conversions instantly in sandbox.</p>
-            </div>
-
-            {myLinks.length === 0 ? (
-              <div className="premium-glass-panel p-12 text-center text-slate-600">
-                <p className="font-bold text-sm">No links generated yet. Go to "Find Offers" to choose a campaign.</p>
-              </div>
-            ) : (
-              <div className="grid gap-6">
-                {myLinks.map((link) => (
-                  <div key={link.id} className="premium-glass-panel p-6 space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900">{link.campaign?.name}</h4>
-                        <p className="text-xs text-slate-600 mt-1">{link.campaign?.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-slate-600">Payout Rate</div>
-                        <div className="text-xs font-bold text-[#0052FF]">${Number(link.campaign?.payout_amount).toFixed(2)} AUD ({link.campaign?.payout_type.toUpperCase()})</div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
-                      <div className="flex-1 bg-[#0d0f17] border border-slate-200 rounded-xl h-11 px-4 flex items-center text-xs text-slate-600 overflow-hidden text-ellipsis whitespace-nowrap">
-                        {`${window.location.origin}/click/${link.code}`}
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleCopyLink(link.code)}
-                          className="bg-white/5 border border-slate-200 hover:bg-white/10 text-white font-bold text-xs h-11 px-4 rounded-xl flex items-center gap-1.5 shrink-0"
-                        >
-                          <Copy className="h-4 w-4" /> Copy Link
-                        </button>
-                        
-                        {isMock && (
-                          <button
-                            onClick={() => handleSimulateClickAndConversion(link)}
-                            className="bg-blue-500/10 hover:bg-blue-600/20 border border-blue-600/30 text-[#0052FF] font-bold text-xs h-11 px-4 rounded-xl flex items-center gap-1.5 shrink-0"
-                          >
-                            <Play className="h-4 w-4" /> Simulate Traffic
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'clicks-conv' && (
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Click Log */}
-            <div className="premium-glass-panel p-6 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <MousePointer className="h-4 w-4 text-[#0052FF]" /> Click Log history
-              </h3>
-              <div className="max-h-[350px] overflow-y-auto space-y-3">
-                {clicks.length === 0 ? (
-                  <p className="text-xs text-slate-600 text-center py-8">No clicks logged yet.</p>
-                ) : (
-                  clicks.map((c) => (
-                    <div key={c.id} className="bg-slate-900/60 border border-white/[0.03] p-3 rounded-xl flex justify-between items-center">
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">{c.campaign?.name}</div>
-                        <div className="text-[10px] text-slate-600 mt-0.5">IP: {c.ip_address} • Ref: {c.referrer}</div>
-                      </div>
-                      <div className="text-[10px] text-slate-600">
-                        {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Conversions Log */}
-            <div className="premium-glass-panel p-6 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-[#0052FF]" /> Conversion Transactions
-              </h3>
-              <div className="max-h-[350px] overflow-y-auto space-y-3">
-                {conversions.length === 0 ? (
-                  <p className="text-xs text-slate-600 text-center py-8">No conversions logged yet.</p>
-                ) : (
-                  conversions.map((conv) => (
-                    <div key={conv.id} className="bg-slate-900/60 border border-white/[0.03] p-3 rounded-xl flex justify-between items-center">
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">{conv.campaign_name || conv.campaign?.name}</div>
-                        <div className="text-[10px] text-slate-600 mt-0.5">TxID: {conv.transaction_id}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs font-bold text-[#0052FF]">+${Number(conv.payout).toFixed(2)}</div>
-                        <span className={`text-[9px] font-extrabold uppercase rounded px-1.5 py-0.5 ${
-                          conv.status === 'approved' ? 'bg-blue-500/10 text-[#0052FF]' :
-                          conv.status === 'pending' ? 'bg-amber-500/10 text-amber-400' :
-                          'bg-red-500/10 text-red-400'
-                        }`}>
-                          {conv.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'wallet' && (
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="premium-glass-panel p-8 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Withdraw Earnings</h3>
-                <p className="text-xs text-slate-600">Transfer your cleared earnings directly to your bank account (AUD).</p>
-              </div>
-
-              <form onSubmit={handleWithdraw} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Withdraw Amount ($)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600" />
-                    <input 
-                      type="number" 
-                      placeholder="e.g. 100"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-500 transition-colors"
-                >
-                  Confirm Sandbox Withdrawal
-                </button>
-              </form>
-            </div>
-
-            <div className="premium-glass-panel p-8 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Earnings Ledger</h3>
-                <p className="text-xs text-slate-600">Summary of publisher financial status.</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
-                  <span className="text-sm text-slate-600">Available Balance</span>
-                  <span className="text-base font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-white/[0.03]">
-                  <span className="text-sm text-slate-600">Pending Approvals</span>
-                  <span className="text-sm font-bold text-slate-900">
-                    ${conversions.filter(c => c.status === 'pending').reduce((acc, c) => acc + Number(c.payout), 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-sm text-slate-600">Total Lifetime Payouts</span>
-                  <span className="text-sm font-bold text-slate-900">${totalEarnings.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-      </main>
-    </div>
-  );
-}
 
 // ----------------------------------------------------
 // 3. ADMIN DASHBOARD
 // ----------------------------------------------------
 function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals'>('campaign-approvals');
+  const { impersonateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt'>('campaign-approvals');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
 
   const loadData = async () => {
     try {
@@ -867,6 +462,17 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
       const clickLogs = await getClicks();
       setClicks(clickLogs);
+
+      // Fetch users
+      if (!isSupabaseConfigured) {
+        const mockProfiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        setProfiles(mockProfiles);
+      } else {
+        const { data: usersData, error: usersErr } = await supabase.from('profiles').select('*');
+        if (!usersErr && usersData) {
+          setProfiles(usersData);
+        }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -913,6 +519,31 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       loadData();
     } catch (err: any) {
       toast.error(err.message);
+    }
+  };
+
+  const handleRemoveUser = async (userId: string) => {
+    if (userId === profile.id) {
+      toast.error('You cannot remove your own active administrator profile.');
+      return;
+    }
+    if (window.confirm('Are you sure you want to remove this user? This profile will be deleted.')) {
+      try {
+        if (!isSupabaseConfigured) {
+          const storedProfiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+          const updated = storedProfiles.filter((p: any) => p.id !== userId);
+          localStorage.setItem('rewardmate_mock_profiles', JSON.stringify(updated));
+          toast.success('Mock User profile deleted successfully.');
+          loadData();
+        } else {
+          const { error } = await supabase.from('profiles').delete().eq('id', userId);
+          if (error) throw error;
+          toast.success('User profile deleted successfully.');
+          loadData();
+        }
+      } catch (err: any) {
+        toast.error(err.message);
+      }
     }
   };
 
@@ -972,18 +603,24 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         </div>
 
         {/* Tab Selection */}
-        <div className="flex space-x-6 border-b border-slate-200/80">
+        <div className="flex space-x-6 border-b border-slate-200/80 font-sans">
           <button 
             onClick={() => setActiveTab('campaign-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'campaign-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'campaign-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
           >
             Pending Campaign Approvals ({pendingCamps})
           </button>
           <button 
             onClick={() => setActiveTab('conversion-approvals')}
-            className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'conversion-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-200'}`}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'conversion-approvals' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
           >
             Pending Conversion Audits ({pendingConvs})
+          </button>
+          <button 
+            onClick={() => setActiveTab('users-mgmt')}
+            className={`pb-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${activeTab === 'users-mgmt' ? 'border-blue-600 text-[#0052FF]' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          >
+            User Management ({profiles.length})
           </button>
         </div>
 
@@ -1091,6 +728,128 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'users-mgmt' && (
+          <div className="space-y-6 animate-in fade-in duration-300 font-sans">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">User Management</h3>
+              <p className="text-xs text-slate-500">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <th className="py-4 px-6">Member Profile</th>
+                      <th className="py-4 px-6">Type</th>
+                      <th className="py-4 px-6">Country</th>
+                      <th className="py-4 px-6">Last Active</th>
+                      <th className="py-4 px-6 text-right">This Month Stats</th>
+                      <th className="py-4 px-6 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {profiles.map((p) => {
+                      const country = (() => {
+                        if (p.email.endsWith('.au')) return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                        if (p.email.endsWith('.uk') || p.email.endsWith('.co.uk')) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                        if (p.email.endsWith('.nz')) return { flag: '🇳🇿', code: 'NZ', name: 'New Zealand' };
+                        const charCode = p.id.charCodeAt(0) || 0;
+                        if (charCode % 3 === 0) return { flag: '🇺🇸', code: 'US', name: 'United States' };
+                        if (charCode % 3 === 1) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                        return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                      })();
+
+                      const lastLoggedIn = (() => {
+                        const charCode = p.id.charCodeAt(p.id.length - 1) || 0;
+                        const hoursAgo = 1 + (charCode % 72);
+                        const date = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+                        return date.toLocaleDateString('en-AU', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        });
+                      })();
+
+                      const isSelf = p.id === profile.id;
+
+                      // Metrics
+                      const clicksCount = clicks.filter(c => c.publisher_id === p.id || c.campaign?.advertiser_id === p.id).length;
+                      const financeVol = p.user_type === 'publisher' 
+                        ? conversions.filter(c => c.publisher_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0)
+                        : conversions.filter(c => c.campaign?.advertiser_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
+
+                      return (
+                        <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs">
+                                {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-bold text-slate-800">{p.full_name || 'No Name'}</div>
+                                <div className="text-[10px] text-slate-500">{p.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={`text-[9px] font-extrabold uppercase rounded px-2.5 py-0.5 tracking-wider ${
+                              p.user_type === 'admin' ? 'bg-purple-100 text-purple-800' :
+                              p.user_type === 'advertiser' ? 'bg-amber-100 text-amber-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {p.user_type}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="flex items-center gap-1.5 font-semibold text-slate-600">
+                              <span>{country.flag}</span>
+                              <span>{country.code}</span>
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-slate-500 font-medium">{lastLoggedIn}</td>
+                          <td className="py-4 px-6 text-right">
+                            <div className="font-bold text-slate-800">
+                              {p.user_type === 'publisher' ? `+$${financeVol.toFixed(2)}` : p.user_type === 'advertiser' ? `-$${financeVol.toFixed(2)}` : '-'}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-medium">
+                              {p.user_type !== 'admin' ? `${clicksCount} clicks` : ''}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 font-sans">
+                            <div className="flex items-center justify-center gap-2">
+                              {!isSelf && p.user_type !== 'admin' && (
+                                <button
+                                  onClick={() => impersonateUser?.(p)}
+                                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                >
+                                  Login As
+                                </button>
+                              )}
+                              {!isSelf && (
+                                <button
+                                  onClick={() => handleRemoveUser(p.id)}
+                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                              {isSelf && (
+                                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                                  You (Active)
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
