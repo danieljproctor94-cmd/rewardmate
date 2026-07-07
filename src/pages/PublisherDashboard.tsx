@@ -10,7 +10,7 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, ChevronDown, Bell, Mail, HelpCircle, ArrowRight, Menu, X
+  ChevronRight, Bell, Mail, HelpCircle, ArrowRight, Menu, X
 } from 'lucide-react';
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
@@ -212,7 +212,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const avatarChar = publisherName.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-screen overflow-hidden w-full bg-[#f8fafc] text-slate-800 font-sans selection:bg-[#0052FF]/10">
+    <div className="flex h-screen overflow-hidden w-full bg-[#090b16] text-slate-800 font-sans selection:bg-[#0052FF]/10 p-3 lg:p-4 gap-3 lg:gap-4">
       
       {/* 1. MOBILE SIDEBAR DRAWER (Sliding panel) */}
       {mobileMenuOpen && (
@@ -295,7 +295,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       )}
 
       {/* Desktop Sidebar (Fixed Left Column - Never Scrolls with Content) */}
-      <aside className="hidden lg:flex w-64 bg-[#090b16] border-r border-white/5 flex-col justify-between shrink-0 h-full z-20">
+      <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
         <div className="flex flex-col">
           {/* Logo Header */}
           <div className="px-6 py-5 flex items-center border-b border-white/5 bg-[#090b16]">
@@ -386,78 +386,79 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       </aside>
 
       {/* 2. MAIN LAYOUT CONTAINER (Header fixed, Main scrolls) */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#090b16]">
         
-        {/* TOP NAVIGATION HEADER (Light Theme borders and background) */}
-        <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between text-slate-800 z-10 shrink-0">
+        {/* TOP NAVIGATION HEADER (Dark Theme header) */}
+        <header className="h-14 bg-[#090b16] px-2 flex items-center justify-between text-white z-10 shrink-0 mb-2">
           <div className="flex items-center">
             <button 
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-1 mr-3 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+              className="lg:hidden p-1 mr-3 text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
               <Menu className="h-6 w-6" />
             </button>
+            <span className="text-xs font-semibold text-[#38bdf8] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">
+              Publisher Control
+            </span>
           </div>
 
-          <div className="flex items-center space-x-5">
+          <div className="flex items-center space-x-4">
             {/* Ask AI Pill button */}
             <button 
               onClick={() => toast.info('AI assistant launch is coming soon!')}
-              className="bg-[#0052FF] hover:bg-blue-650 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 transition-all text-white cursor-pointer shadow-sm shadow-blue-500/10"
+              className="bg-[#0052FF] hover:bg-blue-650 px-3 py-1.5 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 transition-all text-white cursor-pointer shadow-sm shadow-blue-500/10"
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Ask AI</span>
             </button>
 
-            {/* Mail Icon with 99+ Badge */}
-            <button className="relative p-1.5 text-slate-450 hover:text-slate-850 transition-colors cursor-pointer">
-              <Mail className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1.5 bg-[#0052FF] text-white text-[8px] font-extrabold h-4 px-1 rounded-full flex items-center justify-center min-w-4 border border-white">
-                99+
+            {/* Mail Icon */}
+            <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <Mail className="h-4.5 w-4.5" />
+              <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                99
               </span>
             </button>
 
-            {/* Notification Bell with 99+ Badge */}
-            <button className="relative p-1.5 text-slate-450 hover:text-slate-850 transition-colors cursor-pointer">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1.5 bg-[#0052FF] text-white text-[8px] font-extrabold h-4 px-1 rounded-full flex items-center justify-center min-w-4 border border-white">
-                99+
+            {/* Notification Bell */}
+            <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <Bell className="h-4.5 w-4.5" />
+              <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                99
               </span>
             </button>
 
             {/* Help Question Mark */}
-            <button className="flex items-center space-x-1 p-1.5 text-slate-450 hover:text-slate-850 transition-colors cursor-pointer">
-              <HelpCircle className="h-5 w-5" />
-              <ChevronDown className="h-3.5 w-3.5" />
+            <button className="flex items-center space-x-1 p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <HelpCircle className="h-4.5 w-4.5" />
             </button>
 
             {/* Vertical Divider */}
-            <div className="h-6 w-px bg-slate-200"></div>
+            <div className="h-5 w-px bg-white/10"></div>
 
             {/* Profile Dropdown Badge */}
-            <div className="flex items-center space-x-3 cursor-pointer group">
-              <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none border border-purple-500/10 shadow-sm">
+            <div className="flex items-center space-x-2 cursor-pointer group">
+              <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm">
                 {avatarChar}
               </div>
-              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900 transition-colors hidden sm:inline-block">
+              <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors hidden md:inline-block">
                 {publisherName}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-700 transition-colors" />
             </div>
 
             {/* Quick Logout */}
             <button 
               onClick={signOut}
               title="Sign Out"
-              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-[#0052FF] transition-all cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
             >
               <LogOut className="h-4.5 w-4.5" />
             </button>
           </div>
         </header>
 
-        {/* 3. MAIN SCROLLABLE SECTION (This panel scrolls vertically independently) */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-[#f8fafc]">
+        {/* 3. MAIN SCROLLABLE SECTION (Curved canvas floating inside dark background) */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-[#f8fafc] rounded-[24px] border border-white/5 shadow-inner">
           
           {/* TAB 1: MAIN GRAPH OVERVIEW DASHBOARD */}
           {activeTab === 'dashboard' && (
