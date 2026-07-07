@@ -725,6 +725,95 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [newMessageText, setNewMessageText] = useState('');
   const [searchContactText, setSearchContactText] = useState('');
 
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserFullName, setNewUserFullName] = useState('');
+  const [newUserType, setNewUserType] = useState<'admin' | 'publisher' | 'advertiser'>('publisher');
+  const [newUserApproval, setNewUserApproval] = useState<'approved' | 'pending'>('approved');
+  const [newUserBalance, setNewUserBalance] = useState('0.00');
+  
+  // Onboarding answers pre-fill
+  const [newUserBusiness, setNewUserBusiness] = useState('');
+  const [newUserWebsite, setNewUserWebsite] = useState('');
+  const [newUserChannels, setNewUserChannels] = useState('');
+  const [newUserTraffic, setNewUserTraffic] = useState('');
+
+  const handleCreateUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserEmail) {
+      toast.error('Email is required.');
+      return;
+    }
+    
+    try {
+      if (!isSupabaseConfigured) {
+        // Mock Mode Creation
+        const mockProfiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        if (mockProfiles.some((p: any) => p.email.toLowerCase() === newUserEmail.toLowerCase())) {
+          toast.error('A user with this email already exists.');
+          return;
+        }
+
+        const newProfile = {
+          id: `mock-user-${Date.now()}`,
+          email: newUserEmail,
+          full_name: newUserFullName,
+          avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(newUserFullName || newUserEmail)}`,
+          user_type: newUserType,
+          approval_status: newUserType === 'publisher' ? newUserApproval : 'approved',
+          wallet_balance: Number(newUserBalance) || 0,
+          created_at: new Date().toISOString(),
+          business_name: newUserType === 'publisher' ? newUserBusiness : undefined,
+          website: newUserType === 'publisher' ? newUserWebsite : undefined,
+          channels: newUserType === 'publisher' ? newUserChannels : undefined,
+          traffic: newUserType === 'publisher' ? newUserTraffic : undefined,
+          onboarding_completed: newUserType === 'publisher' ? !!(newUserBusiness || newUserWebsite) : true
+        };
+
+        localStorage.setItem('rewardmate_mock_profiles', JSON.stringify([...mockProfiles, newProfile]));
+        toast.success(`User account ${newUserEmail} created successfully!`);
+      } else {
+        // Supabase Live Mode Creation
+        const tempId = 'db-user-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: tempId,
+            email: newUserEmail,
+            full_name: newUserFullName,
+            user_type: newUserType,
+            approval_status: newUserType === 'publisher' ? newUserApproval : 'approved',
+            wallet_balance: Number(newUserBalance) || 0,
+            created_at: new Date().toISOString(),
+            business_name: newUserType === 'publisher' ? newUserBusiness : null,
+            website: newUserType === 'publisher' ? newUserWebsite : null,
+            channels: newUserType === 'publisher' ? newUserChannels : null,
+            traffic: newUserType === 'publisher' ? newUserTraffic : null,
+            onboarding_completed: newUserType === 'publisher' ? !!(newUserBusiness || newUserWebsite) : true
+          } as any);
+
+        if (error) throw error;
+        toast.success(`User account ${newUserEmail} created in database!`);
+      }
+
+      // Reset form states
+      setNewUserEmail('');
+      setNewUserFullName('');
+      setNewUserType('publisher');
+      setNewUserApproval('approved');
+      setNewUserBalance('0.00');
+      setNewUserBusiness('');
+      setNewUserWebsite('');
+      setNewUserChannels('');
+      setNewUserTraffic('');
+      setShowAddUserModal(false);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create user account.');
+    }
+  };
+
   const loadMessages = async () => {
     try {
       const allMsgs = await getMessages(profile.id);
@@ -1279,10 +1368,19 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           )}
 
           {activeTab === 'users-mgmt' && (
-            <div className="space-y-6 animate-in fade-in duration-300 font-sans">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 font-sans">User Management</h3>
-                <p className="text-xs text-slate-550 font-medium">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
+            <>
+              <div className="space-y-6 animate-in fade-in duration-300 font-sans">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-sans">User Management</h3>
+                  <p className="text-xs text-slate-550 font-medium">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
+                </div>
+                <button
+                  onClick={() => setShowAddUserModal(true)}
+                  className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm self-start sm:self-center"
+                >
+                  <Plus className="h-4 w-4" /> Setup User Account
+                </button>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -1477,7 +1575,167 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 </div>
               </div>
             </div>
-          )}
+
+            {/* SETUP NEW USER MODAL */}
+            {showAddUserModal && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-205 text-left">
+                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Setup New Account</h3>
+                    <button 
+                      onClick={() => setShowAddUserModal(false)}
+                      className="text-slate-400 hover:text-slate-655 font-bold p-1 cursor-pointer transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCreateUserSubmit} className="p-6 space-y-4 text-xs font-semibold text-slate-650">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Daniel Proctor"
+                          value={newUserFullName}
+                          onChange={(e) => setNewUserFullName(e.target.value)}
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Email Address</label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="e.g. name@domain.com"
+                          value={newUserEmail}
+                          onChange={(e) => setNewUserEmail(e.target.value)}
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Account Type</label>
+                        <select
+                          value={newUserType}
+                          onChange={(e) => setNewUserType(e.target.value as any)}
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-2 py-2 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                        >
+                          <option value="publisher">Publisher</option>
+                          <option value="advertiser">Advertiser</option>
+                          <option value="admin">Super Admin</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Initial Approval</label>
+                        <select
+                          value={newUserApproval}
+                          disabled={newUserType !== 'publisher'}
+                          onChange={(e) => setNewUserApproval(e.target.value as any)}
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-2 py-2 text-xs font-medium focus:outline-none focus:border-[#0052FF] disabled:opacity-50"
+                        >
+                          <option value="approved">Approved</option>
+                          <option value="pending">Pending Review</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Starting Balance (AUD)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={newUserBalance}
+                          onChange={(e) => setNewUserBalance(e.target.value)}
+                          className="w-full bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pre-fill Onboarding details if Publisher */}
+                    {newUserType === 'publisher' && (
+                      <div className="space-y-3 pt-3 border-t border-slate-105 bg-slate-50/40 p-3 rounded-2xl">
+                        <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Pre-fill Onboarding Answers (Optional)</h4>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-extrabold text-slate-400">Business/Brand Name</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Deal Hunters AU"
+                              value={newUserBusiness}
+                              onChange={(e) => setNewUserBusiness(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-extrabold text-slate-400">Website URL</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. https://dealhunters.com"
+                              value={newUserWebsite}
+                              onChange={(e) => setNewUserWebsite(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-extrabold text-slate-400">Traffic (Monthly Views)</label>
+                            <select
+                              value={newUserTraffic}
+                              onChange={(e) => setNewUserTraffic(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                            >
+                              <option value="">Select Traffic...</option>
+                              <option value="Under 5,000">Under 5,000</option>
+                              <option value="5,000 - 25,000">5,000 - 25,000</option>
+                              <option value="25,000 - 100,000">25,000 - 100,000</option>
+                              <option value="100,000+">100,000+</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-extrabold text-slate-400">Channels</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Email list, Instagram, Blog"
+                              value={newUserChannels}
+                              onChange={(e) => setNewUserChannels(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddUserModal(false)}
+                        className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="h-10 px-5 bg-[#0052FF] hover:bg-blue-650 text-white font-bold rounded-xl transition-colors cursor-pointer shadow-md shadow-blue-500/10"
+                      >
+                        Create Account
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
           {/* TAB 4: MESSAGES SECTION */}
           {activeTab === 'messages' && (

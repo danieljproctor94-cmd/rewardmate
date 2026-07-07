@@ -60,15 +60,31 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   // Auto scroll brand carousel
   useEffect(() => {
     const el = document.getElementById('brands-carousel-container');
-    if (!el) return;
+    if (!el || campaigns.length === 0) return;
 
-    const interval = setInterval(() => {
-      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 10) {
-        el.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        el.scrollBy({ left: 180, behavior: 'smooth' });
+    // Width of one complete set of cards (160px card width + 16px gap = 176px)
+    const setWidth = campaigns.length * 176;
+
+    // Initialize position in the middle set
+    el.scrollLeft = setWidth;
+
+    const scrollStep = () => {
+      // If we scroll past the second set, jump back to the first set seamlessly (without smooth behavior)
+      if (el.scrollLeft >= setWidth * 2) {
+        el.style.scrollBehavior = 'auto';
+        el.scrollLeft = el.scrollLeft - setWidth;
       }
-    }, 3000);
+      
+      // Perform the smooth scroll step
+      setTimeout(() => {
+        if (el) {
+          el.style.scrollBehavior = 'smooth';
+          el.scrollBy({ left: 176, behavior: 'smooth' });
+        }
+      }, 50);
+    };
+
+    const interval = setInterval(scrollStep, 3000);
 
     return () => clearInterval(interval);
   }, [campaigns]);
@@ -695,9 +711,9 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
                 <div 
                   id="brands-carousel-container" 
-                  className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1 scroll-smooth"
+                  className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1.5 px-3 scroll-smooth max-w-lg mx-auto bg-slate-50/50 border border-slate-100 rounded-2xl"
                 >
-                  {campaigns.map((camp) => {
+                  {(campaigns.length > 0 ? [...campaigns, ...campaigns, ...campaigns] : []).map((camp, index) => {
                     const alreadyPartnered = myLinks.some(link => link.campaign_id === camp.id);
                     const initials = camp.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
                     const colors = [
@@ -723,7 +739,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
                     return (
                       <div 
-                        key={camp.id}
+                        key={`${camp.id}-${index}`}
                         onClick={() => setSelectedCampaignForModal(camp)}
                         className="w-40 shrink-0 bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center space-y-3 relative overflow-hidden"
                       >
@@ -735,7 +751,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         {/* Brand Details */}
                         <div className="w-full truncate">
                           <h4 className="text-[11px] font-black text-slate-800 truncate font-sans group-hover:text-[#0052FF] transition-colors">{camp.name}</h4>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">David Proctor</span>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">Daniel Proctor</span>
                         </div>
 
                         {/* Commission Pill */}

@@ -59,7 +59,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-1',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'AMEX Gold Card Sign-ups',
     description: 'Promote the American Express Gold Card. High payout for every approved credit card application.',
     landing_page_url: 'https://www.amex.com.au/gold-card',
@@ -73,7 +73,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-2',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Origin Energy Switch Deal',
     description: 'Refer customers to switch their electricity/gas provider. Earn per successful connection.',
     landing_page_url: 'https://www.originenergy.com.au/switch',
@@ -87,7 +87,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-3',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Kogan Mobile Yearly Plan',
     description: 'Get users to sign up for Kogan Mobile 365-day prepaid plans. High conversion rates.',
     landing_page_url: 'https://www.koganmobile.com.au/plans',
@@ -101,7 +101,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-4',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Woolworths Everyday Mobile',
     description: 'Promote Everyday Mobile by Woolworths prepaid SIMs. Excellent value and network coverage.',
     landing_page_url: 'https://www.everydaymobile.com.au',
@@ -115,7 +115,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-5',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Bupa Health Insurance Cover',
     description: 'Promote Bupa domestic health insurance. High payout for every approved customer policy switcher.',
     landing_page_url: 'https://www.bupa.com.au/health-insurance',
@@ -129,7 +129,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-6',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Samsung Galaxy S26 Promo',
     description: 'Promote Samsung Galaxy S26 flagship pre-orders. Earn flat payout per successful referral sign-up.',
     landing_page_url: 'https://www.samsung.com/au/smartphones/galaxy-s/',
@@ -143,7 +143,7 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
   {
     id: 'campaign-7',
     advertiser_id: 'mock-advertiser-id',
-    advertiser_name: 'David Proctor (Advertiser)',
+    advertiser_name: 'Daniel Proctor (Advertiser)',
     name: 'Amazon Prime Free Trial',
     description: 'Get visitors to sign up for Amazon Prime 30-day Free Trial. Extremely high click-to-conversion rates.',
     landing_page_url: 'https://www.amazon.com.au/prime',
