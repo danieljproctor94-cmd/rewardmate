@@ -17,6 +17,12 @@ import {
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
+export const formatUserId = (id: string | undefined): string => {
+  if (!id) return '';
+  const cleanId = id.replace('mock-user-', '').replace('db-user-', '').replace(/-/g, '');
+  return `RM-${cleanId.substring(0, 6).toUpperCase()}`;
+};
+
 export default function Dashboard() {
   const { user, profile, signOut, updateBalance } = useAuth();
   const navigate = useNavigate();
@@ -240,7 +246,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
                       {profile.full_name || 'Advertiser'}
                     </div>
-                    <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
                   </div>
                 )}
               </div>
@@ -1079,7 +1085,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
                       {profile.full_name || 'Administrator'}
                     </div>
-                    <div className="text-[9px] text-slate-400 font-bold">ID: {profile.id.substring(0, 6).toUpperCase()}</div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
                   </div>
                 )}
               </div>
@@ -1524,7 +1530,12 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                         </span>
                                       )}
                                     </div>
-                                    <div className="text-[10px] text-slate-455 truncate">{p.email}</div>
+                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-455">
+                                      <span className="truncate">{p.email}</span>
+                                      <span className="text-[9px] bg-slate-100 text-slate-500 font-mono font-bold px-1 rounded">
+                                        {formatUserId(p.id)}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </td>
@@ -1594,7 +1605,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                   <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-4 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
                                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                                       <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Detailed Profile View</h4>
-                                      <span className="text-[9px] text-slate-400 font-bold font-mono">ID: {p.id}</span>
+                                      <span className="text-[9px] text-slate-400 font-bold font-mono">Ref ID: {formatUserId(p.id)} | DB Key: {p.id}</span>
                                     </div>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">

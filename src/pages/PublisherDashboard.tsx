@@ -15,6 +15,12 @@ import {
   ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X
 } from 'lucide-react';
 
+export const formatUserId = (id: string | undefined): string => {
+  if (!id) return '';
+  const cleanId = id.replace('mock-user-', '').replace('db-user-', '').replace(/-/g, '');
+  return `RM-${cleanId.substring(0, 6).toUpperCase()}`;
+};
+
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
   const { isMock } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'offers' | 'my-links' | 'clicks-conv' | 'wallet' | 'messages'>('dashboard');
@@ -345,7 +351,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   );
 
   const publisherName = profile.full_name || profile.email.split('@')[0];
-  const publisherId = profile.id.substring(0, 6).toUpperCase();
+  const publisherId = formatUserId(profile.id);
   const avatarChar = publisherName.charAt(0).toUpperCase();
 
   return (
