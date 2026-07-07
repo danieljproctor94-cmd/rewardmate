@@ -31,15 +31,16 @@ export default function App() {
         closeButton
         toastOptions={{
           style: {
-            background: '#151926',
-            color: '#f8fafc',
-            border: '1px solid rgba(16,185,129,0.2)',
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
             borderRadius: '12px',
+            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05)'
           },
           classNames: {
-            toast: 'font-sans',
-            success: '!border-emerald-500 bg-[#151926] text-emerald-400',
-            error: '!border-red-500 bg-[#151926] text-red-400',
+            toast: 'font-sans border border-slate-100',
+            success: '!border-emerald-200 bg-emerald-50/50 text-emerald-800',
+            error: '!border-red-200 bg-red-50/50 text-red-800',
           }
         }}
       />
