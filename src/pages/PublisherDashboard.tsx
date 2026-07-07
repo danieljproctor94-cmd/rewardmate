@@ -310,7 +310,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const avatarChar = publisherName.charAt(0).toUpperCase();
 
   return (
-    <div className="flex h-screen overflow-hidden w-full bg-[#090b16] text-slate-800 font-sans selection:bg-[#0052FF]/10 p-3 lg:p-4 gap-3 lg:gap-4">
+    <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. MOBILE SIDEBAR DRAWER (Sliding panel) */}
       {mobileMenuOpen && (
@@ -485,18 +485,18 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       </aside>
 
       {/* 2. MAIN LAYOUT CONTAINER (Header fixed, Main scrolls) */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#090b16]">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
-        {/* TOP NAVIGATION HEADER (Dark Theme header) */}
-        <header className="h-14 bg-[#090b16] px-2 flex items-center justify-between text-white z-10 shrink-0 mb-2">
+        {/* TOP NAVIGATION HEADER (White theme header) */}
+        <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
             <button 
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-1 mr-3 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              className="lg:hidden p-1 mr-3 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <span className="text-xs font-semibold text-[#38bdf8] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">
+            <span className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 border border-[#0052FF]/10 px-2.5 py-1 rounded-full uppercase tracking-wider hidden sm:inline-block">
               Publisher Control
             </span>
           </div>
@@ -517,11 +517,11 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   setShowNotifications(false);
                 }}
                 title="Messages"
-                className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="relative p-1.5 text-slate-450 hover:text-slate-800 transition-colors cursor-pointer"
               >
                 <Mail className="h-4.5 w-4.5" />
                 {liveMessages.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-white">
                     {liveMessages.length}
                   </span>
                 )}
@@ -543,7 +543,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                             <span className="text-[9px] text-slate-400 font-semibold">{m.time}</span>
                           </div>
                           <div className="text-[10px] font-bold text-[#0052FF] truncate font-sans">{m.subject}</div>
-                          <p className="text-[10px] text-slate-600 font-sans leading-tight">{m.preview}</p>
+                          <p className="text-[10px] text-slate-650 font-sans leading-tight">{m.preview}</p>
                         </div>
                       ))
                     )}
@@ -560,11 +560,11 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   setShowMessages(false);
                 }}
                 title="Notifications"
-                className="relative p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="relative p-1.5 text-slate-450 hover:text-slate-800 transition-colors cursor-pointer"
               >
                 <Bell className="h-4.5 w-4.5" />
                 {liveNotifications.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#090b16]">
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#0052FF] text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-white">
                     {liveNotifications.length}
                   </span>
                 )}
@@ -602,19 +602,19 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             </div>
 
             {/* Help Question Mark */}
-            <button className="flex items-center space-x-1 p-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer">
+            <button className="flex items-center space-x-1 p-1.5 text-slate-450 hover:text-slate-800 transition-colors cursor-pointer">
               <HelpCircle className="h-4.5 w-4.5" />
             </button>
 
             {/* Vertical Divider */}
-            <div className="h-5 w-px bg-white/10"></div>
+            <div className="h-5 w-px bg-slate-200"></div>
 
             {/* Profile Dropdown Badge */}
             <div className="flex items-center space-x-2 cursor-pointer group">
               <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm">
                 {avatarChar}
               </div>
-              <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors hidden md:inline-block">
+              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block">
                 {publisherName}
               </span>
             </div>
@@ -623,15 +623,15 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             <button 
               onClick={signOut}
               title="Sign Out"
-              className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-slate-50 text-slate-450 hover:text-slate-800 transition-all cursor-pointer"
             >
               <LogOut className="h-4.5 w-4.5" />
             </button>
           </div>
         </header>
 
-        {/* 3. MAIN SCROLLABLE SECTION (Curved canvas floating inside dark background) */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-[#f8fafc] rounded-[24px] border border-white/5 shadow-inner">
+        {/* 3. MAIN SCROLLABLE SECTION (Restored to flat flat background) */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50">
           
           {/* TAB 1: MAIN GRAPH OVERVIEW DASHBOARD */}
           {activeTab === 'dashboard' && (

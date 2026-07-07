@@ -210,7 +210,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const totalSpend = campaigns.reduce((acc, c) => acc + Number(c.spend), 0);
 
   return (
-    <div className="flex h-screen overflow-hidden w-full bg-[#090b16] text-slate-800 font-sans selection:bg-[#0052FF]/10 p-3 lg:p-4 gap-3 lg:gap-4">
+    <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
       <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
@@ -287,26 +287,26 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       </aside>
 
       {/* 2. MAIN LAYOUT CONTAINER (Header fixed, Main scrolls) */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#090b16]">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
         {/* TOP NAVIGATION HEADER */}
-        <header className="h-14 bg-[#090b16] px-2 flex items-center justify-between text-white z-10 shrink-0 mb-2">
+        <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
-            <span className="text-xs font-semibold text-[#38bdf8] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 border border-[#0052FF]/10 px-2.5 py-1 rounded-full uppercase tracking-wider">
               Advertiser Dashboard
             </span>
           </div>
 
           <div className="flex items-center space-x-6">
             <div className="text-right">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Wallet Balance</div>
-              <div className="text-sm font-extrabold text-[#38bdf8]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
+              <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Wallet Balance</div>
+              <div className="text-sm font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
             </div>
           </div>
         </header>
 
         {/* 3. SCROLLABLE CONTENT AREA */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-[#f8fafc] rounded-[24px] border border-white/5 shadow-inner">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50">
           
           {/* Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -846,7 +846,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const networkVolume = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
 
   return (
-    <div className="flex h-screen overflow-hidden w-full bg-[#090b16] text-slate-800 font-sans selection:bg-[#0052FF]/10 p-3 lg:p-4 gap-3 lg:gap-4">
+    <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
       <aside className="hidden lg:flex w-64 bg-[#090b16] flex-col justify-between shrink-0 h-full z-20">
@@ -923,26 +923,26 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       </aside>
 
       {/* 2. MAIN LAYOUT CONTAINER (Header fixed, Main scrolls) */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#090b16]">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         
         {/* TOP NAVIGATION HEADER */}
-        <header className="h-14 bg-[#090b16] px-2 flex items-center justify-between text-white z-10 shrink-0 mb-2">
+        <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
-            <span className="text-xs font-semibold text-purple-400 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-xs font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
               Super Admin Control
             </span>
           </div>
 
           <div className="flex items-center space-x-6">
             <div className="text-right">
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Role</div>
-              <div className="text-sm font-extrabold text-purple-400">Network Admin</div>
+              <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Active Role</div>
+              <div className="text-sm font-extrabold text-purple-600">Network Admin</div>
             </div>
           </div>
         </header>
 
         {/* 3. SCROLLABLE CONTENT AREA */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-[#f8fafc] rounded-[24px] border border-white/5 shadow-inner">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50">
           
           {/* Metrics Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
