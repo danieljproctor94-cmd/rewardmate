@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
-import { isAppDomain, getLandingUrl } from './lib/domain';
+import { isAppDomain } from './lib/domain';
 import { useAuth } from './contexts/AuthContext';
 import { getCampaigns, logClick } from './lib/mockDatabase';
 import { Toaster, toast } from 'sonner';
@@ -19,7 +19,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-[#0d0f17] text-white">
-        <div className="h-8 w-8 rounded-full border-4 border-emerald-500/30 border-t-emerald-500 animate-spin"></div>
+        <div className="h-8 w-8 rounded-full border-4 border-[#0052FF]/30 border-t-[#0052FF] animate-spin"></div>
       </div>
     );
   }
@@ -49,32 +49,28 @@ export default function App() {
         {/* Click Tracking Redirect handler */}
         <Route path="/click/:code" element={<ClickRedirect />} />
 
-        {isApp ? (
-          // Subdomain app.rewardmate.com.au Routing
-          <>
-            <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-            <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-            <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-            <Route path="/register/advertiser" element={<AdvertiserRegister />} />
-            <Route path="/about" element={<Navigate to={getLandingUrl('/about')} replace />} />
-            <Route path="/contact" element={<Navigate to={getLandingUrl('/contact')} replace />} />
-            <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        ) : (
-          // Main domain rewardmate.com.au Routing
-          <>
-            <Route path="/" element={<Landing />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            {/* Fallback to landing, but let path queries redirect inside dev */}
-            <Route path="/login" element={<Navigate to={window.location.search.includes('domain=app') ? '/login' : '/'} replace />} />
-            <Route path="/register" element={<Navigate to={window.location.search.includes('domain=app') ? '/register' : '/'} replace />} />
-            <Route path="/register/advertiser" element={<Navigate to={window.location.search.includes('domain=app') ? '/register/advertiser' : '/'} replace />} />
-            <Route path="/dashboard" element={<Navigate to={window.location.search.includes('domain=app') ? '/dashboard' : '/'} replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
+        {/* Public Marketing Routes */}
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+
+        {/* App Portal Routes */}
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register/advertiser" element={<AdvertiserRegister />} />
+        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
+
+        {/* Root Redirect handler based on domain */}
+        <Route 
+          path="/" 
+          element={
+            isApp ? (
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+            ) : (
+              <Landing />
+            )
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
@@ -139,8 +135,8 @@ function ClickRedirect() {
         </div>
       ) : (
         <div className="space-y-4 text-center">
-          <div className="h-10 w-10 rounded-full border-4 border-emerald-500/30 border-t-emerald-500 animate-spin mx-auto"></div>
-          <div className="text-sm font-bold text-emerald-400">Tracking Referral Click...</div>
+          <div className="h-10 w-10 rounded-full border-4 border-[#0052FF]/30 border-t-[#0052FF] animate-spin mx-auto"></div>
+          <div className="text-sm font-bold text-[#0052FF]">Tracking Referral Click...</div>
           <p className="text-slate-400 text-xs">You are being redirected to our sponsor on a secure connection.</p>
         </div>
       )}

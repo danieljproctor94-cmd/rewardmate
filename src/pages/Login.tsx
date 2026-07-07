@@ -24,6 +24,7 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Directly sign in to sandbox for local demonstration
   const handleMockLogin = async (mockEmail: string) => {
@@ -271,6 +272,23 @@ export default function Login() {
                 </button>
               </div>
             </div>
+ 
+            {/* Remember Me Checkbox */}
+            {!isRegister && (
+              <div className="flex items-center pt-1">
+                <input
+                  id="remember_me"
+                  name="remember_me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 text-[#0052FF] focus:ring-[#0052FF] border-slate-300 rounded cursor-pointer"
+                />
+                <label htmlFor="remember_me" className="ml-2 block text-xs font-bold text-slate-500 select-none cursor-pointer">
+                  Remember me
+                </label>
+              </div>
+            )}
 
             <button
               type="submit"
