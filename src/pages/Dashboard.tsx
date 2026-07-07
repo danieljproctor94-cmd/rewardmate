@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import PublisherDashboard from './PublisherDashboard';
@@ -717,6 +717,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [showMessages, setShowMessages] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -1326,93 +1327,149 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                         const financeVol = p.user_type === 'publisher' 
                           ? conversions.filter(c => c.publisher_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0)
                           : conversions.filter(c => c.campaign?.advertiser_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
-                          return (
-                          <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="py-4 px-6">
-                              <div className="flex items-start space-x-3">
-                                <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5">
-                                  {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="space-y-1">
-                                  <div>
-                                    <span className="font-bold text-slate-800">{p.full_name || 'No Name'}</span>
-                                    {p.approval_status === 'pending' && (
-                                      <span className="ml-2 bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                        Pending Review
-                                      </span>
-                                    )}
+                        return (
+                          <Fragment key={p.id}>
+                            <tr 
+                              onClick={() => setExpandedUserId(expandedUserId === p.id ? null : p.id)}
+                              className={`hover:bg-slate-50 transition-colors cursor-pointer select-none ${expandedUserId === p.id ? 'bg-slate-50/80' : ''}`}
+                            >
+                              <td className="py-4 px-6">
+                                <div className="flex items-center space-x-3">
+                                  <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
+                                    {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
                                   </div>
-                                  <div className="text-[10px] text-slate-455">{p.email}</div>
-                                  {p.website && (
-                                    <div className="mt-2 p-3 bg-slate-50 border border-slate-150/70 rounded-2xl space-y-1.5 text-[10px] text-slate-550 font-semibold max-w-sm">
-                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold">Onboarding Answers</div>
-                                      <div><span className="text-slate-400">Business:</span> {p.business_name}</div>
-                                      <div><span className="text-slate-400">Website:</span> <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline">{p.website}</a></div>
-                                      <div><span className="text-slate-400">Channels:</span> {p.channels}</div>
-                                      <div><span className="text-slate-400">Traffic:</span> {p.traffic}</div>
+                                  <div className="space-y-0.5 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-bold text-slate-800 truncate">{p.full_name || 'No Name'}</span>
+                                      {p.approval_status === 'pending' && (
+                                        <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
+                                          Pending Review
+                                        </span>
+                                      )}
+                                      {p.user_type === 'publisher' && (p.onboarding_completed || p.website) && (
+                                        <span className="bg-blue-50 text-[#0052FF] border border-blue-100 text-[8px] font-black px-1 py-0.2 rounded uppercase shrink-0">
+                                          Details Available
+                                        </span>
+                                      )}
                                     </div>
+                                    <div className="text-[10px] text-slate-455 truncate">{p.email}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className={`text-[9px] font-extrabold uppercase rounded px-2.5 py-0.5 tracking-wider ${
+                                  p.user_type === 'admin' ? 'bg-purple-50 text-purple-700 border border-purple-100' :
+                                  p.user_type === 'advertiser' ? 'bg-amber-50 text-amber-705 border border-amber-100' :
+                                  'bg-blue-50 text-[#0052FF] border border-blue-100'
+                                }`}>
+                                  {p.user_type}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="flex items-center gap-1.5 font-semibold text-slate-555">
+                                  <span>{country.flag}</span>
+                                  <span>{country.code}</span>
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-slate-500 font-medium">{lastLoggedIn}</td>
+                              <td className="py-4 px-6 text-right font-sans">
+                                <div className="font-bold text-slate-800">
+                                  {p.user_type === 'publisher' ? `+$${financeVol.toFixed(2)}` : p.user_type === 'advertiser' ? `-$${financeVol.toFixed(2)}` : '-'}
+                                </div>
+                                <div className="text-[10px] text-slate-455 font-medium">
+                                  {p.user_type !== 'admin' ? `${clicksCount} clicks` : ''}
+                                </div>
+                              </td>
+                              <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-2">
+                                  {!isSelf && p.user_type !== 'admin' && p.approval_status === 'pending' && (
+                                    <button
+                                      onClick={() => handleApproveUser(p.id)}
+                                      className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                    >
+                                      Approve
+                                    </button>
+                                  )}
+                                  {!isSelf && p.user_type !== 'admin' && (
+                                    <button
+                                      onClick={() => impersonateUser?.(p)}
+                                      className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                    >
+                                      Login As
+                                    </button>
+                                  )}
+                                  {!isSelf && (
+                                    <button
+                                      onClick={() => handleRemoveUser(p.id)}
+                                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
+                                  {isSelf && (
+                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-150">
+                                      You (Active)
+                                    </span>
                                   )}
                                 </div>
-                              </div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className={`text-[9px] font-extrabold uppercase rounded px-2.5 py-0.5 tracking-wider ${
-                                p.user_type === 'admin' ? 'bg-purple-50 text-purple-700 border border-purple-100' :
-                                p.user_type === 'advertiser' ? 'bg-amber-50 text-amber-705 border border-amber-100' :
-                                'bg-blue-50 text-[#0052FF] border border-blue-100'
-                              }`}>
-                                {p.user_type}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className="flex items-center gap-1.5 font-semibold text-slate-550">
-                                <span>{country.flag}</span>
-                                <span>{country.code}</span>
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-slate-500 font-medium">{lastLoggedIn}</td>
-                            <td className="py-4 px-6 text-right font-sans">
-                              <div className="font-bold text-slate-800">
-                                {p.user_type === 'publisher' ? `+$${financeVol.toFixed(2)}` : p.user_type === 'advertiser' ? `-$${financeVol.toFixed(2)}` : '-'}
-                              </div>
-                              <div className="text-[10px] text-slate-455 font-medium">
-                                {p.user_type !== 'admin' ? `${clicksCount} clicks` : ''}
-                              </div>
-                            </td>
-                            <td className="py-4 px-6 font-sans">
-                              <div className="flex items-center justify-center gap-2">
-                                {!isSelf && p.user_type !== 'admin' && p.approval_status === 'pending' && (
-                                  <button
-                                    onClick={() => handleApproveUser(p.id)}
-                                    className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
-                                  >
-                                    Approve
-                                  </button>
-                                )}
-                                {!isSelf && p.user_type !== 'admin' && (
-                                  <button
-                                    onClick={() => impersonateUser?.(p)}
-                                    className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
-                                  >
-                                    Login As
-                                  </button>
-                                )}
-                                {!isSelf && (
-                                  <button
-                                    onClick={() => handleRemoveUser(p.id)}
-                                    className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
-                                  >
-                                    Remove
-                                  </button>
-                                )}
-                                {isSelf && (
-                                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-150">
-                                    You (Active)
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
+                              </td>
+                            </tr>
+
+                            {/* COLLAPSIBLE DETAILED VIEW */}
+                            {expandedUserId === p.id && (
+                              <tr className="bg-slate-50/50">
+                                <td colSpan={6} className="px-6 py-4 border-t border-slate-100/50">
+                                  <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-4 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
+                                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                                      <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Detailed Profile View</h4>
+                                      <span className="text-[9px] text-slate-400 font-bold font-mono">ID: {p.id}</span>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
+                                      <div className="space-y-2">
+                                        <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Account Information</div>
+                                        <div><span className="text-slate-400 font-bold">Email Address:</span> {p.email}</div>
+                                        <div><span className="text-slate-400 font-bold">Full Name:</span> {p.full_name || 'Not provided'}</div>
+                                        <div><span className="text-slate-400 font-bold">Registration Date:</span> {new Date(p.created_at).toLocaleString('en-AU')}</div>
+                                        <div><span className="text-slate-400 font-bold">Wallet Balance:</span> ${Number(p.wallet_balance).toFixed(2)} AUD</div>
+                                        <div>
+                                          <span className="text-slate-400 font-bold">Approval Status:</span> 
+                                          <span className={`ml-2 text-[9px] font-black uppercase rounded px-2 py-0.5 border ${
+                                            p.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                            p.approval_status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                            'bg-rose-50 text-rose-700 border-rose-100'
+                                          }`}>
+                                            {p.approval_status}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Publisher Onboarding Answers</div>
+                                        {p.user_type !== 'publisher' ? (
+                                          <div className="text-slate-400 italic">Onboarding is only applicable to publisher profiles.</div>
+                                        ) : p.onboarding_completed || p.website || p.business_name ? (
+                                          <div className="space-y-2 bg-slate-50 border border-slate-150 p-4 rounded-xl font-medium text-slate-550 leading-relaxed">
+                                            <div><span className="text-slate-400 font-bold">Business Name:</span> {p.business_name || 'Not provided'}</div>
+                                            <div>
+                                              <span className="text-slate-400 font-bold">Website / Channel:</span> 
+                                              {p.website ? (
+                                                <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline ml-1 font-semibold">{p.website}</a>
+                                              ) : 'Not provided'}
+                                            </div>
+                                            <div><span className="text-slate-400 font-bold">Marketing Channels:</span> {p.channels || 'Not provided'}</div>
+                                            <div><span className="text-slate-400 font-bold">Traffic Estimate:</span> {p.traffic || 'Not provided'}</div>
+                                          </div>
+                                        ) : (
+                                          <div className="text-slate-400 italic">This publisher has not completed onboarding details yet.</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
                         );
                       })}
                     </tbody>

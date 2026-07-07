@@ -22,7 +22,12 @@ CREATE TABLE public.profiles (
     user_type TEXT CHECK (user_type IN ('advertiser', 'publisher', 'admin')) NOT NULL DEFAULT 'publisher',
     approval_status TEXT CHECK (approval_status IN ('pending', 'approved', 'rejected')) NOT NULL DEFAULT 'approved',
     wallet_balance NUMERIC(12,2) NOT NULL DEFAULT 0.00,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    business_name TEXT,
+    website TEXT,
+    channels TEXT,
+    traffic TEXT,
+    onboarding_completed BOOLEAN DEFAULT false
 );
 
 -- Enable RLS on Profiles
@@ -188,3 +193,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Migration snippet to run in Supabase SQL editor for existing tables:
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS business_name TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS website TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS channels TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS traffic TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;

@@ -47,18 +47,40 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
         onOnboardingComplete();
       } else {
         // Supabase update
-        // We can save metadata inside user raw user metadata, or update columns in profiles
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            // Since custom columns might not exist yet, we save them in profile or metadata
-            approval_status: 'pending',
-            // We can pass them as part of update
-            full_name: profile?.full_name || businessName,
-          } as any)
-          .eq('id', profile?.id);
+        // We save the details inside profiles table if the columns are set up, else fallback
+        let saveError = null;
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({
+              approval_status: 'pending',
+              full_name: profile?.full_name || businessName,
+              business_name: businessName,
+              website: website,
+              channels: channels,
+              traffic: traffic,
+              onboarding_completed: true
+            } as any)
+            .eq('id', profile?.id);
+          if (error) {
+            saveError = error;
+          }
+        } catch (err) {
+          saveError = err;
+        }
 
-        if (error) throw error;
+        if (saveError) {
+          console.warn("Profiles custom columns are missing, falling back to profile status update.", saveError);
+          // Fallback: update only columns we are sure exist
+          const { error: fallbackErr } = await supabase
+            .from('profiles')
+            .update({
+              approval_status: 'pending',
+              full_name: profile?.full_name || businessName,
+            } as any)
+            .eq('id', profile?.id);
+          if (fallbackErr) throw fallbackErr;
+        }
 
         // Also save detailed onboarding in user metadata for safety
         const { error: metaErr } = await supabase.auth.updateUser({
