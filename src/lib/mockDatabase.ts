@@ -465,3 +465,76 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
   const { error } = await supabase.from('conversions').update({ status }).eq('id', id);
   if (error) throw error;
 };
+
+export interface Message {
+  id: string;
+  sender_id: string;
+  sender_name: string;
+  receiver_id: string;
+  receiver_name: string;
+  subject: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+  parent_id?: string;
+}
+
+const MESSAGES_KEY = 'rewardmate_mock_messages';
+
+export const getMessages = async (userId: string): Promise<Message[]> => {
+  if (!isSupabaseConfigured) {
+    const messages: Message[] = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    return messages
+      .filter(m => m.sender_id === userId || m.receiver_id === userId)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.warn('Supabase messages query failed, using localStorage backup:', err);
+    const messages: Message[] = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    return messages
+      .filter(m => m.sender_id === userId || m.receiver_id === userId)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  }
+};
+
+export const sendMessage = async (msg: Omit<Message, 'id' | 'created_at' | 'read'>): Promise<Message> => {
+  const newMsg: Message = {
+    ...msg,
+    id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    read: false,
+    created_at: new Date().toISOString()
+  };
+
+  if (!isSupabaseConfigured) {
+    const messages: Message[] = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    messages.push(newMsg);
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+    return newMsg;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(newMsg)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('Supabase messages send failed, using localStorage backup:', err);
+    const messages: Message[] = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    messages.push(newMsg);
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+    return newMsg;
+  }
+};

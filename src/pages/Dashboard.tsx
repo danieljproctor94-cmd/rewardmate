@@ -5,13 +5,14 @@ import PublisherDashboard from './PublisherDashboard';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
   getCampaigns, createCampaign, updateCampaignStatus, 
-  getClicks, getConversions, updateConversionStatus
+  getClicks, getConversions, updateConversionStatus,
+  getMessages, sendMessage
 } from '../lib/mockDatabase';
 import type { Campaign, Click, Conversion } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
-  TrendingUp, Check, X, AlertCircle, FolderKanban, Users 
+  TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -59,7 +60,7 @@ export default function Dashboard() {
 // 1. ADVERTISER DASHBOARD
 // ----------------------------------------------------
 function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
-  const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet'>('campaigns');
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages'>('campaigns');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
@@ -73,6 +74,12 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [campBudget, setCampBudget] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [messages, setMessages] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [searchContactText, setSearchContactText] = useState('');
+
   const loadData = async () => {
     try {
       const all = await getCampaigns();
@@ -82,9 +89,67 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     }
   };
 
+  const loadMessages = async () => {
+    try {
+      const allMsgs = await getMessages(profile.id);
+      setMessages(allMsgs);
+
+      const targetRole = profile.user_type === 'publisher' ? 'advertiser' : 'publisher';
+      let fetchedContacts = [];
+      if (!isSupabaseConfigured) {
+        const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        fetchedContacts = stored.filter((p: any) => p.user_type === targetRole);
+      } else {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_type', targetRole);
+        if (!error && data) {
+          fetchedContacts = data;
+        }
+      }
+      setContacts(fetchedContacts);
+      
+      // Auto-select first contact if none selected
+      if (fetchedContacts.length > 0 && !selectedContact) {
+        setSelectedContact(fetchedContacts[0]);
+      }
+    } catch (err) {
+      console.error('Error loading messages:', err);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [profile.id]);
+
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      loadMessages();
+      const interval = setInterval(loadMessages, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, profile.id, selectedContact]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessageText.trim() || !selectedContact) return;
+
+    try {
+      await sendMessage({
+        sender_id: profile.id,
+        sender_name: profile.full_name || profile.email,
+        receiver_id: selectedContact.id,
+        receiver_name: selectedContact.full_name || selectedContact.email,
+        subject: `Message to ${selectedContact.full_name || selectedContact.email}`,
+        body: newMessageText
+      });
+      setNewMessageText('');
+      loadMessages();
+    } catch (err) {
+      toast.error('Failed to send message.');
+    }
+  };
 
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +260,17 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             >
               <DollarSign className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>Deposit & Wallet</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'messages' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Mail className="h-4.5 w-4.5 mr-3 text-slate-400" />
+              <span>Messages</span>
             </button>
           </nav>
         </div>
@@ -374,6 +450,145 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     <span className="text-sm font-bold text-slate-800">${totalSpend.toFixed(2)}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: MESSAGES SECTION */}
+          {activeTab === 'messages' && (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-[550px] flex animate-in fade-in duration-300">
+              
+              {/* Left Panel: Contacts list */}
+              <div className="w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30">
+                {/* Search Bar */}
+                <div className="p-4 border-b border-slate-100">
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="Search publishers..."
+                      value={searchContactText}
+                      onChange={(e) => setSearchContactText(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl h-10 px-3.5 pl-9 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0052FF] transition-all font-sans"
+                    />
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Contacts Stream */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
+                  {contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).length === 0 ? (
+                    <div className="text-center py-12 text-xs text-slate-400 font-sans font-semibold">No contacts found.</div>
+                  ) : (
+                    contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).map((c) => {
+                      const isSelected = selectedContact?.id === c.id;
+                      const cInitials = (c.full_name || c.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
+                      const lastMessage = messages
+                        .filter(m => (m.sender_id === profile.id && m.receiver_id === c.id) || (m.sender_id === c.id && m.receiver_id === profile.id))
+                        .pop();
+
+                      return (
+                        <div 
+                          key={c.id}
+                          onClick={() => setSelectedContact(c)}
+                          className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'bg-[#0052FF]/5 border border-[#0052FF]/10 text-[#0052FF]' 
+                              : 'hover:bg-slate-50 border border-transparent text-slate-700'
+                          }`}
+                        >
+                          <div className={`h-9 w-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 text-slate-750 flex items-center justify-center font-extrabold text-xs shadow-sm uppercase ${
+                            isSelected ? 'from-[#0052FF] to-blue-600 text-white' : ''
+                          }`}>
+                            {cInitials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-bold truncate font-sans">{c.full_name || c.email}</h4>
+                              {lastMessage && (
+                                <span className="text-[8px] text-slate-400 font-medium">
+                                  {new Date(lastMessage.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 truncate font-sans font-medium mt-0.5">
+                              {lastMessage ? lastMessage.body : 'Start a new conversation'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Right Panel: Chat Thread */}
+              <div className="flex-1 flex flex-col h-full bg-white">
+                {selectedContact ? (
+                  <>
+                    {/* Thread Header */}
+                    <div className="px-6 py-4 border-b border-slate-100 flex items-center space-x-3 bg-slate-50/20">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
+                        {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                      </div>
+                    </div>
+
+                    {/* Messages Body */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/10 no-scrollbar">
+                      {messages.filter(m => (m.sender_id === profile.id && m.receiver_id === selectedContact.id) || (m.sender_id === selectedContact.id && m.receiver_id === profile.id)).length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+                          <Mail className="h-8 w-8 text-slate-300" />
+                          <p className="text-xs font-bold font-sans">No messages yet. Send a message to start partnership chat!</p>
+                        </div>
+                      ) : (
+                        messages.filter(m => (m.sender_id === profile.id && m.receiver_id === selectedContact.id) || (m.sender_id === selectedContact.id && m.receiver_id === profile.id)).map((m) => {
+                          const isMe = m.sender_id === profile.id;
+                          return (
+                            <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} w-full`}>
+                              <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-xs shadow-sm leading-relaxed ${
+                                isMe 
+                                  ? 'bg-[#0052FF] text-white rounded-tr-none' 
+                                  : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-150'
+                              }`}>
+                                <p className="font-sans font-medium">{m.body}</p>
+                                <div className={`text-[8px] mt-1 font-semibold ${isMe ? 'text-blue-200 text-right' : 'text-slate-400'}`}>
+                                  {new Date(m.created_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Text Input area */}
+                    <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-100 flex items-center space-x-3 bg-white">
+                      <input 
+                        type="text" 
+                        placeholder="Type your message here..."
+                        value={newMessageText}
+                        onChange={(e) => setNewMessageText(e.target.value)}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                      />
+                      <button 
+                        type="submit"
+                        className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold h-11 px-5 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm shadow-blue-500/10"
+                      >
+                        Send
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-slate-400 space-y-2">
+                    <Mail className="h-10 w-10 text-slate-300" />
+                    <p className="text-xs font-bold font-sans">Select a publisher to view conversation.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
