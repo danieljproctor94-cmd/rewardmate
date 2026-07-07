@@ -12,6 +12,7 @@ import AdvertiserRegister from './pages/AdvertiserRegister';
 import About from './pages/public/About';
 import Contact from './pages/public/Contact';
 import Terms from './pages/public/Terms';
+import Onboarding from './pages/Onboarding';
 
 export default function App() {
   const { isAuthenticated, loading, isImpersonating, stopImpersonating, profile } = useAuth();
@@ -73,7 +74,22 @@ export default function App() {
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
         <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
         <Route path="/register/advertiser" element={<AdvertiserRegister />} />
-        <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            isAuthenticated ? (
+              profile?.user_type === 'publisher' && (!profile.onboarding_completed || profile.approval_status === 'pending') ? (
+                <Onboarding onOnboardingComplete={() => {
+                  window.location.reload();
+                }} />
+              ) : (
+                <Dashboard />
+              )
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
 
         {/* Root Redirect handler based on domain */}
         <Route 

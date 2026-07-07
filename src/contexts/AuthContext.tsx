@@ -12,6 +12,11 @@ export interface Profile {
   user_type: UserType;
   approval_status: 'pending' | 'approved' | 'rejected';
   wallet_balance: number;
+  onboarding_completed?: boolean;
+  business_name?: string;
+  website?: string;
+  channels?: string;
+  traffic?: string;
 }
 
 interface AuthContextType {
@@ -143,7 +148,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
       
       if (error) throw error;
-      setProfile(data);
+
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const meta = currentUser?.user_metadata || {};
+
+      setProfile({
+        ...data,
+        onboarding_completed: meta.onboarding_completed || false,
+        business_name: meta.business_name || '',
+        website: meta.website || '',
+        channels: meta.channels || '',
+        traffic: meta.traffic || '',
+      });
     } catch (err: any) {
       console.error('Error fetching user profile:', err.message);
     } finally {
@@ -200,8 +216,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           full_name: fullName || email.split('@')[0],
           avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(fullName || email)}`,
           user_type: role,
-          approval_status: 'approved',
-          wallet_balance: role === 'advertiser' ? 1000.00 : 0.00
+          approval_status: role === 'publisher' ? 'pending' : 'approved',
+          wallet_balance: role === 'advertiser' ? 1000.00 : 0.00,
+          onboarding_completed: role !== 'publisher',
         };
 
         const updated = [...storedProfiles, newProfile];

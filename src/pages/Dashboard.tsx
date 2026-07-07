@@ -594,6 +594,30 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     }
   };
 
+  const handleApproveUser = async (userId: string) => {
+    try {
+      if (!isSupabaseConfigured) {
+        const mockProfiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        const updated = mockProfiles.map((p: any) => 
+          p.id === userId ? { ...p, approval_status: 'approved', onboarding_completed: true } : p
+        );
+        localStorage.setItem('rewardmate_mock_profiles', JSON.stringify(updated));
+        toast.success('User profile approved successfully!');
+        loadData();
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ approval_status: 'approved' })
+          .eq('id', userId);
+        if (error) throw error;
+        toast.success('User profile approved successfully!');
+        loadData();
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   // Metrics
   const pendingCamps = campaigns.filter(c => c.status === 'pending_approval').length;
   const pendingConvs = conversions.filter(c => c.status === 'pending').length;
@@ -878,17 +902,32 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                         const financeVol = p.user_type === 'publisher' 
                           ? conversions.filter(c => c.publisher_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0)
                           : conversions.filter(c => c.campaign?.advertiser_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
-
-                        return (
+                          return (
                           <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                             <td className="py-4 px-6">
-                              <div className="flex items-center space-x-3">
-                                <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100">
+                              <div className="flex items-start space-x-3">
+                                <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5">
                                   {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
                                 </div>
-                                <div>
-                                  <div className="font-bold text-slate-800">{p.full_name || 'No Name'}</div>
-                                  <div className="text-[10px] text-slate-450">{p.email}</div>
+                                <div className="space-y-1">
+                                  <div>
+                                    <span className="font-bold text-slate-800">{p.full_name || 'No Name'}</span>
+                                    {p.approval_status === 'pending' && (
+                                      <span className="ml-2 bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                                        Pending Review
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-slate-455">{p.email}</div>
+                                  {p.website && (
+                                    <div className="mt-2 p-3 bg-slate-50 border border-slate-150/70 rounded-2xl space-y-1.5 text-[10px] text-slate-550 font-semibold max-w-sm">
+                                      <div className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold">Onboarding Answers</div>
+                                      <div><span className="text-slate-400">Business:</span> {p.business_name}</div>
+                                      <div><span className="text-slate-400">Website:</span> <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline">{p.website}</a></div>
+                                      <div><span className="text-slate-400">Channels:</span> {p.channels}</div>
+                                      <div><span className="text-slate-400">Traffic:</span> {p.traffic}</div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </td>
@@ -918,6 +957,14 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                             </td>
                             <td className="py-4 px-6 font-sans">
                               <div className="flex items-center justify-center gap-2">
+                                {!isSelf && p.user_type !== 'admin' && p.approval_status === 'pending' && (
+                                  <button
+                                    onClick={() => handleApproveUser(p.id)}
+                                    className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                  >
+                                    Approve
+                                  </button>
+                                )}
                                 {!isSelf && p.user_type !== 'admin' && (
                                   <button
                                     onClick={() => impersonateUser?.(p)}
