@@ -57,6 +57,22 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
     loadData();
   }, [profile.id]);
 
+  // Auto scroll brand carousel
+  useEffect(() => {
+    const el = document.getElementById('brands-carousel-container');
+    if (!el) return;
+
+    const interval = setInterval(() => {
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 10) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: 180, behavior: 'smooth' });
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [campaigns]);
+
   const handleGenerateLink = async (campaignId: string) => {
     try {
       await generateAffiliateLink(profile.id, campaignId);
@@ -693,44 +709,45 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     ];
                     const grad = colors[camp.id.charCodeAt(camp.id.length - 1) % colors.length] || colors[0];
 
+                    const commRate = (() => {
+                      if (camp.id === 'campaign-1') return '5% Comm.';
+                      if (camp.id === 'campaign-2') return '6% Comm.';
+                      if (camp.id === 'campaign-3') return '7% Comm.';
+                      if (camp.id === 'campaign-4') return '8% Comm.';
+                      if (camp.id === 'campaign-5') return '10% Comm.';
+                      if (camp.id === 'campaign-6') return '5% Comm.';
+                      if (camp.id === 'campaign-7') return '10% Comm.';
+                      const charCode = camp.id.charCodeAt(camp.id.length - 1) || 0;
+                      return `${5 + (charCode % 4)}% Comm.`;
+                    })();
+
                     return (
                       <div 
                         key={camp.id}
                         onClick={() => setSelectedCampaignForModal(camp)}
-                        className="w-64 shrink-0 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between"
+                        className="w-40 shrink-0 bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center space-y-3 relative overflow-hidden"
                       >
-                        <div>
-                          {/* Payout & Status badge */}
-                          <div className="flex items-center justify-between mb-3.5">
-                            <span className="text-[10px] font-black uppercase bg-[#0052FF]/5 text-[#0052FF] px-2 py-0.5 rounded-md border border-[#0052FF]/10">
-                              ${camp.payout_amount.toFixed(2)} {camp.payout_type.toUpperCase()}
-                            </span>
-                            {alreadyPartnered && (
-                              <span className="text-[9px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-500/10">
-                                Active
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Brand Identity */}
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm shadow-sm`}>
-                              {initials}
-                            </div>
-                            <div className="truncate">
-                              <h4 className="text-xs font-black text-slate-800 truncate font-sans group-hover:text-[#0052FF] transition-colors">{camp.name}</h4>
-                              <span className="text-[9px] font-bold text-slate-400 font-sans uppercase tracking-wider">{camp.advertiser_name || 'Partner Brand'}</span>
-                            </div>
-                          </div>
-
-                          <p className="text-[10px] text-slate-500 font-sans line-clamp-2 leading-relaxed mb-4">
-                            {camp.description}
-                          </p>
+                        {/* Logo Circle */}
+                        <div className={`h-14 w-14 rounded-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm shadow-sm transition-transform group-hover:scale-105 duration-200`}>
+                          {initials}
                         </div>
 
-                        <button className="w-full py-2.5 bg-slate-50 hover:bg-[#0052FF] text-slate-700 hover:text-white rounded-xl text-[10px] font-extrabold transition-all border border-slate-100 hover:border-[#0052FF] cursor-pointer">
-                          {alreadyPartnered ? 'View details' : 'Apply now'}
-                        </button>
+                        {/* Brand Details */}
+                        <div className="w-full truncate">
+                          <h4 className="text-[11px] font-black text-slate-800 truncate font-sans group-hover:text-[#0052FF] transition-colors">{camp.name}</h4>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">David Proctor</span>
+                        </div>
+
+                        {/* Commission Pill */}
+                        <span className="text-[10px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100/50 px-2 py-0.5 rounded-lg inline-block">
+                          {commRate}
+                        </span>
+
+                        {alreadyPartnered && (
+                          <span className="absolute top-1.5 right-2 text-[7px] font-black uppercase text-emerald-600 bg-emerald-50 px-1 rounded-md border border-emerald-150">
+                            Partner
+                          </span>
+                        )}
                       </div>
                     );
                   })}
