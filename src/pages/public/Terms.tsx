@@ -5,8 +5,8 @@ import { useSEO } from '../../hooks/useSEO';
 
 export default function Terms() {
   useSEO({
-    title: "Terms of Use | Reward Mate Australia",
-    description: "Read the official website Terms of Use for Reward Mate Australia (ABN: 68 857 006 693). Understand the legal parameters, copyright restrictions, and user guidelines for our marketing platform.",
+    title: "Terms of Use | REWARD MATE PTY LTD",
+    description: "Read the official website Terms of Use for REWARD MATE PTY LTD (Australian Company Number 700 041 676). Understand the legal parameters, copyright restrictions, and user guidelines for our marketing platform.",
     noIndex: false
   });
 
@@ -143,7 +143,7 @@ export default function Terms() {
             <div className="space-y-4">
               <h2 className="text-xl font-extrabold text-slate-950">Overview of Terms</h2>
               <p>
-                Welcome to our Website Terms of Use (“Terms of Use”) that govern your access to each website that links to these terms ("Site"). <strong>Reward Mate Australia (ABN: 68 857 006 693)</strong> (“Reward Mate,” “we,” “us,” or “our”) operates this Site to provide online access to information about Reward Mate and our performance tracking solutions, campaign management portals, and marketing opportunities.
+                Welcome to our Website Terms of Use (“Terms of Use”) that govern your access to each website that links to these terms ("Site"). <strong>REWARD MATE PTY LTD (Australian Company Number 700 041 676)</strong> (“Reward Mate,” “we,” “us,” or “our”) operates this Site to provide online access to information about Reward Mate and our performance tracking solutions, campaign management portals, and marketing opportunities.
               </p>
               <p>
                 By accessing and using this Site, you explicitly agree to comply with these Terms of Use and our Privacy Policy. If you register or interact as a platform member, your activities are additionally governed by our Advertiser Standard Terms or Affiliate Standard Terms, depending on your role.
@@ -250,7 +250,7 @@ export default function Terms() {
               Australia's leading affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
             </p>
             <div className="inline-block bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full uppercase tracking-wider">
-              ABN: 68 857 006 693
+              ACN: 700 041 676
             </div>
           </div>
 

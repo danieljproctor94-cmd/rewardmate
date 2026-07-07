@@ -46,6 +46,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
       const convs = await getConversions('publisher', profile.id);
       setConversions(convs);
+      
+      await loadMessages();
     } catch (err) {
       console.error(err);
     }
@@ -119,19 +121,21 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       const allMsgs = await getMessages(profile.id);
       setMessages(allMsgs);
 
-      const targetRole = profile.user_type === 'publisher' ? 'advertiser' : 'publisher';
+      const targetRoles = profile.user_type === 'admin' 
+        ? ['publisher', 'advertiser'] 
+        : [profile.user_type === 'publisher' ? 'advertiser' : 'publisher', 'admin'];
       let fetchedContacts = [];
       if (!isMock) {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_type', targetRole);
+          .in('user_type', targetRoles);
         if (!error && data) {
           fetchedContacts = data;
         }
       } else {
         const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
-        fetchedContacts = stored.filter((p: any) => p.user_type === targetRole);
+        fetchedContacts = stored.filter((p: any) => targetRoles.includes(p.user_type));
       }
       setContacts(fetchedContacts);
       
@@ -290,15 +294,17 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   }));
 
   // Dynamic Messages
-  const liveMessages = [
-    {
-      id: 'welcome',
-      sender: 'David Proctor (Admin)',
-      subject: 'Welcome to Reward Mate Australia!',
-      preview: 'Your publisher application has been approved. Start building links!',
-      time: new Date(profile.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
-    }
-  ];
+  const liveMessages = messages
+    .filter(m => m.receiver_id === profile.id)
+    .slice(-3)
+    .reverse()
+    .map(m => ({
+      id: m.id,
+      sender: m.sender_name,
+      subject: m.subject,
+      preview: m.body,
+      time: new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+    }));
 
   // Link generator search filtering
   const filteredCampaigns = campaigns.filter(c => 

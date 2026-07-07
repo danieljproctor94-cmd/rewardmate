@@ -12,7 +12,7 @@ import type { Campaign, Click, Conversion } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
-  TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail
+  TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -94,16 +94,18 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       const allMsgs = await getMessages(profile.id);
       setMessages(allMsgs);
 
-      const targetRole = profile.user_type === 'publisher' ? 'advertiser' : 'publisher';
+      const targetRoles = profile.user_type === 'admin' 
+        ? ['publisher', 'advertiser'] 
+        : [profile.user_type === 'publisher' ? 'advertiser' : 'publisher', 'admin'];
       let fetchedContacts = [];
       if (!isSupabaseConfigured) {
         const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
-        fetchedContacts = stored.filter((p: any) => p.user_type === targetRole);
+        fetchedContacts = stored.filter((p: any) => targetRoles.includes(p.user_type));
       } else {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_type', targetRole);
+          .in('user_type', targetRoles);
         if (!error && data) {
           fetchedContacts = data;
         }
@@ -708,11 +710,71 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 // ----------------------------------------------------
 function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const { impersonateUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt'>('campaign-approvals');
+  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages'>('campaign-approvals');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [showMessages, setShowMessages] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [searchContactText, setSearchContactText] = useState('');
+
+  const loadMessages = async () => {
+    try {
+      const allMsgs = await getMessages(profile.id);
+      setMessages(allMsgs);
+
+      const targetRoles = ['publisher', 'advertiser'];
+      let fetchedContacts = [];
+      if (!isSupabaseConfigured) {
+        const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        fetchedContacts = stored.filter((p: any) => targetRoles.includes(p.user_type));
+      } else {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('user_type', targetRoles);
+        if (!error && data) {
+          fetchedContacts = data;
+        }
+      }
+      setContacts(fetchedContacts);
+      
+      // Auto-select first contact if none selected
+      if (fetchedContacts.length > 0 && !selectedContact) {
+        setSelectedContact(fetchedContacts[0]);
+      }
+    } catch (err) {
+      console.error('Error loading messages:', err);
+    }
+  };
+
+
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessageText.trim() || !selectedContact) return;
+
+    try {
+      await sendMessage({
+        sender_id: profile.id,
+        sender_name: profile.full_name || profile.email,
+        receiver_id: selectedContact.id,
+        receiver_name: selectedContact.full_name || selectedContact.email,
+        subject: `Message to ${selectedContact.full_name || selectedContact.email}`,
+        body: newMessageText
+      });
+      setNewMessageText('');
+      loadMessages();
+    } catch (err) {
+      toast.error('Failed to send message.');
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -735,6 +797,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           setProfiles(usersData);
         }
       }
+      await loadMessages();
     } catch (err) {
       console.error(err);
     }
@@ -742,6 +805,8 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadMessages, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleApproveCampaign = async (id: string) => {
@@ -845,6 +910,20 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const pendingConvs = conversions.filter(c => c.status === 'pending').length;
   const networkVolume = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
 
+  // Dynamic Messages for Admin
+  const liveMessages = messages
+    .filter(m => m.receiver_id === profile.id)
+    .slice(-3)
+    .reverse()
+    .map(m => ({
+      id: m.id,
+      sender: m.sender_name,
+      subject: m.subject,
+      preview: m.body,
+      time: new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }),
+      sender_id: m.sender_id
+    }));
+
   return (
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
@@ -908,6 +987,17 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               <Users className="h-4.5 w-4.5 mr-3 text-slate-400" />
               <span>User Management</span>
             </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'messages' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Mail className="h-4.5 w-4.5 mr-3 text-slate-400" />
+              <span>Messages</span>
+            </button>
           </nav>
         </div>
 
@@ -934,6 +1024,118 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           </div>
 
           <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              {/* Mail dropdown */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowMessages(!showMessages);
+                    setShowNotifications(false);
+                  }}
+                  title="Messages"
+                  className="relative p-1.5 text-slate-455 hover:text-slate-800 transition-colors cursor-pointer"
+                >
+                  <Mail className="h-4.5 w-4.5" />
+                  {liveMessages.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-purple-600 text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-white">
+                      {liveMessages.length}
+                    </span>
+                  )}
+                </button>
+
+                {showMessages && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-bold text-slate-800 font-sans">Messages ({liveMessages.length})</span>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto space-y-2">
+                      {liveMessages.length === 0 ? (
+                        <div className="text-center py-6 text-xs text-slate-400 font-sans">No messages.</div>
+                      ) : (
+                        liveMessages.map(m => (
+                          <div 
+                            key={m.id} 
+                            onClick={() => {
+                              const matchingContact = contacts.find(c => c.id === m.id.split('-').pop() || c.sender_id === m.sender_id || c.id === m.sender_id);
+                              if (matchingContact) {
+                                setSelectedContact(matchingContact);
+                              }
+                              setActiveTab('messages');
+                              setShowMessages(false);
+                            }}
+                            className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-left space-y-1 cursor-pointer hover:bg-slate-100 transition-all"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-slate-800">{m.sender}</span>
+                              <span className="text-[9px] text-slate-400 font-semibold">{m.time}</span>
+                            </div>
+                            <div className="text-[10px] font-bold text-purple-600 truncate font-sans">{m.subject}</div>
+                            <p className="text-[10px] text-slate-655 font-sans leading-tight line-clamp-2">{m.preview}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Notification Bell */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowNotifications(!showNotifications);
+                    setShowMessages(false);
+                  }}
+                  title="Notifications"
+                  className="relative p-1.5 text-slate-455 hover:text-slate-800 transition-colors cursor-pointer"
+                >
+                  <Bell className="h-4.5 w-4.5" />
+                  {pendingConvs + pendingCamps > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-purple-600 text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-white">
+                      {pendingConvs + pendingCamps}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <span className="text-xs font-bold text-slate-800 font-sans">Notifications</span>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto space-y-2 font-sans text-xs">
+                      {pendingCamps > 0 && (
+                        <div 
+                          onClick={() => {
+                            setActiveTab('campaign-approvals');
+                            setShowNotifications(false);
+                          }}
+                          className="p-3 rounded-xl bg-purple-50/50 border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer text-left space-y-1"
+                        >
+                          <div className="font-bold text-purple-700">Pending Offers ({pendingCamps})</div>
+                          <p className="text-[10px] text-slate-500">New campaign requests are waiting for admin review.</p>
+                        </div>
+                      )}
+                      {pendingConvs > 0 && (
+                        <div 
+                          onClick={() => {
+                            setActiveTab('conversion-approvals');
+                            setShowNotifications(false);
+                          }}
+                          className="p-3 rounded-xl bg-purple-50/50 border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer text-left space-y-1"
+                        >
+                          <div className="font-bold text-purple-700">Pending Conversions ({pendingConvs})</div>
+                          <p className="text-[10px] text-slate-500">Conversions are waiting for admin approval.</p>
+                        </div>
+                      )}
+                      {pendingConvs === 0 && pendingCamps === 0 && (
+                        <div className="text-center py-6 text-xs text-slate-400">All tasks completed!</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="text-right">
               <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Active Role</div>
               <div className="text-sm font-extrabold text-purple-600">Network Admin</div>
@@ -1216,6 +1418,145 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: MESSAGES SECTION */}
+          {activeTab === 'messages' && (
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-[550px] flex animate-in fade-in duration-300">
+              
+              {/* Left Panel: Contacts list */}
+              <div className="w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30">
+                {/* Search Bar */}
+                <div className="p-4 border-b border-slate-100">
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="Search users..."
+                      value={searchContactText}
+                      onChange={(e) => setSearchContactText(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-xl h-10 px-3.5 pl-9 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0052FF] transition-all font-sans"
+                    />
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Contacts Stream */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
+                  {contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).length === 0 ? (
+                    <div className="text-center py-12 text-xs text-slate-400 font-sans font-semibold">No contacts found.</div>
+                  ) : (
+                    contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).map((c) => {
+                      const isSelected = selectedContact?.id === c.id;
+                      const cInitials = (c.full_name || c.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
+                      const lastMessage = messages
+                        .filter(m => (m.sender_id === profile.id && m.receiver_id === c.id) || (m.sender_id === c.id && m.receiver_id === profile.id))
+                        .pop();
+
+                      return (
+                        <div 
+                          key={c.id}
+                          onClick={() => setSelectedContact(c)}
+                          className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'bg-[#0052FF]/5 border border-[#0052FF]/10 text-[#0052FF]' 
+                              : 'hover:bg-slate-50 border border-transparent text-slate-700'
+                          }`}
+                        >
+                          <div className={`h-9 w-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 text-slate-755 flex items-center justify-center font-extrabold text-xs shadow-sm uppercase ${
+                            isSelected ? 'from-[#0052FF] to-blue-600 text-white' : ''
+                          }`}>
+                            {cInitials}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-bold truncate font-sans">{c.full_name || c.email}</h4>
+                              {lastMessage && (
+                                <span className="text-[8px] text-slate-400 font-medium">
+                                  {new Date(lastMessage.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 truncate font-sans font-medium mt-0.5">
+                              {lastMessage ? lastMessage.body : 'Start a new conversation'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Right Panel: Chat Thread */}
+              <div className="flex-1 flex flex-col h-full bg-white">
+                {selectedContact ? (
+                  <>
+                    {/* Thread Header */}
+                    <div className="px-6 py-4 border-b border-slate-100 flex items-center space-x-3 bg-slate-50/20">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
+                        {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                      </div>
+                    </div>
+
+                    {/* Messages Body */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/10 no-scrollbar">
+                      {messages.filter(m => (m.sender_id === profile.id && m.receiver_id === selectedContact.id) || (m.sender_id === selectedContact.id && m.receiver_id === profile.id)).length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+                          <Mail className="h-8 w-8 text-slate-300" />
+                          <p className="text-xs font-bold font-sans">No messages yet. Send a message to start partnership chat!</p>
+                        </div>
+                      ) : (
+                        messages.filter(m => (m.sender_id === profile.id && m.receiver_id === selectedContact.id) || (m.sender_id === selectedContact.id && m.receiver_id === profile.id)).map((m) => {
+                          const isMe = m.sender_id === profile.id;
+                          return (
+                            <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} w-full`}>
+                              <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-xs shadow-sm leading-relaxed ${
+                                isMe 
+                                  ? 'bg-[#0052FF] text-white rounded-tr-none' 
+                                  : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-150'
+                              }`}>
+                                <p className="font-sans font-medium">{m.body}</p>
+                                <div className={`text-[8px] mt-1 font-semibold ${isMe ? 'text-blue-200 text-right' : 'text-slate-400'}`}>
+                                  {new Date(m.created_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    {/* Text Input area */}
+                    <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-100 flex items-center space-x-3 bg-white">
+                      <input 
+                        type="text" 
+                        placeholder="Type your message here..."
+                        value={newMessageText}
+                        onChange={(e) => setNewMessageText(e.target.value)}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                      />
+                      <button 
+                        type="submit"
+                        className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold h-11 px-5 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer shadow-sm shadow-blue-500/10"
+                      >
+                        Send
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-slate-400 space-y-2">
+                    <Mail className="h-10 w-10 text-slate-300" />
+                    <p className="text-xs font-bold font-sans">Select a user to view conversation.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

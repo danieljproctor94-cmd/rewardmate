@@ -165,9 +165,11 @@ export default function Contact() {
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm text-slate-900">Headquarters</h4>
+                  <h4 className="font-extrabold text-sm text-slate-900">Headquarters & Corporate Details</h4>
                   <p className="text-slate-500 text-xs sm:text-sm mt-0.5 leading-relaxed">
-                    Noosaville QLD
+                    Noosaville QLD<br />
+                    REWARD MATE PTY LTD<br />
+                    ACN: 700 041 676
                   </p>
                 </div>
               </div>

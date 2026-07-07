@@ -125,6 +125,34 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
     total_budget: 15000.00,
     spend: 3600.00,
     created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'campaign-6',
+    advertiser_id: 'mock-advertiser-id',
+    advertiser_name: 'David Proctor (Advertiser)',
+    name: 'Samsung Galaxy S26 Promo',
+    description: 'Promote Samsung Galaxy S26 flagship pre-orders. Earn flat payout per successful referral sign-up.',
+    landing_page_url: 'https://www.samsung.com/au/smartphones/galaxy-s/',
+    payout_type: 'cpa',
+    payout_amount: 80.00,
+    status: 'active',
+    total_budget: 12000.00,
+    spend: 0.00,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'campaign-7',
+    advertiser_id: 'mock-advertiser-id',
+    advertiser_name: 'David Proctor (Advertiser)',
+    name: 'Amazon Prime Free Trial',
+    description: 'Get visitors to sign up for Amazon Prime 30-day Free Trial. Extremely high click-to-conversion rates.',
+    landing_page_url: 'https://www.amazon.com.au/prime',
+    payout_type: 'cpa',
+    payout_amount: 12.00,
+    status: 'active',
+    total_budget: 6000.00,
+    spend: 0.00,
+    created_at: new Date().toISOString()
   }
 ];
 
@@ -484,6 +512,25 @@ const MESSAGES_KEY = 'rewardmate_mock_messages';
 export const getMessages = async (userId: string): Promise<Message[]> => {
   if (!isSupabaseConfigured) {
     const messages: Message[] = JSON.parse(localStorage.getItem(MESSAGES_KEY) || '[]');
+    
+    // Auto-seed welcome message from admin if not already present
+    const hasWelcome = messages.some(m => m.receiver_id === userId && m.sender_id === 'mock-admin-id');
+    if (!hasWelcome && userId !== 'mock-admin-id') {
+      const welcomeMsg: Message = {
+        id: 'msg-welcome-seeded-' + userId,
+        sender_id: 'mock-admin-id',
+        sender_name: 'Super Admin (Reward Mate)',
+        receiver_id: userId,
+        receiver_name: 'User',
+        subject: 'Welcome to Reward Mate Australia!',
+        body: 'Welcome to Reward Mate Australia! Your publisher application has been approved. Start building links, generating clicks, and earning commissions!',
+        read: false,
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() // 1 day ago
+      };
+      messages.push(welcomeMsg);
+      localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+    }
+
     return messages
       .filter(m => m.sender_id === userId || m.receiver_id === userId)
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
