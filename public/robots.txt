@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /click
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /login
+Allow: /register
+Disallow: /dashboard/
+Disallow: /click/
 
 Sitemap: https://rewardmate.com.au/sitemap.xml

@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import AdvertiserRegister from './pages/AdvertiserRegister';
 import About from './pages/public/About';
 import Contact from './pages/public/Contact';
+import Terms from './pages/public/Terms';
 
 export default function App() {
   const { isAuthenticated, loading, isImpersonating, stopImpersonating, profile } = useAuth();
@@ -66,6 +67,7 @@ export default function App() {
         {/* Public Marketing Routes */}
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/terms" element={<Terms />} />
 
         {/* App Portal Routes */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />

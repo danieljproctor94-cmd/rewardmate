@@ -728,7 +728,7 @@ export default function Landing() {
           </div>
           <div className="flex space-x-6">
             <a href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-400 transition-colors">Terms of Service</a>
+            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-slate-400 transition-colors">Cookie Policy</a>
           </div>
         </div>
