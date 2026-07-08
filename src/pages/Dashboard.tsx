@@ -6,14 +6,14 @@ import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
   getCampaigns, createCampaign, updateCampaignStatus, 
   getClicks, getConversions, updateConversionStatus,
-  getMessages, sendMessage
+  getMessages, sendMessage, getAllAffiliateLinks
 } from '../lib/mockDatabase';
-import type { Campaign, Click, Conversion } from '../lib/mockDatabase';
+import type { Campaign, Click, Conversion, AffiliateLink } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
-  ChevronLeft, ChevronRight, Menu, Sliders
+  ChevronLeft, ChevronRight, Menu, Sliders, Building
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -942,7 +942,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages' | 'settings'>('campaign-approvals');
+  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings'>('campaign-approvals');
+  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
+  const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
 
   // Account Settings Form State
   const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
@@ -1071,8 +1073,8 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           approval_status: newUserType === 'publisher' ? newUserApproval : 'approved',
           wallet_balance: Number(newUserBalance) || 0,
           created_at: new Date().toISOString(),
-          business_name: newUserType === 'publisher' ? newUserBusiness : undefined,
-          website: newUserType === 'publisher' ? newUserWebsite : undefined,
+          business_name: newUserType !== 'admin' ? newUserBusiness : undefined,
+          website: newUserType !== 'admin' ? newUserWebsite : undefined,
           channels: newUserType === 'publisher' ? newUserChannels : undefined,
           traffic: newUserType === 'publisher' ? newUserTraffic : undefined,
           onboarding_completed: newUserType === 'publisher' ? !!(newUserBusiness || newUserWebsite) : true
@@ -1094,8 +1096,8 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             approval_status: newUserType === 'publisher' ? newUserApproval : 'approved',
             wallet_balance: Number(newUserBalance) || 0,
             created_at: new Date().toISOString(),
-            business_name: newUserType === 'publisher' ? newUserBusiness : null,
-            website: newUserType === 'publisher' ? newUserWebsite : null,
+            business_name: newUserType !== 'admin' ? newUserBusiness : null,
+            website: newUserType !== 'admin' ? newUserWebsite : null,
             channels: newUserType === 'publisher' ? newUserChannels : null,
             traffic: newUserType === 'publisher' ? newUserTraffic : null,
             onboarding_completed: newUserType === 'publisher' ? !!(newUserBusiness || newUserWebsite) : true
@@ -1184,6 +1186,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
       const clickLogs = await getClicks();
       setClicks(clickLogs);
+
+      const links = await getAllAffiliateLinks();
+      setAffiliateLinks(links);
 
       // Fetch users
       if (!isSupabaseConfigured) {
@@ -1371,7 +1376,8 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               {[
                 { id: 'campaign-approvals', label: 'Campaigns', icon: FolderKanban },
                 { id: 'conversion-approvals', label: 'Conversions', icon: DollarSign },
-                { id: 'users-mgmt', label: 'Users', icon: Users },
+                { id: 'brands', label: 'Brands', icon: Building },
+                { id: 'affiliates', label: 'Affiliates', icon: Users },
                 { id: 'messages', label: 'Messages', icon: Mail },
               ].map((item) => {
                 const Icon = item.icon;
@@ -1502,16 +1508,28 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               {!isSidebarCollapsed && <span>Conversion Audits ({pendingConvs})</span>}
             </button>
             <button
-              onClick={() => setActiveTab('users-mgmt')}
-              title="User Management"
+              onClick={() => setActiveTab('brands')}
+              title="Brands"
               className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
-                activeTab === 'users-mgmt' 
+                activeTab === 'brands' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Building className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Brands</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('affiliates')}
+              title="Affiliates"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'affiliates' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
-              {!isSidebarCollapsed && <span>User Management</span>}
+              {!isSidebarCollapsed && <span>Affiliates</span>}
             </button>
             <button
               onClick={() => setActiveTab('messages')}
@@ -1907,230 +1925,444 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             </div>
           )}
 
-          {activeTab === 'users-mgmt' && (
+          {/* TAB: BRANDS */}
+          {activeTab === 'brands' && (
             <>
-              <div className="space-y-6 animate-in fade-in duration-300 font-sans">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 font-sans">User Management</h3>
-                  <p className="text-xs text-slate-550 font-medium">Monitor active system members, impersonate publisher/advertiser views, or revoke profiles.</p>
+              <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 font-sans">Brand Management</h3>
+                    <p className="text-xs text-slate-550 font-medium">Monitor active advertiser brands, view their balance, active campaigns, and connected affiliates.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setNewUserType('advertiser');
+                      setNewUserFullName('');
+                      setNewUserEmail('');
+                      setNewUserBalance('0.00');
+                      setNewUserBusiness('');
+                      setNewUserWebsite('');
+                      setShowAddUserModal(true);
+                    }}
+                    className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm self-start sm:self-center"
+                  >
+                    <Plus className="h-4 w-4" /> Setup New Brand
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowAddUserModal(true)}
-                  className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm self-start sm:self-center"
-                >
-                  <Plus className="h-4 w-4" /> Setup User Account
-                </button>
-              </div>
 
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-450">
-                        <th className="py-4 px-6">Member Profile</th>
-                        <th className="py-4 px-6">Type</th>
-                        <th className="py-4 px-6">Country</th>
-                        <th className="py-4 px-6">Last Active</th>
-                        <th className="py-4 px-6 text-right">This Month Stats</th>
-                        <th className="py-4 px-6 text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs">
-                      {profiles.map((p) => {
-                        const country = (() => {
-                          if (p.email.endsWith('.au')) return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
-                          if (p.email.endsWith('.uk') || p.email.endsWith('.co.uk')) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
-                          if (p.email.endsWith('.nz')) return { flag: '🇳🇿', code: 'NZ', name: 'New Zealand' };
-                          const charCode = p.id.charCodeAt(0) || 0;
-                          if (charCode % 3 === 0) return { flag: '🇺🇸', code: 'US', name: 'United States' };
-                          if (charCode % 3 === 1) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
-                          return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
-                        })();
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
+                          <th className="py-4 px-6">Brand Details</th>
+                          <th className="py-4 px-6">Starting Country</th>
+                          <th className="py-4 px-6">Campaigns Count</th>
+                          <th className="py-4 px-6">Total Clicks</th>
+                          <th className="py-4 px-6 text-right">Account Balance</th>
+                          <th className="py-4 px-6 text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-xs">
+                        {profiles.filter(p => p.user_type === 'advertiser').length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400 font-bold">No brands found. Setup a new brand account to start.</td>
+                          </tr>
+                        ) : (
+                          profiles.filter(p => p.user_type === 'advertiser').map((p) => {
+                            const country = (() => {
+                              if (p.email.endsWith('.au')) return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                              if (p.email.endsWith('.uk') || p.email.endsWith('.co.uk')) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                              if (p.email.endsWith('.nz')) return { flag: '🇳🇿', code: 'NZ', name: 'New Zealand' };
+                              const charCode = p.id.charCodeAt(0) || 0;
+                              if (charCode % 3 === 0) return { flag: '🇺🇸', code: 'US', name: 'United States' };
+                              if (charCode % 3 === 1) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                              return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                            })();
 
-                        const lastLoggedIn = (() => {
-                          const charCode = p.id.charCodeAt(p.id.length - 1) || 0;
-                          const hoursAgo = 1 + (charCode % 72);
-                          const date = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
-                          return date.toLocaleDateString('en-AU', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                          });
-                        })();
-
-                        const isSelf = p.id === profile.id;
-
-                        // Metrics
-                        const clicksCount = clicks.filter(c => c.publisher_id === p.id || c.campaign?.advertiser_id === p.id).length;
-                        const financeVol = p.user_type === 'publisher' 
-                          ? conversions.filter(c => c.publisher_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0)
-                          : conversions.filter(c => c.campaign?.advertiser_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
-                        return (
-                          <Fragment key={p.id}>
-                            <tr 
-                              onClick={() => setExpandedUserId(expandedUserId === p.id ? null : p.id)}
-                              className={`hover:bg-slate-50 transition-colors cursor-pointer select-none ${expandedUserId === p.id ? 'bg-slate-50/80' : ''}`}
-                            >
-                              <td className="py-4 px-6">
-                                <div className="flex items-center space-x-3">
-                                  {p.avatar_url ? (
-                                    <img src={p.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5 border border-slate-200" alt="Avatar" />
-                                  ) : (
-                                    <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
-                                      {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
-                                    </div>
-                                  )}
-                                  <div className="space-y-0.5 min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="font-bold text-slate-800 truncate">{p.full_name || 'No Name'}</span>
-                                      {p.approval_status === 'pending' && (
-                                        <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
-                                          Pending Review
-                                        </span>
+                            const brandCampaigns = campaigns.filter(c => c.advertiser_id === p.id);
+                            const brandClicks = clicks.filter(c => c.campaign?.advertiser_id === p.id).length;
+                            
+                            // Connected affiliates are publishers who have tracking links for this brand's campaigns
+                            const connectedLinks = affiliateLinks.filter(l => l.campaign?.advertiser_id === p.id);
+                            const uniqueAffiliateIds = Array.from(new Set(connectedLinks.map(l => l.publisher_id)));
+                            
+                            return (
+                              <Fragment key={p.id}>
+                                <tr 
+                                  onClick={() => setExpandedUserId(expandedUserId === p.id ? null : p.id)}
+                                  className={`hover:bg-slate-50 transition-colors cursor-pointer select-none ${expandedUserId === p.id ? 'bg-slate-50/80' : ''}`}
+                                >
+                                  <td className="py-4 px-6">
+                                    <div className="flex items-center space-x-3">
+                                      {p.avatar_url ? (
+                                        <img src={p.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5 border border-slate-200" alt="Avatar" />
+                                      ) : (
+                                        <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
+                                          {(p.business_name || p.full_name || p.email).charAt(0).toUpperCase()}
+                                        </div>
                                       )}
-                                      {p.user_type === 'publisher' && (p.onboarding_completed || p.website) && (
-                                        <span className="bg-blue-50 text-[#0052FF] border border-blue-100 text-[8px] font-black px-1 py-0.2 rounded uppercase shrink-0">
-                                          Details Available
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-455">
-                                      <span className="truncate">{p.email}</span>
-                                      <span className="text-[9px] bg-slate-100 text-slate-500 font-mono font-bold px-1 rounded">
-                                        {formatUserId(p.id)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="py-4 px-6">
-                                <span className={`text-[9px] font-extrabold uppercase rounded px-2.5 py-0.5 tracking-wider ${
-                                  p.user_type === 'admin' ? 'bg-purple-50 text-purple-700 border border-purple-100' :
-                                  p.user_type === 'advertiser' ? 'bg-amber-50 text-amber-705 border border-amber-100' :
-                                  'bg-blue-50 text-[#0052FF] border border-blue-100'
-                                }`}>
-                                  {p.user_type}
-                                </span>
-                              </td>
-                              <td className="py-4 px-6">
-                                <span className="flex items-center gap-1.5 font-semibold text-slate-555">
-                                  <span>{country.flag}</span>
-                                  <span>{country.code}</span>
-                                </span>
-                              </td>
-                              <td className="py-4 px-6 text-slate-500 font-medium">{lastLoggedIn}</td>
-                              <td className="py-4 px-6 text-right font-sans">
-                                <div className="font-bold text-slate-800">
-                                  {p.user_type === 'publisher' ? `+$${financeVol.toFixed(2)}` : p.user_type === 'advertiser' ? `-$${financeVol.toFixed(2)}` : '-'}
-                                </div>
-                                <div className="text-[10px] text-slate-455 font-medium">
-                                  {p.user_type !== 'admin' ? `${clicksCount} clicks` : ''}
-                                </div>
-                              </td>
-                              <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-center gap-2">
-                                  {!isSelf && p.user_type !== 'admin' && p.approval_status === 'pending' && (
-                                    <button
-                                      onClick={() => handleApproveUser(p.id)}
-                                      className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
-                                    >
-                                      Approve
-                                    </button>
-                                  )}
-                                  {!isSelf && p.user_type !== 'admin' && (
-                                    <button
-                                      onClick={() => impersonateUser?.(p)}
-                                      className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
-                                    >
-                                      Login As
-                                    </button>
-                                  )}
-                                  {!isSelf && (
-                                    <button
-                                      onClick={() => handleRemoveUser(p.id)}
-                                      className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
-                                    >
-                                      Remove
-                                    </button>
-                                  )}
-                                  {isSelf && (
-                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-150">
-                                      You (Active)
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-
-                            {/* COLLAPSIBLE DETAILED VIEW */}
-                            {expandedUserId === p.id && (
-                              <tr className="bg-slate-50/50">
-                                <td colSpan={6} className="px-6 py-4 border-t border-slate-100/50">
-                                  <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-4 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
-                                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                                      <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Detailed Profile View</h4>
-                                      <span className="text-[9px] text-slate-400 font-bold font-mono">Ref ID: {formatUserId(p.id)} | DB Key: {p.id}</span>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
-                                      <div className="space-y-2">
-                                        <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Account Information</div>
-                                        <div><span className="text-slate-400 font-bold">Email Address:</span> {p.email}</div>
-                                        <div><span className="text-slate-400 font-bold">Full Name:</span> {p.full_name || 'Not provided'}</div>
-                                        <div><span className="text-slate-400 font-bold">Registration Date:</span> {new Date(p.created_at).toLocaleString('en-AU')}</div>
-                                        <div><span className="text-slate-400 font-bold">Wallet Balance:</span> ${Number(p.wallet_balance).toFixed(2)} AUD</div>
-                                        <div>
-                                          <span className="text-slate-400 font-bold">Approval Status:</span> 
-                                          <span className={`ml-2 text-[9px] font-black uppercase rounded px-2 py-0.5 border ${
-                                            p.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                                            p.approval_status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                                            'bg-rose-50 text-rose-700 border-rose-100'
-                                          }`}>
-                                            {p.approval_status}
+                                      <div className="space-y-0.5 min-w-0">
+                                        <div className="font-bold text-slate-800 truncate">{p.business_name || p.full_name || 'No Name'}</div>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-455">
+                                          <span className="truncate">{p.email}</span>
+                                          <span className="text-[9px] bg-slate-100 text-slate-500 font-mono font-bold px-1 rounded">
+                                            {formatUserId(p.id)}
                                           </span>
                                         </div>
                                       </div>
-
-                                      <div className="space-y-2">
-                                        <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Publisher Onboarding Answers</div>
-                                        {p.user_type !== 'publisher' ? (
-                                          <div className="text-slate-400 italic">Onboarding is only applicable to publisher profiles.</div>
-                                        ) : p.onboarding_completed || p.website || p.business_name ? (
-                                          <div className="space-y-2 bg-slate-50 border border-slate-150 p-4 rounded-xl font-medium text-slate-550 leading-relaxed">
-                                            <div><span className="text-slate-400 font-bold">Business Name:</span> {p.business_name || 'Not provided'}</div>
-                                            <div>
-                                              <span className="text-slate-400 font-bold">Website / Channel:</span> 
-                                              {p.website ? (
-                                                <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline ml-1 font-semibold">{p.website}</a>
-                                              ) : 'Not provided'}
-                                            </div>
-                                            <div><span className="text-slate-400 font-bold">Marketing Channels:</span> {p.channels || 'Not provided'}</div>
-                                            <div><span className="text-slate-400 font-bold">Traffic Estimate:</span> {p.traffic || 'Not provided'}</div>
-                                          </div>
-                                        ) : (
-                                          <div className="text-slate-400 italic">This publisher has not completed onboarding details yet.</div>
-                                        )}
-                                      </div>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                                  </td>
+                                  <td className="py-4 px-6">
+                                    <span className="flex items-center gap-1.5 font-semibold text-slate-555">
+                                      <span>{country.flag}</span>
+                                      <span>{country.code}</span>
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-6 font-bold text-slate-600">{brandCampaigns.length} Campaigns</td>
+                                  <td className="py-4 px-6 font-bold text-slate-600">{brandClicks} Clicks</td>
+                                  <td className="py-4 px-6 text-right font-sans">
+                                    <div className="font-bold text-slate-800">${Number(p.wallet_balance).toFixed(2)} AUD</div>
+                                  </td>
+                                  <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center justify-center gap-2">
+                                      <button
+                                        onClick={() => impersonateUser?.(p)}
+                                        className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                      >
+                                        Login As
+                                      </button>
+                                      <button
+                                        onClick={() => handleRemoveUser(p.id)}
+                                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {expandedUserId === p.id && (
+                                  <tr className="bg-slate-50/50">
+                                    <td colSpan={6} className="px-6 py-4 border-t border-slate-100/50">
+                                      <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-6 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
+                                        
+                                        {/* Brand Profile Details */}
+                                        <div>
+                                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Account Details</h4>
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-slate-655 bg-slate-50/40 border border-slate-150 p-4 rounded-xl">
+                                            <div><span className="text-slate-400 font-bold">Website:</span> {p.website ? <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] underline ml-1">{p.website}</a> : 'Not provided'}</div>
+                                            <div><span className="text-slate-400 font-bold">Contact Name:</span> {p.full_name || 'Not provided'}</div>
+                                            <div><span className="text-slate-400 font-bold">Registered:</span> {new Date(p.created_at).toLocaleDateString('en-AU')}</div>
+                                            <div><span className="text-slate-400 font-bold">Role ID:</span> <span className="font-mono bg-slate-100 px-1 py-0.5 rounded text-[10px]">{p.id}</span></div>
+                                          </div>
+                                        </div>
+
+                                        {/* Brand Campaigns */}
+                                        <div>
+                                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Campaigns ({brandCampaigns.length})</h4>
+                                          {brandCampaigns.length === 0 ? (
+                                            <div className="text-xs text-slate-400 italic bg-slate-50/30 p-4 rounded-xl border border-slate-150/50">No campaigns created yet.</div>
+                                          ) : (
+                                            <div className="border border-slate-150 rounded-xl overflow-hidden shadow-sm">
+                                              <table className="w-full text-left text-xs border-collapse">
+                                                <thead>
+                                                  <tr className="bg-slate-50 border-b border-slate-150 text-[9px] font-black text-slate-400 uppercase">
+                                                    <th className="py-2.5 px-4">Campaign Name</th>
+                                                    <th className="py-2.5 px-4">Payout</th>
+                                                    <th className="py-2.5 px-4">Total Budget</th>
+                                                    <th className="py-2.5 px-4">Spend</th>
+                                                    <th className="py-2.5 px-4">Status</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 font-medium text-slate-655">
+                                                  {brandCampaigns.map(c => (
+                                                    <tr key={c.id} className="hover:bg-slate-50/30">
+                                                      <td className="py-2 px-4 font-bold text-slate-800">{c.name}</td>
+                                                      <td className="py-2 px-4">${Number(c.payout_amount).toFixed(2)} ({c.payout_type.toUpperCase()})</td>
+                                                      <td className="py-2 px-4">${Number(c.total_budget).toFixed(2)}</td>
+                                                      <td className="py-2 px-4">${Number(c.spend).toFixed(2)}</td>
+                                                      <td className="py-2 px-4">
+                                                        <span className={`text-[9px] font-black uppercase rounded px-1.5 py-0.2 border ${
+                                                          c.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                          c.status === 'pending_approval' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                                          'bg-rose-50 text-rose-700 border-rose-100'
+                                                        }`}>{c.status}</span>
+                                                      </td>
+                                                    </tr>
+                                                  ))}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Connected Affiliates */}
+                                        <div>
+                                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Connected Affiliates ({uniqueAffiliateIds.length})</h4>
+                                          {uniqueAffiliateIds.length === 0 ? (
+                                            <div className="text-xs text-slate-400 italic bg-slate-50/30 p-4 rounded-xl border border-slate-150/50">No active publishers connected to this brand yet.</div>
+                                          ) : (
+                                            <div className="border border-slate-150 rounded-xl overflow-hidden shadow-sm">
+                                              <table className="w-full text-left text-xs border-collapse">
+                                                <thead>
+                                                  <tr className="bg-slate-50 border-b border-slate-150 text-[9px] font-black text-slate-400 uppercase">
+                                                    <th className="py-2.5 px-4">Publisher</th>
+                                                    <th className="py-2.5 px-4">Website</th>
+                                                    <th className="py-2.5 px-4">Link Tracking Code</th>
+                                                    <th className="py-2.5 px-4">Monthly Traffic</th>
+                                                    <th className="py-2.5 px-4">Connected Campaign</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 font-medium text-slate-655">
+                                                  {connectedLinks.map(link => {
+                                                    const pub = profiles.find(pr => pr.id === link.publisher_id);
+                                                    if (!pub) return null;
+                                                    return (
+                                                      <tr key={link.id} className="hover:bg-slate-50/30">
+                                                        <td className="py-2 px-4 font-bold text-slate-800">{pub.business_name || pub.full_name || pub.email}</td>
+                                                        <td className="py-2 px-4">{pub.website ? <a href={pub.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline font-semibold">{pub.website}</a> : 'Not provided'}</td>
+                                                        <td className="py-2 px-4"><span className="font-mono bg-slate-50 border border-slate-200 px-1 py-0.5 rounded text-[10px]">{link.code}</span></td>
+                                                        <td className="py-2 px-4 text-slate-500">{pub.traffic || 'Not provided'}</td>
+                                                        <td className="py-2 px-4 text-slate-500">{link.campaign?.name || 'Campaign'}</td>
+                                                      </tr>
+                                                    );
+                                                  })}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
+          )}
+
+          {/* TAB: AFFILIATES */}
+          {activeTab === 'affiliates' && (
+            <>
+              <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 font-sans">Affiliate Management</h3>
+                    <p className="text-xs text-slate-555 font-medium">Monitor active affiliate publishers, audit onboarding answers, and track traffic click stats.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setNewUserType('publisher');
+                      setNewUserFullName('');
+                      setNewUserEmail('');
+                      setNewUserBalance('0.00');
+                      setNewUserBusiness('');
+                      setNewUserWebsite('');
+                      setNewUserChannels('');
+                      setNewUserTraffic('');
+                      setNewUserApproval('approved');
+                      setShowAddUserModal(true);
+                    }}
+                    className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm self-start sm:self-center"
+                  >
+                    <Plus className="h-4 w-4" /> Setup New Affiliate
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
+                          <th className="py-4 px-6">Affiliate Profile</th>
+                          <th className="py-4 px-6">Country</th>
+                          <th className="py-4 px-6">Onboarding</th>
+                          <th className="py-4 px-6">Total Clicks</th>
+                          <th className="py-4 px-6 text-right">Total Earnings</th>
+                          <th className="py-4 px-6 text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-xs">
+                        {profiles.filter(p => p.user_type === 'publisher').length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-slate-400 font-bold">No affiliates found. Setup a new affiliate account to start.</td>
+                          </tr>
+                        ) : (
+                          profiles.filter(p => p.user_type === 'publisher').map((p) => {
+                            const country = (() => {
+                              if (p.email.endsWith('.au')) return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                              if (p.email.endsWith('.uk') || p.email.endsWith('.co.uk')) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                              if (p.email.endsWith('.nz')) return { flag: '🇳🇿', code: 'NZ', name: 'New Zealand' };
+                              const charCode = p.id.charCodeAt(0) || 0;
+                              if (charCode % 3 === 0) return { flag: '🇺🇸', code: 'US', name: 'United States' };
+                              if (charCode % 3 === 1) return { flag: '🇬🇧', code: 'GB', name: 'United Kingdom' };
+                              return { flag: '🇦🇺', code: 'AU', name: 'Australia' };
+                            })();
+
+                            const isSelf = p.id === profile.id;
+                            const clicksCount = clicks.filter(c => c.publisher_id === p.id).length;
+                            const earnings = conversions.filter(c => c.publisher_id === p.id && c.status === 'approved').reduce((s, c) => s + Number(c.payout), 0);
+                            
+                            return (
+                              <Fragment key={p.id}>
+                                <tr 
+                                  onClick={() => setExpandedUserId(expandedUserId === p.id ? null : p.id)}
+                                  className={`hover:bg-slate-50 transition-colors cursor-pointer select-none ${expandedUserId === p.id ? 'bg-slate-50/80' : ''}`}
+                                >
+                                  <td className="py-4 px-6">
+                                    <div className="flex items-center space-x-3">
+                                      {p.avatar_url ? (
+                                        <img src={p.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5 border border-slate-200" alt="Avatar" />
+                                      ) : (
+                                        <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
+                                          {(p.full_name || p.email).charAt(0).toUpperCase()}
+                                        </div>
+                                      )}
+                                      <div className="space-y-0.5 min-w-0">
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="font-bold text-slate-800 truncate">{p.full_name || 'No Name'}</span>
+                                          {p.approval_status === 'pending' && (
+                                            <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
+                                              Pending Review
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-455">
+                                          <span className="truncate">{p.email}</span>
+                                          <span className="text-[9px] bg-slate-100 text-slate-500 font-mono font-bold px-1 rounded">
+                                            {formatUserId(p.id)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-4 px-6">
+                                    <span className="flex items-center gap-1.5 font-semibold text-slate-555">
+                                      <span>{country.flag}</span>
+                                      <span>{country.code}</span>
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-6 font-sans">
+                                    <span className={`text-[9px] font-black uppercase rounded px-2 py-0.5 border ${
+                                      p.onboarding_completed 
+                                        ? 'bg-blue-50 text-[#0052FF] border-blue-100' 
+                                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                                    }`}>
+                                      {p.onboarding_completed ? 'Completed' : 'Pending'}
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-6 font-bold text-slate-600">{clicksCount} Clicks</td>
+                                  <td className="py-4 px-6 text-right font-sans">
+                                    <div className="font-bold text-slate-800">+${earnings.toFixed(2)} AUD</div>
+                                  </td>
+                                  <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center justify-center gap-2">
+                                      {!isSelf && p.approval_status === 'pending' && (
+                                        <button
+                                          onClick={() => handleApproveUser(p.id)}
+                                          className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                        >
+                                          Approve
+                                        </button>
+                                      )}
+                                      {!isSelf && (
+                                        <button
+                                          onClick={() => impersonateUser?.(p)}
+                                          className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                        >
+                                          Login As
+                                        </button>
+                                      )}
+                                      {!isSelf && (
+                                        <button
+                                          onClick={() => handleRemoveUser(p.id)}
+                                          className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px] border border-rose-100"
+                                        >
+                                          Remove
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+
+                                {expandedUserId === p.id && (
+                                  <tr className="bg-slate-50/50">
+                                    <td colSpan={6} className="px-6 py-4 border-t border-slate-100/50">
+                                      <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-4 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
+                                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                                          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-wider">Affiliate Detailed Profile</h4>
+                                          <span className="text-[9px] text-slate-400 font-bold font-mono">Ref ID: {formatUserId(p.id)} | DB Key: {p.id}</span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600">
+                                          <div className="space-y-2">
+                                            <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Account Details</div>
+                                            <div><span className="text-slate-400 font-bold">Email Address:</span> {p.email}</div>
+                                            <div><span className="text-slate-400 font-bold">Full Name:</span> {p.full_name || 'Not provided'}</div>
+                                            <div><span className="text-slate-400 font-bold">Registration Date:</span> {new Date(p.created_at).toLocaleString('en-AU')}</div>
+                                            <div><span className="text-slate-400 font-bold">Account Balance:</span> ${Number(p.wallet_balance).toFixed(2)} AUD</div>
+                                            <div>
+                                              <span className="text-slate-400 font-bold">Approval Status:</span> 
+                                              <span className={`ml-2 text-[9px] font-black uppercase rounded px-2 py-0.5 border ${
+                                                p.approval_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                p.approval_status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                                                'bg-rose-50 text-rose-700 border-rose-100'
+                                              }`}>{p.approval_status}</span>
+                                            </div>
+                                          </div>
+
+                                          <div className="space-y-2">
+                                            <div className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Publisher Onboarding Answers</div>
+                                            {p.onboarding_completed || p.website || p.business_name ? (
+                                              <div className="space-y-2 bg-slate-50 border border-slate-150 p-4 rounded-xl font-medium text-slate-550 leading-relaxed">
+                                                <div><span className="text-slate-400 font-bold">Business Name:</span> {p.business_name || 'Not provided'}</div>
+                                                <div>
+                                                  <span className="text-slate-400 font-bold">Website / Channel:</span> 
+                                                  {p.website ? (
+                                                    <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline ml-1 font-semibold">{p.website}</a>
+                                                  ) : 'Not provided'}
+                                                </div>
+                                                <div><span className="text-slate-400 font-bold">Marketing Channels:</span> {p.channels || 'Not provided'}</div>
+                                                <div><span className="text-slate-400 font-bold">Traffic Estimate:</span> {p.traffic || 'Not provided'}</div>
+                                              </div>
+                                            ) : (
+                                              <div className="text-slate-400 italic">This publisher has not completed onboarding details yet.</div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
             {/* SETUP NEW USER MODAL */}
             {showAddUserModal && (
               <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-205 text-left">
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-205 text-left font-sans">
                   <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Setup New Account</h3>
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      {newUserType === 'advertiser' ? 'Setup New Brand' : newUserType === 'publisher' ? 'Setup New Affiliate' : 'Setup New Account'}
+                    </h3>
                     <button 
                       onClick={() => setShowAddUserModal(false)}
                       className="text-slate-400 hover:text-slate-655 font-bold p-1 cursor-pointer transition-colors"
@@ -2139,10 +2371,10 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     </button>
                   </div>
 
-                  <form onSubmit={handleCreateUserSubmit} className="p-6 space-y-4 text-xs font-semibold text-slate-650">
+                  <form onSubmit={handleCreateUserSubmit} className="p-6 space-y-4 text-xs font-semibold text-slate-655">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Full Name</label>
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Contact Full Name</label>
                         <input
                           type="text"
                           required
@@ -2194,7 +2426,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Starting Balance (AUD)</label>
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">
+                          {newUserType === 'advertiser' ? 'Starting Funds (AUD)' : 'Starting Balance (AUD)'}
+                        </label>
                         <input
                           type="number"
                           step="0.01"
@@ -2205,17 +2439,21 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       </div>
                     </div>
 
-                    {/* Pre-fill Onboarding details if Publisher */}
-                    {newUserType === 'publisher' && (
+                    {/* Pre-fill Onboarding / Business details if Brand or Affiliate */}
+                    {newUserType !== 'admin' && (
                       <div className="space-y-3 pt-3 border-t border-slate-105 bg-slate-50/40 p-3 rounded-2xl">
-                        <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Pre-fill Onboarding Answers (Optional)</h4>
+                        <h4 className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                          {newUserType === 'advertiser' ? 'Pre-fill Brand details (Optional)' : 'Pre-fill Onboarding details (Optional)'}
+                        </h4>
                         
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[9px] font-extrabold text-slate-400">Business/Brand Name</label>
+                            <label className="text-[9px] font-extrabold text-slate-400">
+                              {newUserType === 'advertiser' ? 'Company / Brand Name' : 'Business Name'}
+                            </label>
                             <input
                               type="text"
-                              placeholder="e.g. Deal Hunters AU"
+                              placeholder={newUserType === 'advertiser' ? 'e.g. Mattel Shop' : 'e.g. Deal Hunters AU'}
                               value={newUserBusiness}
                               onChange={(e) => setNewUserBusiness(e.target.value)}
                               className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
@@ -2226,7 +2464,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                             <label className="text-[9px] font-extrabold text-slate-400">Website URL</label>
                             <input
                               type="text"
-                              placeholder="e.g. https://dealhunters.com"
+                              placeholder={newUserType === 'advertiser' ? 'e.g. https://shop.mattel.com' : 'e.g. https://dealhunters.com'}
                               value={newUserWebsite}
                               onChange={(e) => setNewUserWebsite(e.target.value)}
                               className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
@@ -2234,33 +2472,35 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-extrabold text-slate-400">Traffic (Monthly Views)</label>
-                            <select
-                              value={newUserTraffic}
-                              onChange={(e) => setNewUserTraffic(e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
-                            >
-                              <option value="">Select Traffic...</option>
-                              <option value="Under 5,000">Under 5,000</option>
-                              <option value="5,000 - 25,000">5,000 - 25,000</option>
-                              <option value="25,000 - 100,000">25,000 - 100,000</option>
-                              <option value="100,000+">100,000+</option>
-                            </select>
-                          </div>
+                        {newUserType === 'publisher' && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-extrabold text-slate-400">Traffic (Monthly Views)</label>
+                              <select
+                                value={newUserTraffic}
+                                onChange={(e) => setNewUserTraffic(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                              >
+                                <option value="">Select Traffic...</option>
+                                <option value="Under 5,000">Under 5,000</option>
+                                <option value="5,000 - 25,000">5,000 - 25,000</option>
+                                <option value="25,000 - 100,000">25,000 - 100,000</option>
+                                <option value="100,000+">100,000+</option>
+                              </select>
+                            </div>
 
-                          <div className="space-y-1">
-                            <label className="text-[9px] font-extrabold text-slate-400">Channels</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Email list, Instagram, Blog"
-                              value={newUserChannels}
-                              onChange={(e) => setNewUserChannels(e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
-                            />
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-extrabold text-slate-400">Channels</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Email list, Instagram, Blog"
+                                value={newUserChannels}
+                                onChange={(e) => setNewUserChannels(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-[#0052FF]"
+                              />
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
@@ -2283,8 +2523,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 </div>
               </div>
             )}
-          </>
-        )}
 
           {/* TAB 4: MESSAGES SECTION */}
           {activeTab === 'messages' && (
@@ -2293,7 +2531,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               {/* Left Panel: Contacts list */}
               <div className={`w-full md:w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30 shrink-0 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
                 {/* Search Bar */}
-                <div className="p-4 border-b border-slate-100">
+                <div className="p-4 border-b border-slate-100 space-y-3">
                   <div className="relative">
                     <input 
                       type="text" 
@@ -2306,16 +2544,51 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
+
+                  {/* Message Segment Filter */}
+                  <div className="grid grid-cols-3 bg-slate-100/85 p-0.5 rounded-xl text-[10px] font-bold text-slate-500 font-sans">
+                    <button
+                      type="button"
+                      onClick={() => setMessageFilter('all')}
+                      className={`py-1.5 rounded-lg transition-all cursor-pointer ${messageFilter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'hover:text-slate-700'}`}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessageFilter('brands')}
+                      className={`py-1.5 rounded-lg transition-all cursor-pointer ${messageFilter === 'brands' ? 'bg-white text-slate-800 shadow-sm' : 'hover:text-slate-700'}`}
+                    >
+                      Brands
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessageFilter('affiliates')}
+                      className={`py-1.5 rounded-lg transition-all cursor-pointer ${messageFilter === 'affiliates' ? 'bg-white text-slate-800 shadow-sm' : 'hover:text-slate-700'}`}
+                    >
+                      Affiliates
+                    </button>
+                  </div>
                 </div>
 
                 {/* Contacts Stream */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
-                  {contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).length === 0 ? (
-                    <div className="text-center py-12 text-xs text-slate-400 font-sans font-semibold">No contacts found.</div>
-                  ) : (
-                    contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).map((c) => {
+                  {(() => {
+                    const filteredContacts = contacts
+                      .filter(c => {
+                        if (messageFilter === 'brands') return c.user_type === 'advertiser';
+                        if (messageFilter === 'affiliates') return c.user_type === 'publisher';
+                        return true;
+                      })
+                      .filter(c => (c.full_name || c.email || c.business_name || '').toLowerCase().includes(searchContactText.toLowerCase()));
+
+                    if (filteredContacts.length === 0) {
+                      return <div className="text-center py-12 text-xs text-slate-400 font-sans font-semibold">No contacts found.</div>;
+                    }
+
+                    return filteredContacts.map((c) => {
                       const isSelected = selectedContact?.id === c.id;
-                      const cInitials = (c.full_name || c.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
+                      const cInitials = (c.business_name || c.full_name || c.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
                       const lastMessage = messages
                         .filter(m => (m.sender_id === profile.id && m.receiver_id === c.id) || (m.sender_id === c.id && m.receiver_id === profile.id))
                         .pop();
@@ -2337,21 +2610,21 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold truncate font-sans">{c.full_name || c.email}</h4>
+                              <h4 className="text-xs font-bold truncate font-sans text-left">{c.business_name || c.full_name || c.email}</h4>
                               {lastMessage && (
                                 <span className="text-[8px] text-slate-400 font-medium">
                                   {new Date(lastMessage.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-slate-400 truncate font-sans font-medium mt-0.5">
+                            <p className="text-[10px] text-slate-400 truncate font-sans font-medium mt-0.5 text-left">
                               {lastMessage ? lastMessage.body : 'Start a new conversation'}
                             </p>
                           </div>
                         </div>
                       );
-                    })
-                  )}
+                    });
+                  })()}
                 </div>
               </div>
 

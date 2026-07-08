@@ -446,3 +446,24 @@ export const sendMessage = async (msg: Omit<Message, 'id' | 'created_at' | 'read
     return newMsg;
   }
 };
+
+export const getAllAffiliateLinks = async (): Promise<AffiliateLink[]> => {
+  if (!isSupabaseConfigured) {
+    const links = getStored(LINKS_KEY, DEFAULT_LINKS);
+    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    return links.map(l => ({
+      ...l,
+      campaign: campaigns.find(c => c.id === l.campaign_id)
+    }));
+  }
+  try {
+    const { data, error } = await supabase
+      .from('affiliate_links')
+      .select('*, campaign:campaigns(*)');
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching all affiliate links:', err);
+    return [];
+  }
+};
