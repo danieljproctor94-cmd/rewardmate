@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, X, ChevronDown, Search, Zap, Mic, BookOpen } from 'lucide-react';
+import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, X, ChevronDown, Search, Zap, Mic, BookOpen, Menu } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Landing() {
@@ -9,6 +9,7 @@ export default function Landing() {
   const [notification, setNotification] = useState<{ text: string; subText: string; type: string } | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const schema = {
     "@context": "https://schema.org",
@@ -115,6 +116,93 @@ export default function Landing() {
   return (
     <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden">
       
+      {/* Mobile Drawer Navigation Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] flex md:hidden">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)}></div>
+          
+          {/* Drawer Menu Panel */}
+          <div className="relative ml-auto max-w-xs w-full bg-[#070913] border-l border-white/5 p-6 flex flex-col justify-between transition-all duration-300 animate-in slide-in-from-right text-white z-50">
+            <div>
+              {/* Close Button */}
+              <div className="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                <img 
+                  src="/rewardmate-logo-cropped.png" 
+                  className="h-5 w-auto object-contain brightness-0 invert" 
+                  alt="Reward Mate Logo" 
+                />
+                <button 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex flex-col space-y-4">
+                <a 
+                  href="#features" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Features
+                </a>
+                <a 
+                  href="#pricing" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Pricing
+                </a>
+                <a 
+                  href="/about" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Who we are
+                </a>
+                
+                {/* Resources list inside mobile drawer */}
+                <div className="pt-2">
+                  <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Resources</div>
+                  <div className="flex flex-col space-y-3 pl-3 border-l border-white/5">
+                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+                      Advertiser directory
+                    </a>
+                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+                      Product releases
+                    </a>
+                    <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+                      FAQ
+                    </a>
+                  </div>
+                </div>
+              </nav>
+            </div>
+
+            {/* Auth Buttons in Footer */}
+            <div className="pt-6 border-t border-white/5 space-y-3">
+              <a 
+                href={getAppUrl('/login')}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center border border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-11 rounded-full text-sm font-bold transition-all shadow-sm"
+              >
+                Login
+              </a>
+              <a 
+                href={getAppUrl('/register')}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center bg-white text-black hover:bg-white/95 h-11 rounded-full text-sm font-bold transition-all shadow-sm"
+              >
+                Register
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner (Revolut Announcement style) */}
       <div className="bg-[#0047FF] text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-wide flex items-center justify-center gap-1 z-[60] relative">
         <span className="hidden sm:inline">Australia's premier performance affiliate network.</span>
@@ -123,7 +211,7 @@ export default function Landing() {
           Open account →
         </a>
       </div>
-
+ 
       <header className="absolute top-10 sm:top-12 left-0 w-full z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -150,7 +238,7 @@ export default function Landing() {
                 <span>Resources</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResourcesOpen ? 'rotate-180' : ''}`} />
               </button>
-
+ 
               {/* Dropdown Menu Box */}
               {isResourcesOpen && (
                 <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-white text-slate-800 rounded-3xl p-5 shadow-2xl border border-slate-100 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -164,7 +252,7 @@ export default function Landing() {
                         <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Search and connect with brands across every industry.</p>
                       </div>
                     </a>
-
+ 
                     {/* Item 2: Product Releases */}
                     <a href="#features" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
                       <Zap className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
@@ -173,7 +261,7 @@ export default function Landing() {
                         <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Stay informed with our latest platform innovations and updates.</p>
                       </div>
                     </a>
-
+ 
                     {/* Item 3: Podcast */}
                     <a href="#" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
                       <Mic className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
@@ -182,7 +270,7 @@ export default function Landing() {
                         <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Practical affiliate marketing advice and industry insights.</p>
                       </div>
                     </a>
-
+ 
                     {/* Item 4: FAQ */}
                     <a href="#faq" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
                       <HelpCircle className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
@@ -191,7 +279,7 @@ export default function Landing() {
                         <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Get quick answers about Reward Mate and affiliate best practices.</p>
                       </div>
                     </a>
-
+ 
                     {/* Item 5: Market Insights */}
                     <a href="#" onClick={() => setIsResourcesOpen(false)} className="flex items-start gap-4.5 p-2 rounded-2xl hover:bg-slate-50 transition-colors group">
                       <BookOpen className="h-5 w-5 text-[#0052FF] shrink-0 mt-0.5" />
@@ -200,27 +288,38 @@ export default function Landing() {
                         <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Expert affiliate marketing insights and industry trends.</p>
                       </div>
                     </a>
-
+ 
                   </div>
                 </div>
               )}
             </div>
-
+ 
             <a href="/about" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Who we are</a>
           </nav>
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <a 
-              href={getAppUrl('/login')} 
-              className="border border-white/20 text-white hover:bg-white/10 hover:border-white/30 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+            <div className="hidden sm:flex items-center space-x-3 sm:space-x-4">
+              <a 
+                href={getAppUrl('/login')} 
+                className="border border-white/20 text-white hover:bg-white/10 hover:border-white/30 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+              >
+                Login
+              </a>
+              <a 
+                href={getAppUrl('/register')}
+                className="bg-white text-black hover:bg-white/95 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+              >
+                Register
+              </a>
+            </div>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              aria-label="Open Menu"
             >
-              Login
-            </a>
-            <a 
-              href={getAppUrl('/register')}
-              className="bg-white text-black hover:bg-white/95 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
-            >
-              Register
-            </a>
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
         </div>
       </header>
