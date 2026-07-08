@@ -74,7 +74,7 @@ const DEFAULT_MOCK_PROFILES: Profile[] = [
   {
     id: 'mock-admin-id',
     email: 'admin@rewardmate.com.au',
-    full_name: 'Daniel Proctor (Admin)',
+    full_name: 'Daniel Proctor',
     avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
     user_type: 'admin',
     approval_status: 'approved',
@@ -92,7 +92,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const origProfileStr = localStorage.getItem('rewardmate_original_admin_profile');
     if (origProfileStr) {
-      setOriginalAdminProfile(JSON.parse(origProfileStr));
+      try {
+        const op = JSON.parse(origProfileStr);
+        if (op.full_name && op.full_name.includes('Daniel Proctor (Admin)')) {
+          op.full_name = 'Daniel Proctor';
+          localStorage.setItem('rewardmate_original_admin_profile', JSON.stringify(op));
+          setOriginalAdminProfile(op);
+        } else {
+          setOriginalAdminProfile(op);
+        }
+      } catch (e) {
+        try {
+          setOriginalAdminProfile(JSON.parse(origProfileStr));
+        } catch (inner) {}
+      }
     }
   }, []);
 
@@ -107,11 +120,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profiles = JSON.parse(storedProfiles);
         let updated = false;
         const newProfiles = profiles.map((p: any) => {
-          if (p.full_name && p.full_name.includes('David')) {
+          let name = p.full_name;
+          if (name && name.includes('David')) {
+            name = name.replace(/David/g, 'Daniel');
             updated = true;
-            return { ...p, full_name: p.full_name.replace(/David/g, 'Daniel') };
           }
-          return p;
+          if (name && name.includes('Daniel Proctor (Admin)')) {
+            name = 'Daniel Proctor';
+            updated = true;
+          }
+          return { ...p, full_name: name };
         });
         if (updated) {
           localStorage.setItem(MOCK_PROFILES_KEY, JSON.stringify(newProfiles));
@@ -154,8 +172,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser) {
       try {
         const u = JSON.parse(storedUser);
-        if (u.full_name && u.full_name.includes('David')) {
-          const newU = { ...u, full_name: u.full_name.replace(/David/g, 'Daniel') };
+        let userUpdated = false;
+        let name = u.full_name;
+        if (name && name.includes('David')) {
+          name = name.replace(/David/g, 'Daniel');
+          userUpdated = true;
+        }
+        if (name && name.includes('Daniel Proctor (Admin)')) {
+          name = 'Daniel Proctor';
+          userUpdated = true;
+        }
+        if (userUpdated) {
+          const newU = { ...u, full_name: name };
           localStorage.setItem('rewardmate_mock_user', JSON.stringify(newU));
         }
       } catch (e) {}
