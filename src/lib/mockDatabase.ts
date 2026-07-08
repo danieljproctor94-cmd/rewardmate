@@ -345,10 +345,7 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
   try {
     const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    if (!data || data.length === 0) {
-      console.log('No live campaigns found. Using default mock campaigns as fallback.');
-      return DEFAULT_CAMPAIGNS;
-    }
+    if (!data) return [];
     return data.map((camp: Campaign) => {
       const matchedMock = DEFAULT_CAMPAIGNS.find(c => c.name.toLowerCase() === camp.name.toLowerCase());
       if (matchedMock) {
@@ -382,7 +379,7 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
     });
   } catch (err) {
     console.error('Error loading campaigns from Supabase:', err);
-    return DEFAULT_CAMPAIGNS;
+    return [];
   }
 };
 
