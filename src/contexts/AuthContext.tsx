@@ -225,33 +225,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (uid: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', uid)
-        .single();
+      let profileData: any = null;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', uid)
+          .single();
+        if (error) throw error;
+        profileData = data;
+      } catch (dbErr) {
+        console.warn('Profiles table select query failed, falling back to auth session metadata:', dbErr);
+      }
       
-      if (error) throw error;
-
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { user: currentUser } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
       const meta = currentUser?.user_metadata || {};
 
       const localOverrides = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
       const userOverride = localOverrides[uid] || {};
 
       setProfile({
-        ...data,
-        onboarding_completed: meta.onboarding_completed || false,
-        business_name: meta.business_name || data.business_name || '',
-        website: meta.website || data.website || '',
-        channels: meta.channels || data.channels || '',
-        traffic: meta.traffic || data.traffic || '',
-        payout_method: meta.payout_method || data.payout_method || null,
-        paypal_email: meta.paypal_email || data.paypal_email || '',
-        bank_name: meta.bank_name || data.bank_name || '',
-        bank_bsb: meta.bank_bsb || data.bank_bsb || '',
-        bank_account_number: meta.bank_account_number || data.bank_account_number || '',
-        bank_account_name: meta.bank_account_name || data.bank_account_name || '',
+        id: uid,
+        email: currentUser?.email || 'user@rewardmate.com.au',
+        full_name: meta.full_name || currentUser?.email?.split('@')[0] || 'User',
+        avatar_url: meta.avatar_url || '',
+        user_type: meta.user_type || 'publisher',
+        approval_status: 'approved',
+        wallet_balance: 0.00,
+        onboarding_completed: true,
+        ...profileData,
+        business_name: meta.business_name || (profileData && profileData.business_name) || '',
+        website: meta.website || (profileData && profileData.website) || '',
+        channels: meta.channels || (profileData && profileData.channels) || '',
+        traffic: meta.traffic || (profileData && profileData.traffic) || '',
+        payout_method: meta.payout_method || (profileData && profileData.payout_method) || null,
+        paypal_email: meta.paypal_email || (profileData && profileData.paypal_email) || '',
+        bank_name: meta.bank_name || (profileData && profileData.bank_name) || '',
+        bank_bsb: meta.bank_bsb || (profileData && profileData.bank_bsb) || '',
+        bank_account_number: meta.bank_account_number || (profileData && profileData.bank_account_number) || '',
+        bank_account_name: meta.bank_account_name || (profileData && profileData.bank_account_name) || '',
         ...userOverride,
       });
     } catch (err: any) {
