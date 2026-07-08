@@ -111,97 +111,8 @@ export default function Landing() {
       q: "How do Advertisers pay?",
       a: "Advertisers set up a campaign budget and deposit funds into their wallet. They only pay when a conversion (e.g. sale, subscription, or qualified lead) is successfully tracked. No setup fees, no risks."
     }
-  ];
-
-  return (
+  ];  return (
     <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden">
-      
-      {/* Mobile Drawer Navigation Overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] flex md:hidden">
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)}></div>
-          
-          {/* Drawer Menu Panel */}
-          <div className="relative ml-auto max-w-xs w-full bg-[#070913] border-l border-white/5 p-6 flex flex-col justify-between transition-all duration-300 animate-in slide-in-from-right text-white z-50">
-            <div>
-              {/* Close Button */}
-              <div className="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
-                <img 
-                  src="/rewardmate-logo-cropped.png" 
-                  className="h-5 w-auto object-contain brightness-0 invert" 
-                  alt="Reward Mate Logo" 
-                />
-                <button 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X className="h-4.5 w-4.5" />
-                </button>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="flex flex-col space-y-4">
-                <a 
-                  href="#features" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
-                >
-                  Features
-                </a>
-                <a 
-                  href="#pricing" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
-                >
-                  Pricing
-                </a>
-                <a 
-                  href="/about" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-slate-200 hover:text-white transition-colors py-1"
-                >
-                  Who we are
-                </a>
-                
-                {/* Resources list inside mobile drawer */}
-                <div className="pt-2">
-                  <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Resources</div>
-                  <div className="flex flex-col space-y-3 pl-3 border-l border-white/5">
-                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
-                      Advertiser directory
-                    </a>
-                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
-                      Product releases
-                    </a>
-                    <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-slate-300 hover:text-white transition-colors">
-                      FAQ
-                    </a>
-                  </div>
-                </div>
-              </nav>
-            </div>
-
-            {/* Auth Buttons in Footer */}
-            <div className="pt-6 border-t border-white/5 space-y-3">
-              <a 
-                href={getAppUrl('/login')}
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center border border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-11 rounded-full text-sm font-bold transition-all shadow-sm"
-              >
-                Login
-              </a>
-              <a 
-                href={getAppUrl('/register')}
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center bg-white text-black hover:bg-white/95 h-11 rounded-full text-sm font-bold transition-all shadow-sm"
-              >
-                Register
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Top Banner (Revolut Announcement style) */}
       <div className="bg-[#0047FF] text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-wide flex items-center justify-center gap-1 z-[60] relative">
@@ -213,7 +124,7 @@ export default function Landing() {
       </div>
  
       <header className="absolute top-10 sm:top-12 left-0 w-full z-50 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between relative">
           <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
               src="/rewardmate-logo-cropped.png" 
@@ -318,9 +229,71 @@ export default function Landing() {
               className="md:hidden p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
               aria-label="Open Menu"
             >
-              <Menu className="h-6 w-6" />
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
+
+          {/* Mobile Dropdown Navigation Menu (Floating card drops down from header) */}
+          {mobileMenuOpen && (
+            <div className="absolute top-16 sm:top-20 left-0 right-0 bg-[#070913]/98 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col space-y-4 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white">
+              <nav className="flex flex-col space-y-3">
+                <a 
+                  href="#features" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Features
+                </a>
+                <a 
+                  href="#pricing" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Pricing
+                </a>
+                <a 
+                  href="/about" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                >
+                  Who we are
+                </a>
+                
+                <div className="pt-2 border-t border-white/5">
+                  <div className="text-[10px] font-semibold text-slate-450 uppercase tracking-wider mb-2">Resources</div>
+                  <div className="flex flex-col space-y-2.5 pl-3 border-l border-white/5">
+                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-300 hover:text-white transition-colors">
+                      Advertiser directory
+                    </a>
+                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-305 hover:text-white transition-colors">
+                      Product releases
+                    </a>
+                    <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-305 hover:text-white transition-colors">
+                      FAQ
+                    </a>
+                  </div>
+                </div>
+              </nav>
+
+              {/* Login & Register */}
+              <div className="pt-4 border-t border-white/5 flex gap-3">
+                <a 
+                  href={getAppUrl('/login')}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center border border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-10 rounded-full text-xs font-bold transition-all shadow-sm"
+                >
+                  Login
+                </a>
+                <a 
+                  href={getAppUrl('/register')}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center bg-white text-black hover:bg-white/95 h-10 rounded-full text-xs font-bold transition-all shadow-sm"
+                >
+                  Register
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </header>
       
@@ -339,8 +312,8 @@ export default function Landing() {
           {/* Heading and Description */}
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.12] sm:leading-[1.08] max-w-4xl mx-auto text-white">
-              Aussie Brands.<br />
-              <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Aussie Affiliates.</span>
+              Australian Owned.<br />
+              <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Marketing.</span>
             </h1>
  
             <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-slate-400">
