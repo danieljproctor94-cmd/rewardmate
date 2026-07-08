@@ -913,41 +913,16 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">Dashboard</h1>
               </div>
 
-              {/* Featured Brands Carousel */}
+              {/* Featured Brands Section (Full-width grid, no scroll cutoff) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-sans">Featured Brand Campaigns</h2>
-                  <div className="flex space-x-1.5">
-                    <button 
-                      onClick={() => {
-                        const el = document.getElementById('brands-carousel-container');
-                        if (el) el.scrollBy({ left: -240, behavior: 'smooth' });
-                      }}
-                      className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const el = document.getElementById('brands-carousel-container');
-                        if (el) el.scrollBy({ left: 240, behavior: 'smooth' });
-                      }}
-                      className="h-7 w-7 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
-                    >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
                 </div>
 
                 <div 
-                  id="brands-carousel-container" 
-                  className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1.5 px-3 scroll-smooth max-w-lg mx-auto bg-slate-50/50 border border-slate-100 rounded-2xl"
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4 bg-slate-50/50 border border-slate-100 rounded-2xl p-4 w-full"
                 >
-                  {(campaigns.length > 0 ? [...campaigns, ...campaigns, ...campaigns] : []).map((camp, index) => {
+                  {campaigns.map((camp, index) => {
                     const alreadyPartnered = myLinks.some(link => link.campaign_id === camp.id);
                     const initials = camp.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
                     const colors = [
@@ -975,7 +950,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       <div 
                         key={`${camp.id}-${index}`}
                         onClick={() => setSelectedCampaignForModal(camp)}
-                        className="w-40 shrink-0 bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center space-y-3 relative overflow-hidden"
+                        className="w-full bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center space-y-3 relative overflow-hidden"
                       >
                         {/* Logo Circle */}
                         <div className={`h-14 w-14 rounded-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm shadow-sm transition-transform group-hover:scale-105 duration-200`}>
