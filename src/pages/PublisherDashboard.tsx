@@ -478,7 +478,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
               {[
                 { id: 'dashboard', label: 'Dashboard', icon: FolderKanban },
-                { id: 'offers', label: 'Partners', icon: Users },
+                { id: 'offers', label: 'Advertisers', icon: Users },
                 { id: 'my-links', label: 'Traffic Sources', icon: Globe },
                 { id: 'clicks-conv', label: 'Reporting', icon: BarChart3 },
                 { id: 'wallet', label: 'Finance', icon: DollarSign },
@@ -571,7 +571,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
           <nav className={`space-y-1 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
             {[
               { id: 'dashboard', label: 'Dashboard', icon: FolderKanban },
-              { id: 'offers', label: 'Partners', icon: Users, hasSub: true },
+              { id: 'offers', label: 'Advertisers', icon: Users, hasSub: true },
               { id: 'messages', label: 'Messages', icon: Mail, hasSub: true },
               { id: 'opportunities', label: 'Opportunities', icon: Compass, hasSub: true },
               { id: 'my-links', label: 'Traffic Sources', icon: Globe, hasSub: true },
@@ -1438,7 +1438,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               <div className="grid gap-4">
                 {myLinks.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-sm font-bold text-slate-450 font-sans">
-                    You haven't generated any partner tracking links yet. Go to 'Partners' to get started!
+                    You haven't generated any partner tracking links yet. Go to 'Advertisers' to get started!
                   </div>
                 ) : (
                   myLinks.map((link) => (

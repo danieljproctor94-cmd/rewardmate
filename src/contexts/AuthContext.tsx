@@ -160,6 +160,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (e) {}
     }
+
+    // 4. Force override stale mock campaigns from previous sessions
+    const currentMockCamps = localStorage.getItem('rewardmate_mock_campaigns');
+    if (currentMockCamps && currentMockCamps.includes('AMEX')) {
+      console.log('Clearing old mock campaigns database cache...');
+      localStorage.removeItem('rewardmate_mock_campaigns');
+      localStorage.removeItem('rewardmate_mock_clicks');
+      localStorage.removeItem('rewardmate_mock_conversions');
+      localStorage.removeItem('rewardmate_mock_affiliate_links');
+    }
   }, []);
 
   // Initialize Mock Profiles
