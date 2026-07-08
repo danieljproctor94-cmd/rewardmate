@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Menu
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -73,6 +73,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Form fields for new campaign
   const [campName, setCampName] = useState('');
@@ -223,6 +224,89 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   return (
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
+      {/* MOBILE SIDEBAR DRAWER (Sliding panel) */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
+          
+          {/* Drawer Panel */}
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#090b16] border-r border-white/5 pt-5 pb-4 transition-all duration-300 animate-in slide-in-from-left text-white">
+            <div className="absolute right-4 top-4">
+              <button 
+                onClick={() => setMobileMenuOpen(false)}
+                className="h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
+            {/* Logo */}
+            <div className="px-6 pb-5 flex items-center border-b border-white/5">
+              <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+            </div>
+
+            {/* Profile Card */}
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer text-white">
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate max-w-[150px]">{profile.full_name || 'Advertiser'}</div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation stack */}
+            <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
+              {[
+                { id: 'campaigns', label: 'My Campaigns', icon: FolderKanban },
+                { id: 'wallet', label: 'Wallet & Budget', icon: DollarSign },
+                { id: 'messages', label: 'Messages', icon: Mail },
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id as any);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-white/5 bg-[#090b16]">
+              <button 
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
+              >
+                <LogOut className="h-4 w-4 mr-2" /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
       <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex flex-col">
@@ -348,6 +432,12 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         {/* TOP NAVIGATION HEADER */}
         <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-1 mr-3 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -827,6 +917,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const { impersonateUser } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages'>('campaign-approvals');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
@@ -1134,6 +1225,90 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   return (
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
       
+      {/* MOBILE SIDEBAR DRAWER (Sliding panel) */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          {/* Backdrop */}
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
+          
+          {/* Drawer Panel */}
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#090b16] border-r border-white/5 pt-5 pb-4 transition-all duration-300 animate-in slide-in-from-left text-white">
+            <div className="absolute right-4 top-4">
+              <button 
+                onClick={() => setMobileMenuOpen(false)}
+                className="h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
+            {/* Logo */}
+            <div className="px-6 pb-5 flex items-center border-b border-white/5">
+              <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
+            </div>
+
+            {/* Profile Card */}
+            <div className="px-4 py-4">
+              <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer text-white">
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none shadow">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate max-w-[150px]">{profile.full_name || 'Admin'}</div>
+                    <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation stack */}
+            <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
+              {[
+                { id: 'campaign-approvals', label: 'Campaigns', icon: FolderKanban },
+                { id: 'conversion-approvals', label: 'Conversions', icon: DollarSign },
+                { id: 'users-mgmt', label: 'Users', icon: Users },
+                { id: 'messages', label: 'Messages', icon: Mail },
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id as any);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-white/10 text-white border-l-4 border-purple-500 pl-2.5' 
+                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-white/5 bg-[#090b16]">
+              <button 
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center text-xs font-bold text-slate-300 hover:text-white transition-colors bg-white/5 hover:bg-white/10 h-10 rounded-xl cursor-pointer"
+              >
+                <LogOut className="h-4 w-4 mr-2" /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* 1. LEFT SIDEBAR PANEL (Fixed) */}
       <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex flex-col">
@@ -1271,6 +1446,12 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {/* TOP NAVIGATION HEADER */}
         <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-1 mr-3 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
 
           <div className="flex items-center space-x-6">
