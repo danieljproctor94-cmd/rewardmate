@@ -131,6 +131,17 @@ export default function AdvertiserRegister() {
   return (
     <div className="min-h-screen lg:h-screen w-full grid lg:grid-cols-2 text-slate-800 font-sans selection:bg-blue-500/20 bg-white overflow-x-hidden relative">
       
+      {/* Mobile Go Back Button */}
+      <div className="absolute top-6 left-6 lg:hidden z-20">
+        <a 
+          href={getLandingUrl('/')} 
+          className="flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors shadow-sm"
+        >
+          <span>←</span>
+          <span>Go Back</span>
+        </a>
+      </div>
+
       {/* Left panel: Info/Branding (Premium dark blue hero-matched panel) */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#070913] border-r border-white/5 relative overflow-hidden text-white">
         

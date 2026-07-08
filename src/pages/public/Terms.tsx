@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { ChevronDown, Search, Zap, Mic, BookOpen, HelpCircle, FileText } from 'lucide-react';
+import { ChevronDown, Search, Zap, Mic, BookOpen, HelpCircle, FileText, Menu, X } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
 export default function Terms() {
@@ -11,13 +11,14 @@ export default function Terms() {
   });
 
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden">
       
       {/* Header (Matching Landing dark header styling) */}
-      <header className="w-full bg-[#070913] py-5 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <header className="w-full bg-[#070913] py-5 border-b border-white/5 relative z-50">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between relative">
           <a href="/" className="flex items-center cursor-pointer">
             <img 
               src="/rewardmate-logo-cropped.png" 
@@ -40,7 +41,7 @@ export default function Terms() {
                 <span>Resources</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isResourcesOpen ? 'rotate-180' : ''}`} />
               </button>
-
+ 
               {/* Dropdown Box */}
               {isResourcesOpen && (
                 <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-white text-slate-800 rounded-3xl p-5 shadow-2xl border border-slate-100 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
@@ -84,23 +85,91 @@ export default function Terms() {
                 </div>
               )}
             </div>
-
+ 
             <a href="/about" className="transition-all hover:bg-white/10 hover:text-white py-1.5 px-3.5 rounded-full">Who we are</a>
           </nav>
-          <div className="flex items-center space-x-4">
-            <a 
-              href={getAppUrl('/login')} 
-              className="border border-white/20 text-white hover:bg-white/10 hover:border-white/30 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="hidden sm:flex items-center space-x-3 sm:space-x-4">
+              <a 
+                href={getAppUrl('/login')} 
+                className="border border-white/20 text-white hover:bg-white/10 hover:border-white/30 px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+              >
+                Login
+              </a>
+              <a 
+                href={getAppUrl('/register')}
+                className="bg-white text-black hover:bg-white/95 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
+              >
+                Start Free
+              </a>
+            </div>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              aria-label="Open Menu"
             >
-              Login
-            </a>
-            <a 
-              href={getAppUrl('/register')}
-              className="bg-white text-black hover:bg-white/95 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm"
-            >
-              Start Free
-            </a>
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
+
+          {/* Mobile Dropdown Navigation Menu (Floating card drops down from header) */}
+          {mobileMenuOpen && (
+            <div className="absolute top-16 sm:top-20 left-6 right-6 sm:left-8 sm:right-8 bg-[#090b16]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 shadow-2xl flex flex-col space-y-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white overflow-hidden">
+              {/* Purple/Violet radial glow gradient */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[240px] h-[100px] rounded-full bg-[radial-gradient(circle,#8b5cf6_0%,transparent_70%)] opacity-30 blur-xl pointer-events-none" />
+
+              <nav className="flex flex-col space-y-5 relative z-10 text-left">
+                <a 
+                  href="/#features" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
+                >
+                  Features
+                </a>
+                <a 
+                  href="/#pricing" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
+                >
+                  Pricing
+                </a>
+                <a 
+                  href="/about" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
+                >
+                  Who we are
+                </a>
+                <a 
+                  href="/#faq" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
+                >
+                  FAQ
+                </a>
+              </nav>
+
+              {/* Login & Register */}
+              <div className="pt-6 border-t border-white/5 flex flex-col space-y-3 relative z-10">
+                <a 
+                  href={getAppUrl('/register')}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full bg-white hover:bg-white/90 text-black py-3.5 rounded-full font-bold text-center transition-all shadow-lg flex items-center justify-center text-sm"
+                >
+                  Start Free
+                </a>
+                <a 
+                  href={getAppUrl('/login')}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full border border-white/20 hover:border-white/40 text-white py-3.5 rounded-full font-bold text-center transition-all flex items-center justify-center text-sm"
+                >
+                  Log in
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
