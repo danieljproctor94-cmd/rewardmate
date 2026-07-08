@@ -274,7 +274,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password?: string) => {
-    setLoading(true);
     try {
       if (isMock) {
         // Mock Sign-in Logic
@@ -301,13 +300,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       toast.error(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password?: string, fullName?: string, role: UserType = 'publisher') => {
-    setLoading(true);
     try {
       if (isMock) {
         // Mock Sign-up Logic
@@ -352,13 +348,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       toast.error(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
   const signOut = async () => {
-    setLoading(true);
     try {
       if (isMock) {
         localStorage.removeItem('rewardmate_mock_active_user_id');
@@ -372,8 +365,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err: any) {
       toast.error(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
