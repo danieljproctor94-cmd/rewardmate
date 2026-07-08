@@ -679,7 +679,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-[550px] flex animate-in fade-in duration-300">
               
               {/* Left Panel: Contacts list */}
-              <div className="w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30">
+              <div className={`w-full md:w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30 shrink-0 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
                 {/* Search Bar */}
                 <div className="p-4 border-b border-slate-100">
                   <div className="relative">
@@ -744,17 +744,28 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               </div>
 
               {/* Right Panel: Chat Thread */}
-              <div className="flex-1 flex flex-col h-full bg-white">
+              <div className={`flex-1 flex flex-col h-full bg-white ${selectedContact ? 'flex' : 'hidden md:flex'}`}>
                 {selectedContact ? (
                   <>
                     {/* Thread Header */}
-                    <div className="px-6 py-4 border-b border-slate-100 flex items-center space-x-3 bg-slate-50/20">
-                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
-                        {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                    <div className="px-6 py-4 border-b border-slate-100 flex items-center bg-slate-50/20">
+                      {/* Back button for mobile */}
+                      <button 
+                        type="button"
+                        onClick={() => setSelectedContact(null)}
+                        className="md:hidden p-1 mr-2.5 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                        title="Back to contacts"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <div className="flex items-center space-x-3">
+                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
+                          {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -2178,7 +2189,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden h-[550px] flex animate-in fade-in duration-300">
               
               {/* Left Panel: Contacts list */}
-              <div className="w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30">
+              <div className={`w-full md:w-80 border-r border-slate-100 flex flex-col h-full bg-slate-50/30 shrink-0 ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
                 {/* Search Bar */}
                 <div className="p-4 border-b border-slate-100">
                   <div className="relative">
@@ -2243,17 +2254,28 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               </div>
 
               {/* Right Panel: Chat Thread */}
-              <div className="flex-1 flex flex-col h-full bg-white">
+              <div className={`flex-1 flex flex-col h-full bg-white ${selectedContact ? 'flex' : 'hidden md:flex'}`}>
                 {selectedContact ? (
                   <>
                     {/* Thread Header */}
-                    <div className="px-6 py-4 border-b border-slate-100 flex items-center space-x-3 bg-slate-50/20">
-                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
-                        {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                    <div className="px-6 py-4 border-b border-slate-100 flex items-center bg-slate-50/20">
+                      {/* Back button for mobile */}
+                      <button 
+                        type="button"
+                        onClick={() => setSelectedContact(null)}
+                        className="md:hidden p-1 mr-2.5 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                        title="Back to contacts"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <div className="flex items-center space-x-3">
+                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
+                          {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
+                        </div>
                       </div>
                     </div>
 
