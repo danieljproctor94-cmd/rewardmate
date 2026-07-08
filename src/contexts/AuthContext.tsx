@@ -468,6 +468,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.business_name !== undefined) newMeta.business_name = updates.business_name;
         if (updates.website !== undefined) newMeta.website = updates.website;
         if (updates.full_name !== undefined) newMeta.full_name = updates.full_name;
+        if (updates.channels !== undefined) newMeta.channels = updates.channels;
+        if (updates.traffic !== undefined) newMeta.traffic = updates.traffic;
 
         const { error: authError } = await supabase.auth.updateUser({
           data: newMeta
@@ -479,6 +481,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.full_name !== undefined) dbUpdates.full_name = updates.full_name;
         if (updates.business_name !== undefined) dbUpdates.business_name = updates.business_name;
         if (updates.website !== undefined) dbUpdates.website = updates.website;
+        if (updates.channels !== undefined) dbUpdates.channels = updates.channels;
+        if (updates.traffic !== undefined) dbUpdates.traffic = updates.traffic;
+        if (updates.payout_method !== undefined) dbUpdates.payout_method = updates.payout_method;
+        if (updates.paypal_email !== undefined) dbUpdates.paypal_email = updates.paypal_email;
+        if (updates.bank_name !== undefined) dbUpdates.bank_name = updates.bank_name;
+        if (updates.bank_bsb !== undefined) dbUpdates.bank_bsb = updates.bank_bsb;
+        if (updates.bank_account_number !== undefined) dbUpdates.bank_account_number = updates.bank_account_number;
+        if (updates.bank_account_name !== undefined) dbUpdates.bank_account_name = updates.bank_account_name;
 
         if (Object.keys(dbUpdates).length > 0) {
           const { error: dbError } = await supabase

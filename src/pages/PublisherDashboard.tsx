@@ -47,6 +47,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
   const [settingsBusinessName, setSettingsBusinessName] = useState(profile?.business_name || '');
   const [settingsWebsite, setSettingsWebsite] = useState(profile?.website || '');
+  const [settingsChannels, setSettingsChannels] = useState(profile?.channels || 'Social Media');
+  const [settingsTraffic, setSettingsTraffic] = useState(profile?.traffic || 'Under 10,000 views');
   const [settingsPayoutMethod, setSettingsPayoutMethod] = useState<'paypal' | 'bank' | null>(profile?.payout_method || null);
   const [settingsPaypalEmail, setSettingsPaypalEmail] = useState(profile?.paypal_email || '');
   const [settingsBankName, setSettingsBankName] = useState(profile?.bank_name || '');
@@ -60,6 +62,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       setSettingsFullName(profile.full_name || '');
       setSettingsBusinessName(profile.business_name || '');
       setSettingsWebsite(profile.website || '');
+      setSettingsChannels(profile.channels || 'Social Media');
+      setSettingsTraffic(profile.traffic || 'Under 10,000 views');
       setSettingsPayoutMethod(profile.payout_method || null);
       setSettingsPaypalEmail(profile.paypal_email || '');
       setSettingsBankName(profile.bank_name || '');
@@ -94,6 +98,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         full_name: settingsFullName,
         business_name: settingsBusinessName,
         website: settingsWebsite,
+        channels: settingsChannels,
+        traffic: settingsTraffic,
         payout_method: settingsPayoutMethod,
         paypal_email: settingsPaypalEmail,
         bank_name: settingsBankName,
@@ -1882,6 +1888,35 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       placeholder="https://mywebsite.com"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
                     />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Primary Marketing Channel</label>
+                    <select
+                      value={settingsChannels}
+                      onChange={(e) => setSettingsChannels(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-850 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer"
+                    >
+                      <option>Social Media</option>
+                      <option>Content Blog</option>
+                      <option>Email Marketing</option>
+                      <option>Cashback & Loyalty</option>
+                      <option>Coupon & Deals Site</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Est. Monthly Traffic</label>
+                    <select
+                      value={settingsTraffic}
+                      onChange={(e) => setSettingsTraffic(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-855 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer"
+                    >
+                      <option>Under 10,000 views</option>
+                      <option>10,000 - 50,000 views</option>
+                      <option>50,000 - 100,000 views</option>
+                      <option>Over 100,000 views</option>
+                    </select>
                   </div>
                 </div>
 
