@@ -68,6 +68,7 @@ export default function Dashboard() {
 // ----------------------------------------------------
 function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages'>('campaigns');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -352,10 +353,74 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             </span>
           </div>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4">
             <div className="text-right">
               <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Wallet Balance</div>
               <div className="text-sm font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="h-5 w-px bg-slate-200"></div>
+
+            {/* Profile Dropdown Badge */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                className="flex items-center space-x-2 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+              >
+                <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm shrink-0">
+                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block truncate max-w-[120px]">
+                  {profile.full_name || 'Advertiser'}
+                </span>
+                <svg className={`h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+
+              {/* The Dropdown Menu */}
+              {showUserDropdown && (
+                <>
+                  {/* Backdrop to close dropdown */}
+                  <div className="fixed inset-0 z-40" onClick={() => setShowUserDropdown(false)}></div>
+                  
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2.5 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150 font-sans">
+                    {/* User Details */}
+                    <div className="px-4 py-2 border-b border-slate-100 mb-1.5 text-left">
+                      <div className="text-xs font-black text-slate-855 truncate">{profile.full_name || 'Advertiser'}</div>
+                      <div className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{profile.email}</div>
+                      <div className="text-[9px] text-slate-400 font-mono mt-1 font-bold">ID: {formatUserId(profile.id)}</div>
+                    </div>
+
+                    {/* Dropdown Options */}
+                    <button 
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        setActiveTab('campaigns');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                    >
+                      My Campaigns
+                    </button>
+                    
+                    {/* Divider */}
+                    <div className="h-px bg-slate-100 my-1.5"></div>
+
+                    {/* Log Out option */}
+                    <button 
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        signOut();
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -764,6 +829,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const { impersonateUser } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages'>('campaign-approvals');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
@@ -1326,9 +1392,73 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               </div>
             </div>
 
-            <div className="text-right">
-              <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Active Role</div>
+            <div className="text-right hidden sm:block">
+              <div className="text-[10px] text-slate-455 font-bold uppercase tracking-wider">Active Role</div>
               <div className="text-sm font-extrabold text-purple-600">Network Admin</div>
+            </div>
+
+            {/* Vertical Divider */}
+            <div className="h-5 w-px bg-slate-200"></div>
+
+            {/* Profile Dropdown Badge */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                className="flex items-center space-x-2 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+              >
+                <div className="h-7 w-7 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-xs select-none border border-purple-200 shadow-sm shrink-0">
+                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block truncate max-w-[120px]">
+                  {profile.full_name || 'Admin'}
+                </span>
+                <svg className={`h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+
+              {/* The Dropdown Menu */}
+              {showUserDropdown && (
+                <>
+                  {/* Backdrop to close dropdown */}
+                  <div className="fixed inset-0 z-40" onClick={() => setShowUserDropdown(false)}></div>
+                  
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2.5 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150 font-sans">
+                    {/* User Details */}
+                    <div className="px-4 py-2 border-b border-slate-100 mb-1.5 text-left">
+                      <div className="text-xs font-black text-slate-855 truncate">{profile.full_name || 'Administrator'}</div>
+                      <div className="text-[10px] text-slate-500 font-medium truncate mt-0.5">{profile.email}</div>
+                      <div className="text-[9px] text-slate-400 font-mono mt-1 font-bold">ID: {formatUserId(profile.id)}</div>
+                    </div>
+
+                    {/* Dropdown Options */}
+                    <button 
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        setActiveTab('campaign-approvals');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                    >
+                      Offer Approvals
+                    </button>
+                    
+                    {/* Divider */}
+                    <div className="h-px bg-slate-100 my-1.5"></div>
+
+                    {/* Log Out option */}
+                    <button 
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        signOut();
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
