@@ -703,9 +703,6 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             >
               <Menu className="h-6 w-6" />
             </button>
-            <span className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 border border-[#0052FF]/10 px-2.5 py-1 rounded-full uppercase tracking-wider hidden sm:inline-block">
-              Publisher Control
-            </span>
           </div>
 
           <div className="flex items-center space-x-4">

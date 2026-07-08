@@ -209,3 +209,19 @@ CREATE TRIGGER on_auth_user_created
 -- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS channels TEXT;
 -- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS traffic TEXT;
 -- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
+
+-- 8. Seed Live Campaigns and Profiles
+INSERT INTO public.profiles (id, email, full_name, user_type, approval_status, wallet_balance, onboarding_completed) VALUES
+('c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'info@danielproctor.com', 'Daniel Proctor (Admin)', 'admin', 'approved', 0.00, true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.campaigns (id, advertiser_id, name, description, landing_page_url, payout_type, payout_amount, status, total_budget, spend, created_at) VALUES
+('9473fee0-a97d-42bd-87c7-2d03debc51d8', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Mattel Shop', 'Official Mattel online store. Promote Barbie, Hot Wheels, Fisher-Price and more classic toy brands.', 'https://shop.mattel.com', 'cpa', 8.00, 'active', 20000.00, 4500.00, '2026-07-06 00:00:00+00'),
+('a40da6c0-d7bd-4505-b136-1283616da083', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'UPPAbaby', 'High-quality strollers, car seats and baby accessories for modern families.', 'https://uppababy.com', 'cpa', 8.00, 'active', 15000.00, 1200.00, '2026-07-01 00:00:00+00'),
+('82f7c637-098a-429c-9978-3bcaa2a71235', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Nanit', 'Promote smart baby monitors, floor stands, and breathing wear for healthy development tracking.', 'https://www.nanit.com', 'cpa', 10.00, 'active', 10000.00, 0.00, '2026-07-01 00:00:00+00'),
+('2029035c-9462-4940-996b-4e4afde07229', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Howards Storage World', 'Promote premium home organization, space-saving racks, cupboards and organizers.', 'https://www.hsw.com.au', 'cpa', 5.00, 'active', 18000.00, 3400.00, '2026-06-30 00:00:00+00'),
+('a7110c30-0904-4c6a-87a9-23768a2f1eb6', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Flo & Frankie', 'Boutique women''s fashion, homewares, designer accessories and gifts.', 'https://floandfrankie.com', 'cpa', 8.00, 'active', 8000.00, 600.00, '2026-06-23 00:00:00+00'),
+('8f80178f-e991-43b3-add2-049f861dd8f8', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Kollektive', 'Eco-friendly and designer items, lifestyle organizers, modern stationery and planners.', 'https://kollektive.com.au', 'cpa', 10.00, 'active', 12000.00, 400.00, '2026-06-17 00:00:00+00'),
+('3978d0ff-7fe1-4001-a515-42962bbe1542', 'c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'Zamel''s', 'Fine diamond rings, gold necklaces, watches, and precious gemstones since 1954.', 'https://www.zamels.com.au', 'cpa', 1.00, 'active', 6000.00, 150.00, '2026-06-16 00:00:00+00')
+ON CONFLICT (id) DO NOTHING;
+

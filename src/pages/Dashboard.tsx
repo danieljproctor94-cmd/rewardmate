@@ -348,9 +348,6 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         {/* TOP NAVIGATION HEADER */}
         <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
-            <span className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 border border-[#0052FF]/10 px-2.5 py-1 rounded-full uppercase tracking-wider">
-              Advertiser Dashboard
-            </span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -1274,9 +1271,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {/* TOP NAVIGATION HEADER */}
         <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between z-10 shrink-0">
           <div className="flex items-center">
-            <span className="text-xs font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
-              Super Admin Control
-            </span>
           </div>
 
           <div className="flex items-center space-x-6">
