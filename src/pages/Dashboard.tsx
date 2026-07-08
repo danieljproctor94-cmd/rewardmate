@@ -1875,9 +1875,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                             >
                               <td className="py-4 px-6">
                                 <div className="flex items-center space-x-3">
-                                  <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
-                                    {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
-                                  </div>
+                                  {p.avatar_url ? (
+                                    <img src={p.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0 mt-0.5 border border-slate-200" alt="Avatar" />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-xs border border-blue-100 mt-0.5 shrink-0">
+                                      {p.full_name ? p.full_name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
                                   <div className="space-y-0.5 min-w-0">
                                     <div className="flex items-center gap-1.5">
                                       <span className="font-bold text-slate-800 truncate">{p.full_name || 'No Name'}</span>
