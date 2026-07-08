@@ -316,7 +316,7 @@ export default function Terms() {
               <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
             </div>
             <p className="text-xs text-slate-550 leading-relaxed max-w-sm">
-              Australia's leading affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
+              Australia's independent affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
             </p>
             <div className="inline-block bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full uppercase tracking-wider">
               ACN: 700 041 676

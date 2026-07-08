@@ -17,7 +17,7 @@ export default function Landing() {
     "name": "Reward Mate",
     "url": "https://rewardmate.com.au",
     "logo": "https://rewardmate.com.au/rewardmate-logo-cropped.png",
-    "description": "Australia's leading affiliate marketing network connecting high-intent publishers with premier advertisers on a risk-free CPA basis.",
+    "description": "Australia's independent affiliate marketing network connecting high-intent publishers with premier advertisers on a risk-free CPA basis.",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "AU"
@@ -29,7 +29,7 @@ export default function Landing() {
   };
 
   useSEO({
-    title: "Reward Mate | Australia's Leading Affiliate & CPA Network",
+    title: "Reward Mate | Australia's Independent Affiliate & CPA Network",
     description: "Reward Mate connects premium Australian publishers with premier brands. Acquire customers on a 100% risk-free CPA affiliate basis or earn top revenues today.",
     schema
   });
@@ -97,7 +97,7 @@ export default function Landing() {
   const faqs = [
     {
       q: "What is Reward Mate?",
-      a: "Reward Mate is Australia's leading affiliate marketing network. We connect brands looking for risk-free sales (Advertisers) with creators, media buyers, and website owners (Publishers) who promote those brands for a commission."
+      a: "Reward Mate is Australia's independent affiliate marketing network. We connect brands looking for risk-free sales (Advertisers) with creators, media buyers, and website owners (Publishers) who promote those brands for a commission."
     },
     {
       q: "How does the tracking work?",
@@ -117,7 +117,7 @@ export default function Landing() {
       {/* Top Banner (Revolut Announcement style) */}
       <div className="bg-[#0047FF] text-white text-center py-2 px-4 text-[10px] sm:text-xs font-bold tracking-wide flex items-center justify-center gap-1 z-[60] relative">
         <span className="hidden sm:inline">Australia's premier performance affiliate network.</span>
-        <span className="sm:hidden">Australia's leading affiliate network.</span>
+        <span className="sm:hidden">Australia's independent affiliate network.</span>
         <a href={getAppUrl('/register')} className="underline hover:text-blue-100 transition-colors flex items-center gap-0.5 ml-1">
           Open account →
         </a>
@@ -423,7 +423,7 @@ export default function Landing() {
                   </div>
                   <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Monetize Your Traffic at High Payouts</h3>
                   <p className="text-slate-500 leading-relaxed">
-                    Partner with Australia's leading advertisers in retail, finance, utilities, and telecom. Access custom promo codes, unique links, and high CPA commissions.
+                    Partner with premium Australian advertisers in retail, finance, utilities, and telecom. Access custom promo codes, unique links, and high CPA commissions.
                   </p>
                   <ul className="space-y-3.5">
                     {[
@@ -710,10 +710,10 @@ export default function Landing() {
               <img src="/rewardmate-logo-cropped.png" className="h-6 w-auto object-contain brightness-0 invert" alt="Reward Mate Logo" />
             </div>
             <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
-              Australia's leading affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
+              Australia's independent affiliate marketing platform. Connecting brands and partners across the Asia-Pacific region since 2026.
             </p>
             <div className="inline-block bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full uppercase tracking-wider">
-              Australia's Performance Leader
+              Australia's Performance Network
             </div>
             <div className="flex space-x-3 pt-2">
               <a href="#" className="h-8 w-8 rounded-full border border-white/10 flex items-center justify-center hover:border-white/30 hover:bg-white/5 hover:text-white transition-all">
