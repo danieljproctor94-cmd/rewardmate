@@ -235,61 +235,56 @@ export default function Landing() {
 
           {/* Mobile Dropdown Navigation Menu (Floating card drops down from header) */}
           {mobileMenuOpen && (
-            <div className="absolute top-16 sm:top-20 left-0 right-0 bg-[#070913]/98 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col space-y-4 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white">
-              <nav className="flex flex-col space-y-3">
+            <div className="absolute top-16 sm:top-20 left-0 right-0 bg-[#090b16]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 shadow-2xl flex flex-col space-y-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white overflow-hidden">
+              {/* Purple/Violet radial glow gradient at the bottom inside the card */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[240px] h-[100px] rounded-full bg-[radial-gradient(circle,#8b5cf6_0%,transparent_70%)] opacity-30 blur-xl pointer-events-none" />
+
+              <nav className="flex flex-col space-y-5 relative z-10 text-left">
                 <a 
                   href="#features" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
                 >
                   Features
                 </a>
                 <a 
                   href="#pricing" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
                 >
                   Pricing
                 </a>
                 <a 
                   href="/about" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-bold text-slate-200 hover:text-white transition-colors py-1"
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
                 >
                   Who we are
                 </a>
-                
-                <div className="pt-2 border-t border-white/5">
-                  <div className="text-[10px] font-semibold text-slate-450 uppercase tracking-wider mb-2">Resources</div>
-                  <div className="flex flex-col space-y-2.5 pl-3 border-l border-white/5">
-                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-300 hover:text-white transition-colors">
-                      Advertiser directory
-                    </a>
-                    <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-305 hover:text-white transition-colors">
-                      Product releases
-                    </a>
-                    <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-xs font-semibold text-slate-305 hover:text-white transition-colors">
-                      FAQ
-                    </a>
-                  </div>
-                </div>
+                <a 
+                  href="#faq" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-bold tracking-tight text-white hover:text-blue-400 transition-colors"
+                >
+                  FAQ
+                </a>
               </nav>
 
-              {/* Login & Register */}
-              <div className="pt-4 border-t border-white/5 flex gap-3">
-                <a 
-                  href={getAppUrl('/login')}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center border border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-10 rounded-full text-xs font-bold transition-all shadow-sm"
-                >
-                  Login
-                </a>
+              {/* Login & Register (full width pill shapes from the screenshot) */}
+              <div className="pt-6 border-t border-white/5 flex flex-col space-y-3 relative z-10">
                 <a 
                   href={getAppUrl('/register')}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center bg-white text-black hover:bg-white/95 h-10 rounded-full text-xs font-bold transition-all shadow-sm"
+                  className="w-full bg-white hover:bg-white/90 text-black py-3.5 rounded-full font-bold text-center transition-all shadow-lg flex items-center justify-center text-sm"
                 >
                   Register
+                </a>
+                <a 
+                  href={getAppUrl('/login')}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full border border-white/20 hover:border-white/40 text-white py-3.5 rounded-full font-bold text-center transition-all flex items-center justify-center text-sm"
+                >
+                  Log in
                 </a>
               </div>
             </div>
