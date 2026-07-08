@@ -40,6 +40,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [showMessages, setShowMessages] = useState(false);
   const [selectedCampaignForModal, setSelectedCampaignForModal] = useState<Campaign | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [advertiserSearchText, setAdvertiserSearchText] = useState('');
+  const [advertiserViewMode, setAdvertiserViewMode] = useState<'list' | 'grid'>('list');
 
   // Account Settings Form State
   const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
@@ -1214,49 +1216,216 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
           )}
 
           {/* TAB 2: FIND OFFERS (PARTNERS) */}
-          {activeTab === 'offers' && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 font-sans">Browse Active Partner Campaigns</h3>
-                <p className="text-xs text-slate-500 font-medium font-sans">Join networks and copy your tracking URLs instantly.</p>
-              </div>
+          {activeTab === 'offers' && (() => {
+            const filteredCampaigns = campaigns.filter(camp => 
+              camp.name.toLowerCase().includes(advertiserSearchText.toLowerCase()) ||
+              (camp.description && camp.description.toLowerCase().includes(advertiserSearchText.toLowerCase()))
+            );
 
-              <div className="grid gap-4">
-                {campaigns.map((camp) => {
-                  const joined = myLinks.some(l => l.campaign_id === camp.id);
-                  return (
-                    <div key={camp.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm w-full">
-                      <div className="space-y-1.5">
-                        <h4 className="text-base font-extrabold text-slate-800 font-sans">{camp.name}</h4>
-                        <p className="text-xs text-slate-500 max-w-xl leading-relaxed font-sans">{camp.description}</p>
-                      </div>
+            return (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 font-sans text-left">
+                  <div>
+                    <h1 className="text-2xl font-extrabold text-slate-800 leading-tight">Advertisers</h1>
+                  </div>
+                </div>
 
-                      <div className="flex items-center gap-6 shrink-0 font-sans">
-                        <div className="text-right">
-                          <div className="text-xs text-slate-400 font-semibold">Payout Rate</div>
-                          <div className="text-sm font-extrabold text-[#0052FF]">${Number(camp.payout_amount).toFixed(2)} AUD</div>
-                          <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{camp.payout_type}</div>
-                        </div>
-
-                        {joined ? (
-                          <div className="bg-emerald-50 text-emerald-700 text-xs font-bold px-4 py-2.5 rounded-xl border border-emerald-100 flex items-center gap-1.5 select-none">
-                            <Check className="h-4 w-4" /> Active Partner
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleGenerateLink(camp.id)}
-                            className="bg-[#0052FF] text-white font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-blue-650 transition-colors shadow-sm cursor-pointer"
-                          >
-                            Get tracking code
-                          </button>
-                        )}
-                      </div>
+                {/* Header search, filter and view mode bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 font-sans">
+                  <div className="flex items-center space-x-3">
+                    {/* Search Input */}
+                    <div className="relative w-64">
+                      <input 
+                        type="text" 
+                        placeholder="Search"
+                        value={advertiserSearchText}
+                        onChange={(e) => setAdvertiserSearchText(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-lg h-9 pl-3 pr-8 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0052FF] transition-all"
+                      />
+                      <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+                      </svg>
                     </div>
-                  );
-                })}
+
+                    {/* Filter Button */}
+                    <button className="flex items-center space-x-2 px-3 bg-white border border-slate-200 hover:border-slate-350 text-slate-600 rounded-lg h-9 text-xs font-bold transition-all cursor-pointer">
+                      <span>Filter</span>
+                      <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* View Mode Selectors */}
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={() => setAdvertiserViewMode('grid')}
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border cursor-pointer ${
+                        advertiserViewMode === 'grid' 
+                          ? 'bg-[#00B2E2] border-[#00B2E2] text-white shadow-sm' 
+                          : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
+                      }`}
+                      title="Grid View"
+                    >
+                      <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={() => setAdvertiserViewMode('list')}
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border cursor-pointer ${
+                        advertiserViewMode === 'list' 
+                          ? 'bg-[#00B2E2] border-[#00B2E2] text-white shadow-sm' 
+                          : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
+                      }`}
+                      title="List View"
+                    >
+                      <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <line x1="8" y1="6" x2="21" y2="6" strokeLinecap="round" />
+                        <line x1="8" y1="12" x2="21" y2="12" strokeLinecap="round" />
+                        <line x1="8" y1="18" x2="21" y2="18" strokeLinecap="round" />
+                        <circle cx="4" cy="6" r="1.5" fill="currentColor" />
+                        <circle cx="4" cy="12" r="1.5" fill="currentColor" />
+                        <circle cx="4" cy="18" r="1.5" fill="currentColor" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* List View Mode (Pixel-perfect table matching screenshot) */}
+                {advertiserViewMode === 'list' && (
+                  <div className="bg-white border border-slate-150 rounded-lg overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse font-sans text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider select-none text-[9px]">
+                            <th className="py-3 px-4 w-10 text-center">
+                              <input type="checkbox" className="rounded border-slate-300 text-[#0052FF] focus:ring-[#0052FF]" />
+                            </th>
+                            <th className="py-3 px-4 font-bold tracking-wide">ADVERTISER</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">ITP 2.2</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">TARGET MARKETS</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">COMMISSION</th>
+                            <th className="py-3 px-4 font-bold tracking-wide bg-slate-100/80 border-l border-r border-slate-150 text-slate-800">LAUNCHED &darr;</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">AVC</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">AOV</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">CR</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">EPC</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">AVG. PAYOUT DAYS</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">STATUS</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-150">
+                          {filteredCampaigns.map((camp) => {
+                            const joined = myLinks.some(l => l.campaign_id === camp.id);
+                            const dateStr = new Date(camp.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'numeric', year: 'numeric' });
+                            
+                            return (
+                              <tr key={camp.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="py-3.5 px-4 text-center">
+                                  <input type="checkbox" className="rounded border-slate-300 text-[#0052FF] focus:ring-[#0052FF]" />
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <div className="flex items-center space-x-3 text-left">
+                                    <div className={`h-7 w-7 rounded-full flex items-center justify-center text-white text-[9px] font-black shadow-sm shrink-0 ${camp.logo_bg || 'bg-slate-500'}`}>
+                                      {camp.logo_url || camp.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-slate-800 hover:text-[#0052FF] cursor-pointer text-xs" onClick={() => setSelectedCampaignForModal(camp)}>
+                                        {camp.name}
+                                      </div>
+                                      <div className="text-[9px] text-slate-450 font-bold">({camp.id.replace('campaign-', '')})</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4 font-semibold text-slate-600">{camp.itp_support || 'Yes'}</td>
+                                <td className="py-3.5 px-4">
+                                  <span className="bg-cyan-50 text-cyan-600 border border-cyan-100/50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">
+                                    {camp.target_markets || 'AU'}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.commission_rate || `${camp.payout_amount}% per Sale`}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20 border-l border-r border-slate-100">{dateStr}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.avc || '-'}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.aov || '-'}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.cr || '-'}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.epc || '-'}</td>
+                                <td className="py-3.5 px-4 font-bold text-slate-500">{camp.avg_payout_days || '30'}</td>
+                                <td className="py-3.5 px-4">
+                                  {joined ? (
+                                    <span className="text-emerald-600 font-bold bg-emerald-50/50 px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1 w-fit text-[10px]">
+                                      <Check className="h-3 w-3" /> Joined
+                                    </span>
+                                  ) : (
+                                    <button 
+                                      onClick={() => handleGenerateLink(camp.id)}
+                                      className="text-slate-500 hover:text-[#0052FF] font-bold text-left transition-all cursor-pointer hover:underline"
+                                    >
+                                      Not Joined
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Grid View Mode */}
+                {advertiserViewMode === 'grid' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
+                    {filteredCampaigns.map((camp) => {
+                      const joined = myLinks.some(l => l.campaign_id === camp.id);
+                      return (
+                        <div key={camp.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all text-left">
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm shrink-0 ${camp.logo_bg || 'bg-slate-500'}`}>
+                                {camp.logo_url || camp.name.charAt(0)}
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-slate-800 leading-none mb-1">{camp.name}</h4>
+                                <span className="bg-cyan-50 text-cyan-600 border border-cyan-100/50 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
+                                  {camp.target_markets || 'AU'}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-sans line-clamp-3">{camp.description}</p>
+                          </div>
+
+                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                              <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Commission</div>
+                              <div className="text-xs font-extrabold text-[#0052FF]">{camp.commission_rate || `${camp.payout_amount}% per Sale`}</div>
+                            </div>
+                            
+                            {joined ? (
+                              <span className="text-emerald-600 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100 flex items-center gap-1 select-none">
+                                <Check className="h-3 w-3" /> Joined
+                              </span>
+                            ) : (
+                              <button 
+                                onClick={() => handleGenerateLink(camp.id)}
+                                className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition-colors cursor-pointer shadow-sm"
+                              >
+                                Join Offer
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* TAB 3: MY AFFILIATE LINKS (TRAFFIC SOURCES) */}
           {activeTab === 'my-links' && (
