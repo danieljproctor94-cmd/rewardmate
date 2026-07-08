@@ -574,9 +574,9 @@ export default function Landing() {
               </div>
               <div>
                 <div className="text-[#0052FF] text-sm font-bold uppercase tracking-wider mb-2">Advertiser Standard</div>
-                <div className="text-3xl font-extrabold text-slate-900 mb-4">5% Commission</div>
+                <div className="text-3xl font-extrabold text-slate-900 mb-4">1.5% Commission</div>
                 <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                  Start listing campaigns instantly. Pay a small 5% network fee strictly on approved tracked conversions.
+                  Start listing campaigns instantly. Pay a small 1.5% network fee strictly on approved tracked conversions.
                 </p>
                 <div className="border-t border-slate-100 pt-6 space-y-4">
                   <div className="flex items-center space-x-3 text-sm text-slate-600">
@@ -605,9 +605,9 @@ export default function Landing() {
             <div className="bg-white border border-slate-200/60 rounded-3xl p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300">
               <div>
                 <div className="text-[#0052FF] text-sm font-bold uppercase tracking-wider mb-2">Advertiser Enterprise</div>
-                <div className="text-3xl font-extrabold text-slate-900 mb-4">2.5% Commission</div>
+                <div className="text-3xl font-extrabold text-slate-900 mb-4">1.0% Commission</div>
                 <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-                  For large brands spending &gt; $10k per month. Discounted commission and custom support tools.
+                  For large brands spending &gt; $10k per month. Discounted 1.0% commission and custom support tools.
                 </p>
                 <div className="border-t border-slate-100 pt-6 space-y-4">
                   <div className="flex items-center space-x-3 text-sm text-slate-600">
