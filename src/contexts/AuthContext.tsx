@@ -242,10 +242,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProfile({
         ...data,
         onboarding_completed: meta.onboarding_completed || false,
-        business_name: meta.business_name || '',
-        website: meta.website || '',
-        channels: meta.channels || '',
-        traffic: meta.traffic || '',
+        business_name: meta.business_name || data.business_name || '',
+        website: meta.website || data.website || '',
+        channels: meta.channels || data.channels || '',
+        traffic: meta.traffic || data.traffic || '',
+        payout_method: meta.payout_method || data.payout_method || null,
+        paypal_email: meta.paypal_email || data.paypal_email || '',
+        bank_name: meta.bank_name || data.bank_name || '',
+        bank_bsb: meta.bank_bsb || data.bank_bsb || '',
+        bank_account_number: meta.bank_account_number || data.bank_account_number || '',
+        bank_account_name: meta.bank_account_name || data.bank_account_name || '',
         ...userOverride,
       });
     } catch (err: any) {
@@ -445,11 +451,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } else {
-        const { error } = await supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', profile.id);
-        if (error) throw error;
+        // 1. Update user metadata in Supabase Auth (always works, persistent)
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const meta = currentUser?.user_metadata || {};
+        
+        const newMeta: any = { ...meta };
+        if (updates.payout_method !== undefined) newMeta.payout_method = updates.payout_method;
+        if (updates.paypal_email !== undefined) newMeta.paypal_email = updates.paypal_email;
+        if (updates.bank_name !== undefined) newMeta.bank_name = updates.bank_name;
+        if (updates.bank_bsb !== undefined) newMeta.bank_bsb = updates.bank_bsb;
+        if (updates.bank_account_number !== undefined) newMeta.bank_account_number = updates.bank_account_number;
+        if (updates.bank_account_name !== undefined) newMeta.bank_account_name = updates.bank_account_name;
+        if (updates.business_name !== undefined) newMeta.business_name = updates.business_name;
+        if (updates.website !== undefined) newMeta.website = updates.website;
+        if (updates.full_name !== undefined) newMeta.full_name = updates.full_name;
+
+        const { error: authError } = await supabase.auth.updateUser({
+          data: newMeta
+        });
+        if (authError) throw authError;
+
+        // 2. Filter update fields to only those columns that exist in the profiles database table
+        const dbUpdates: any = {};
+        if (updates.full_name !== undefined) dbUpdates.full_name = updates.full_name;
+        if (updates.business_name !== undefined) dbUpdates.business_name = updates.business_name;
+        if (updates.website !== undefined) dbUpdates.website = updates.website;
+
+        if (Object.keys(dbUpdates).length > 0) {
+          const { error: dbError } = await supabase
+            .from('profiles')
+            .update(dbUpdates)
+            .eq('id', profile.id);
+          if (dbError) throw dbError;
+        }
+
         setProfile({ ...profile, ...updates });
       }
       toast.success('Profile settings saved successfully!');
@@ -460,7 +495,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('rewardmate_supabase_profiles_override', JSON.stringify(storedProfiles));
       
       setProfile({ ...profile, ...updates });
-      toast.warning('Settings saved locally! (Database schema migration to add payout columns is recommended).');
+      toast.warning('Settings saved locally!');
     }
   };
 
