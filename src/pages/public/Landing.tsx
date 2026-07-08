@@ -124,7 +124,7 @@ export default function Landing() {
       </div>
  
       <header className="absolute top-10 sm:top-12 left-0 w-full z-50 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between relative">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 h-16 sm:h-20 flex items-center justify-between relative">
           <div className="flex items-center cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
               src="/rewardmate-logo-cropped.png" 
@@ -235,7 +235,7 @@ export default function Landing() {
 
           {/* Mobile Dropdown Navigation Menu (Floating card drops down from header) */}
           {mobileMenuOpen && (
-            <div className="absolute top-16 sm:top-20 left-0 right-0 bg-[#090b16]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 shadow-2xl flex flex-col space-y-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white overflow-hidden">
+            <div className="absolute top-16 sm:top-20 left-6 right-6 sm:left-8 sm:right-8 bg-[#090b16]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 sm:p-10 shadow-2xl flex flex-col space-y-6 md:hidden animate-in fade-in slide-in-from-top-4 duration-200 z-[100] text-white overflow-hidden">
               {/* Purple/Violet radial glow gradient at the bottom inside the card */}
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[240px] h-[100px] rounded-full bg-[radial-gradient(circle,#8b5cf6_0%,transparent_70%)] opacity-30 blur-xl pointer-events-none" />
 
