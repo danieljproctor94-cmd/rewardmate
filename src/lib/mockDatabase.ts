@@ -241,14 +241,14 @@ const DEFAULT_LINKS: AffiliateLink[] = [
     id: 'link-1',
     publisher_id: 'mock-publisher-id',
     campaign_id: 'campaign-1',
-    code: 'SarahAMEX123',
+    code: 'SarahMattel123',
     created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: 'link-2',
     publisher_id: 'mock-publisher-id',
     campaign_id: 'campaign-2',
-    code: 'SarahOrigin456',
+    code: 'SarahUPPAbaby456',
     created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
@@ -293,10 +293,10 @@ const DEFAULT_CONVERSIONS: Conversion[] = [
     publisher_id: 'mock-publisher-id',
     publisher_name: 'Sarah Connor (Publisher)',
     campaign_id: 'campaign-1',
-    campaign_name: 'AMEX Gold Card Sign-ups',
-    payout: 150.00,
+    campaign_name: 'Mattel Shop',
+    payout: 8.00,
     status: 'approved',
-    transaction_id: 'TXN-AMEX-98213',
+    transaction_id: 'TXN-MATTEL-98213',
     created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
@@ -305,10 +305,10 @@ const DEFAULT_CONVERSIONS: Conversion[] = [
     publisher_id: 'mock-publisher-id',
     publisher_name: 'Sarah Connor (Publisher)',
     campaign_id: 'campaign-2',
-    campaign_name: 'Origin Energy Switch Deal',
-    payout: 75.00,
+    campaign_name: 'UPPAbaby',
+    payout: 8.00,
     status: 'approved',
-    transaction_id: 'TXN-ORIGIN-45612',
+    transaction_id: 'TXN-UPPABABY-45612',
     created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
   },
   {
@@ -317,10 +317,10 @@ const DEFAULT_CONVERSIONS: Conversion[] = [
     publisher_id: 'mock-publisher-id',
     publisher_name: 'Sarah Connor (Publisher)',
     campaign_id: 'campaign-1',
-    campaign_name: 'AMEX Gold Card Sign-ups',
-    payout: 150.00,
+    campaign_name: 'Mattel Shop',
+    payout: 8.00,
     status: 'pending',
-    transaction_id: 'TXN-AMEX-22341',
+    transaction_id: 'TXN-MATTEL-22341',
     created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
   }
 ];
