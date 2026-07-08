@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
-  ChevronLeft, ChevronRight, Menu
+  ChevronLeft, ChevronRight, Menu, Sliders
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -938,11 +938,87 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 // 3. ADMIN DASHBOARD
 // ----------------------------------------------------
 function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
-  const { impersonateUser } = useAuth();
+  const { impersonateUser, updateProfileDetails } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages'>('campaign-approvals');
+  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'users-mgmt' | 'messages' | 'settings'>('campaign-approvals');
+
+  // Account Settings Form State
+  const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
+  const [settingsAvatarUrl, setSettingsAvatarUrl] = useState(profile?.avatar_url || '');
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setSettingsFullName(profile.full_name || '');
+      setSettingsAvatarUrl(profile.avatar_url || '');
+    }
+  }, [profile]);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      toast.error('Image file must be under 1MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 128;
+        const MAX_HEIGHT = 128;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setSettingsAvatarUrl(compressedBase64);
+          toast.success('Avatar loaded! Save settings to apply.');
+        }
+      };
+      img.src = base64Str;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveLoading(true);
+    try {
+      await updateProfileDetails({
+        full_name: settingsFullName,
+        avatar_url: settingsAvatarUrl
+      });
+      toast.success('Settings updated successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save settings.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
@@ -1449,6 +1525,18 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               <Mail className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Messages</span>}
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              title="Account Settings"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'settings' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Sliders className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Account Settings</span>}
+            </button>
           </nav>
         </div>
 
@@ -1652,6 +1740,16 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
                       Offer Approvals
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        setActiveTab('settings');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                    >
+                      Account Settings
                     </button>
                     
                     {/* Divider */}
@@ -2334,6 +2432,101 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     <p className="text-xs font-bold font-sans">Select a user to view conversation.</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: ACCOUNT SETTINGS */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6 animate-in fade-in duration-300 text-left font-sans max-w-4xl mx-auto">
+              <div>
+                <h1 className="text-2xl font-extrabold text-slate-800 leading-tight">Account Settings</h1>
+                <p className="text-xs text-slate-500 font-medium mt-1">Manage your administrative profile and platform details.</p>
+              </div>
+
+              <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-sm p-6 space-y-6">
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider pb-3 border-b border-slate-100">
+                  Profile Details
+                </h3>
+
+                <form onSubmit={handleSaveSettings} className="space-y-6">
+                  {/* Avatar Upload block */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+                    <div className="relative group shrink-0">
+                      {settingsAvatarUrl ? (
+                        <img 
+                          src={settingsAvatarUrl} 
+                          className="h-20 w-20 rounded-2xl object-cover border border-slate-200 shadow-sm"
+                          alt="Avatar Preview" 
+                        />
+                      ) : (
+                        <div className="h-20 w-20 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-black text-2xl border border-purple-100 shadow-sm select-none">
+                          {settingsFullName ? settingsFullName.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <label className="absolute -bottom-2 -right-2 h-7 w-7 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105">
+                        <svg className="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={handleAvatarFileChange} 
+                          className="hidden" 
+                        />
+                      </label>
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-slate-800">Profile Image</h4>
+                      <p className="text-[10px] text-slate-455 font-medium">JPEG or PNG. Max size 1MB. Image will be scaled automatically.</p>
+                      {settingsAvatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setSettingsAvatarUrl('')}
+                          className="text-[10px] text-red-500 font-bold hover:underline block cursor-pointer animate-in fade-in"
+                        >
+                          Remove Avatar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Input fields */}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Full Name</label>
+                      <input 
+                        type="text" 
+                        value={settingsFullName}
+                        onChange={(e) => setSettingsFullName(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                        placeholder="Administrator Name"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address (Read Only)</label>
+                      <input 
+                        type="email" 
+                        value={profile.email}
+                        className="w-full bg-slate-105 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-500 cursor-not-allowed"
+                        disabled
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-4 border-t border-slate-100 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={saveLoading}
+                      className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold h-11 px-6 rounded-xl text-xs flex items-center justify-center cursor-pointer shadow-sm shadow-blue-500/10 transition-colors"
+                    >
+                      {saveLoading ? <div className="h-4 w-4 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" /> : 'Save Details'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
