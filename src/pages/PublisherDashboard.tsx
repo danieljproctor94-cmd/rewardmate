@@ -12,7 +12,7 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X
+  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles
 } from 'lucide-react';
 
 export const formatUserId = (id: string | undefined): string => {
@@ -732,9 +732,9 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             {/* Ask AI Pill button */}
             <button 
               onClick={() => toast.info('AI assistant launch is coming soon!')}
-              className="bg-[#0052FF] hover:bg-blue-650 px-3 py-1.5 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 transition-all text-white cursor-pointer shadow-sm shadow-blue-500/10"
+              className="bg-gradient-to-r from-[#7c3aed] to-[#0052FF] hover:from-[#6d28d9] hover:to-[#0042cc] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 text-white cursor-pointer shadow-md shadow-violet-500/10 hover:shadow-lg hover:shadow-violet-500/20 transition-all transform active:scale-95 group"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <Sparkles className="h-4 w-4 text-violet-200 group-hover:rotate-12 transition-transform duration-300" />
               <span>Ask AI</span>
             </button>
             <div className="relative">
