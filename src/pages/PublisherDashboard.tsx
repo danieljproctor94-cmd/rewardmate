@@ -442,11 +442,19 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         <div className="flex flex-col">
           {/* Logo Header */}
           <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-            <img 
-              src="/rewardmate-logo-cropped.png" 
-              className={`h-6 transition-all ${isSidebarCollapsed ? 'w-6 object-cover object-left rounded' : 'w-auto object-contain'}`} 
-              alt="Reward Mate Logo" 
-            />
+            {isSidebarCollapsed ? (
+              <img 
+                src="/RewardMateFav.png" 
+                className="h-7 w-7 object-contain" 
+                alt="Reward Mate Favicon" 
+              />
+            ) : (
+              <img 
+                src="/rewardmate-logo-cropped.png" 
+                className="h-6 w-auto object-contain" 
+                alt="Reward Mate Logo" 
+              />
+            )}
           </div>
 
           {/* Real Publisher Profile Card */}
