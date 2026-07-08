@@ -44,8 +44,8 @@ export default function Dashboard() {
 
   if (!profile) {
     return (
-      <div className="flex justify-center items-center h-screen bg-[#f8fafc] text-slate-800">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-600/30 border-t-blue-600 animate-spin"></div>
+      <div className="flex justify-center items-center h-screen bg-slate-50 text-slate-850">
+        <div className="h-8 w-8 rounded-full border-4 border-[#0052FF]/20 border-t-[#0052FF] animate-spin"></div>
       </div>
     );
   }
