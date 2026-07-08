@@ -339,8 +339,8 @@ export default function Landing() {
           {/* Heading and Description */}
           <div className="space-y-4 sm:space-y-6">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.12] sm:leading-[1.08] max-w-4xl mx-auto text-white">
-              Australian Owned.<br />
-              <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Performance Marketing.</span>
+              Aussie Brands.<br />
+              <span className="bg-gradient-to-r from-[#38bdf8] via-[#0052FF] to-[#3b82f6] bg-clip-text text-transparent">Aussie Affiliates.</span>
             </h1>
  
             <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-slate-400">
