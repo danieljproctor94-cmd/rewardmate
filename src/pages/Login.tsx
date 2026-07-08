@@ -31,7 +31,6 @@ export default function Login() {
     setLoading(true);
     try {
       await signIn(mockEmail, 'sandbox');
-      toast.success('Successfully logged into Sandbox simulation!');
       navigate('/dashboard');
     } catch (err: any) {
       toast.error(err.message);
@@ -81,7 +80,6 @@ export default function Login() {
         }
       } else {
         await signIn(email, password);
-        toast.success('Signed in successfully!');
         navigate('/dashboard');
       }
     } catch (err) {
