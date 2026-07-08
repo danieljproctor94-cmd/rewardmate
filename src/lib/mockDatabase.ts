@@ -349,7 +349,37 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
       console.log('No live campaigns found. Using default mock campaigns as fallback.');
       return DEFAULT_CAMPAIGNS;
     }
-    return data;
+    return data.map((camp: Campaign) => {
+      const matchedMock = DEFAULT_CAMPAIGNS.find(c => c.name.toLowerCase() === camp.name.toLowerCase());
+      if (matchedMock) {
+        return {
+          ...camp,
+          itp_support: matchedMock.itp_support,
+          target_markets: matchedMock.target_markets,
+          commission_rate: matchedMock.commission_rate,
+          avc: matchedMock.avc,
+          aov: matchedMock.aov,
+          cr: matchedMock.cr,
+          epc: matchedMock.epc,
+          avg_payout_days: matchedMock.avg_payout_days,
+          logo_url: matchedMock.logo_url,
+          logo_bg: matchedMock.logo_bg
+        };
+      }
+      return {
+        ...camp,
+        itp_support: 'Yes',
+        target_markets: 'AU',
+        commission_rate: camp.payout_type === 'cpa' ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` : `$${Number(camp.payout_amount).toFixed(2)} per Click`,
+        avc: '-',
+        aov: '-',
+        cr: '-',
+        epc: '-',
+        avg_payout_days: '30',
+        logo_url: camp.name.charAt(0).toUpperCase(),
+        logo_bg: 'bg-[#0052FF]'
+      };
+    });
   } catch (err) {
     console.error('Error loading campaigns from Supabase:', err);
     return DEFAULT_CAMPAIGNS;
