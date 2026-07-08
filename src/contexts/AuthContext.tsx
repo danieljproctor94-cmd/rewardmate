@@ -191,13 +191,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 4. Force override stale mock campaigns from previous sessions via schema versioning
     const cacheVersion = localStorage.getItem('rewardmate_cache_version');
-    if (cacheVersion !== 'v3') {
+    if (cacheVersion !== 'v4') {
       console.log('Detected older schema version. Force clearing mock localStorage databases...');
       localStorage.removeItem('rewardmate_mock_campaigns');
       localStorage.removeItem('rewardmate_mock_clicks');
       localStorage.removeItem('rewardmate_mock_conversions');
       localStorage.removeItem('rewardmate_mock_affiliate_links');
-      localStorage.setItem('rewardmate_cache_version', 'v3');
+      localStorage.setItem('rewardmate_cache_version', 'v4');
     }
   }, []);
 
