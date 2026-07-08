@@ -49,6 +49,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [settingsWebsite, setSettingsWebsite] = useState(profile?.website || '');
   const [settingsChannels, setSettingsChannels] = useState(profile?.channels || 'Social Media');
   const [settingsTraffic, setSettingsTraffic] = useState(profile?.traffic || 'Under 10,000 views');
+  const [settingsAvatarUrl, setSettingsAvatarUrl] = useState(profile?.avatar_url || '');
   const [settingsPayoutMethod, setSettingsPayoutMethod] = useState<'paypal' | 'bank' | null>(profile?.payout_method || null);
   const [settingsPaypalEmail, setSettingsPaypalEmail] = useState(profile?.paypal_email || '');
   const [settingsBankName, setSettingsBankName] = useState(profile?.bank_name || '');
@@ -64,6 +65,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       setSettingsWebsite(profile.website || '');
       setSettingsChannels(profile.channels || 'Social Media');
       setSettingsTraffic(profile.traffic || 'Under 10,000 views');
+      setSettingsAvatarUrl(profile.avatar_url || '');
       setSettingsPayoutMethod(profile.payout_method || null);
       setSettingsPaypalEmail(profile.paypal_email || '');
       setSettingsBankName(profile.bank_name || '');
@@ -72,6 +74,54 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       setSettingsBankAccountName(profile.bank_account_name || '');
     }
   }, [profile]);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      toast.error('Image file must be under 1MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 128;
+        const MAX_HEIGHT = 128;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setSettingsAvatarUrl(compressedBase64);
+          toast.success('Avatar loaded! Save settings to apply.');
+        }
+      };
+      img.src = base64Str;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +150,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         website: settingsWebsite,
         channels: settingsChannels,
         traffic: settingsTraffic,
+        avatar_url: settingsAvatarUrl,
         payout_method: settingsPayoutMethod,
         paypal_email: settingsPaypalEmail,
         bank_name: settingsBankName,
@@ -522,9 +573,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             <div className="px-4 py-4">
               <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer text-white">
                 <div className="flex items-center space-x-3">
-                  <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow">
-                    {avatarChar}
-                  </div>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0" alt="Avatar" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow shrink-0">
+                      {avatarChar}
+                    </div>
+                  )}
                   <div>
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1">{publisherName}</div>
                     <div className="text-[9px] text-slate-400 font-bold">ID: {publisherId}</div>
@@ -627,9 +682,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
           <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
             <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-9 w-9 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-[#0052FF]/10 shrink-0">
-                  {avatarChar}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-9 w-9 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow border border-[#0052FF]/10 shrink-0">
+                    {avatarChar}
+                  </div>
+                )}
                 {!isSidebarCollapsed && (
                   <div className="space-y-0.5 truncate">
                     <div className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors leading-tight font-sans truncate">
@@ -843,9 +902,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
               >
-                <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm shrink-0">
-                  {avatarChar}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-7 w-7 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm shrink-0">
+                    {avatarChar}
+                  </div>
+                )}
                 <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block truncate max-w-[120px]">
                   {publisherName}
                 </span>
@@ -1846,6 +1909,47 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
                   <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Profile & Business Details</h3>
                   
+                  {/* Avatar Upload block */}
+                  <div className="flex items-center space-x-4 pb-4 border-b border-slate-100/70">
+                    <div className="relative group shrink-0">
+                      {settingsAvatarUrl ? (
+                        <img 
+                          src={settingsAvatarUrl} 
+                          className="h-16 w-16 rounded-full object-cover border-2 border-slate-200" 
+                          alt="Avatar Preview" 
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xl shadow border border-[#0052FF]/10 shrink-0">
+                          {avatarChar}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Profile Image</label>
+                      <div className="flex items-center gap-2">
+                        <label className="bg-slate-100 hover:bg-slate-250 border border-slate-200 text-slate-700 font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-colors transition-all select-none">
+                          Upload File
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={handleAvatarFileChange} 
+                          />
+                        </label>
+                        {settingsAvatarUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setSettingsAvatarUrl('')}
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-colors border border-rose-100/50"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-[9px] text-slate-400 font-semibold block">JPEG/PNG under 1MB. Fits to circle.</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Email Address</label>
                     <input 

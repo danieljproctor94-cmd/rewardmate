@@ -240,6 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { data: { user: currentUser } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
       const meta = currentUser?.user_metadata || {};
+      const gmailAvatar = meta.avatar_url || meta.picture || meta.avatar || meta.avatarUrl || '';
 
       const localOverrides = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
       const userOverride = localOverrides[uid] || {};
@@ -248,12 +249,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: uid,
         email: currentUser?.email || 'user@rewardmate.com.au',
         full_name: meta.full_name || currentUser?.email?.split('@')[0] || 'User',
-        avatar_url: meta.avatar_url || '',
         user_type: meta.user_type || 'publisher',
         approval_status: 'approved',
         wallet_balance: 0.00,
         onboarding_completed: true,
         ...profileData,
+        avatar_url: profileData?.avatar_url || gmailAvatar || '',
         business_name: meta.business_name || (profileData && profileData.business_name) || '',
         website: meta.website || (profileData && profileData.website) || '',
         channels: meta.channels || (profileData && profileData.channels) || '',
@@ -470,6 +471,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.full_name !== undefined) newMeta.full_name = updates.full_name;
         if (updates.channels !== undefined) newMeta.channels = updates.channels;
         if (updates.traffic !== undefined) newMeta.traffic = updates.traffic;
+        if (updates.avatar_url !== undefined) newMeta.avatar_url = updates.avatar_url;
 
         const { error: authError } = await supabase.auth.updateUser({
           data: newMeta
@@ -483,6 +485,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.website !== undefined) dbUpdates.website = updates.website;
         if (updates.channels !== undefined) dbUpdates.channels = updates.channels;
         if (updates.traffic !== undefined) dbUpdates.traffic = updates.traffic;
+        if (updates.avatar_url !== undefined) dbUpdates.avatar_url = updates.avatar_url;
         if (updates.payout_method !== undefined) dbUpdates.payout_method = updates.payout_method;
         if (updates.paypal_email !== undefined) dbUpdates.paypal_email = updates.paypal_email;
         if (updates.bank_name !== undefined) dbUpdates.bank_name = updates.bank_name;

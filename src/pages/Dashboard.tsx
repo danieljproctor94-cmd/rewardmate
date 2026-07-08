@@ -250,9 +250,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             <div className="px-4 py-4">
               <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer text-white">
                 <div className="flex items-center space-x-3">
-                  <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow">
-                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                  </div>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0" alt="Avatar" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-sm select-none shadow shrink-0">
+                      {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate max-w-[150px]">{profile.full_name || 'Advertiser'}</div>
                     <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
@@ -350,9 +354,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
             <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 {!isSidebarCollapsed && (
                   <div className="truncate">
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
@@ -456,9 +464,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
               >
-                <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm shrink-0">
-                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-7 w-7 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xs select-none border border-[#0052FF]/10 shadow-sm shrink-0">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block truncate max-w-[120px]">
                   {profile.full_name || 'Advertiser'}
                 </span>
@@ -1252,9 +1264,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             <div className="px-4 py-4">
               <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer text-white">
                 <div className="flex items-center space-x-3">
-                  <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none shadow">
-                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                  </div>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0" alt="Avatar" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-sm select-none shadow shrink-0">
+                      {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate max-w-[150px]">{profile.full_name || 'Admin'}</div>
                     <div className="text-[9px] text-slate-400 font-bold">ID: {formatUserId(profile.id)}</div>
@@ -1353,9 +1369,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           <div className={isSidebarCollapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-4'}>
             <div className={`flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer group text-white ${isSidebarCollapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full'}`}>
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 rounded-full bg-purple-650 text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-purple-650 text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 {!isSidebarCollapsed && (
                   <div className="truncate">
                     <div className="text-xs font-bold text-slate-200 leading-none mb-1 truncate">
@@ -1583,9 +1603,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 cursor-pointer group p-1.5 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
               >
-                <div className="h-7 w-7 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-xs select-none border border-purple-200 shadow-sm shrink-0">
-                  {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
-                </div>
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} className="h-7 w-7 rounded-full object-cover shrink-0" alt="Avatar" />
+                ) : (
+                  <div className="h-7 w-7 rounded-full bg-purple-600 text-white flex items-center justify-center font-extrabold text-xs select-none border border-purple-200 shadow-sm shrink-0">
+                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span className="text-xs font-bold text-slate-600 group-hover:text-slate-800 transition-colors hidden md:inline-block truncate max-w-[120px]">
                   {profile.full_name || 'Admin'}
                 </span>
