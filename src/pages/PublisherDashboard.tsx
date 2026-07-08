@@ -586,21 +586,40 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
       {/* Desktop Sidebar (Fixed Left Column - Never Scrolls with Content) */}
       <aside className={`hidden lg:flex bg-[#090b16] flex-col justify-between shrink-0 h-full z-20 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
           {/* Logo Header */}
-          <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+          <div className={`py-5 flex items-center border-b border-white/5 bg-[#090b16] w-full ${isSidebarCollapsed ? 'justify-center px-0' : 'px-6'}`}>
             {isSidebarCollapsed ? (
-              <img 
-                src="/RewardMateFav.png" 
-                className="h-7 w-7 object-contain" 
-                alt="Reward Mate Favicon" 
-              />
+              <div className="flex flex-col items-center gap-3">
+                <img 
+                  src="/RewardMateFav.png" 
+                  className="h-7 w-7 object-contain cursor-pointer" 
+                  alt="Reward Mate Favicon"
+                  onClick={() => setIsSidebarCollapsed(false)}
+                />
+                <button 
+                  onClick={() => setIsSidebarCollapsed(false)}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5"
+                  title="Expand Menu"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             ) : (
-              <img 
-                src="/rewardmate-logo-cropped.png" 
-                className="h-6 w-auto object-contain" 
-                alt="Reward Mate Logo" 
-              />
+              <div className="flex items-center justify-between w-full">
+                <img 
+                  src="/rewardmate-logo-cropped.png" 
+                  className="h-6 w-auto object-contain" 
+                  alt="Reward Mate Logo" 
+                />
+                <button 
+                  onClick={() => setIsSidebarCollapsed(true)}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5 shrink-0"
+                  title="Collapse Menu"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
             )}
           </div>
 
@@ -677,31 +696,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
         {/* Sidebar Footer */}
         <div className={`border-t border-white/5 bg-[#090b16] ${isSidebarCollapsed ? 'p-2' : 'p-4'}`}>
-          <div className={`flex ${isSidebarCollapsed ? 'flex-col items-center gap-2 mb-2' : 'items-center justify-between mb-4'}`}>
-            {isSidebarCollapsed ? (
-              <button 
-                onClick={() => setIsSidebarCollapsed(false)}
-                className="h-8 w-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5"
-                title="Expand Menu"
-              >
-                <ChevronRight className="h-4.5 w-4.5" />
-              </button>
-            ) : (
-              <>
-                <div className="flex items-center space-x-2 text-slate-500 font-bold select-none">
-                  <span className="text-[10px] tracking-wider font-semibold uppercase text-slate-455">v1.0</span>
-                </div>
-                
-                <button 
-                  onClick={() => setIsSidebarCollapsed(true)}
-                  className="h-8 w-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer border border-white/5"
-                  title="Collapse Menu"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-              </>
-            )}
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2 text-slate-500 font-bold select-none">
+                <span className="text-[10px] tracking-wider font-semibold uppercase text-slate-455">v1.0</span>
+              </div>
+            </div>
+          )}
 
           <button 
             onClick={signOut}
