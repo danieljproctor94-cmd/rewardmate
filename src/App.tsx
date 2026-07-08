@@ -16,14 +16,17 @@ import Onboarding from './pages/Onboarding';
 
 export default function App() {
   useEffect(() => {
-    // Force reload browser and clear legacy mock campaigns storage cache
-    if (localStorage.getItem('rewardmate_cache_version') !== 'v4') {
-      localStorage.removeItem('rewardmate_mock_campaigns');
-      localStorage.removeItem('rewardmate_mock_clicks');
-      localStorage.removeItem('rewardmate_mock_conversions');
-      localStorage.removeItem('rewardmate_mock_affiliate_links');
-      localStorage.setItem('rewardmate_cache_version', 'v4');
-      window.location.reload();
+    // Clear legacy mock campaigns storage cache if version mismatches
+    try {
+      if (localStorage.getItem('rewardmate_cache_version') !== 'v4') {
+        localStorage.removeItem('rewardmate_mock_campaigns');
+        localStorage.removeItem('rewardmate_mock_clicks');
+        localStorage.removeItem('rewardmate_mock_conversions');
+        localStorage.removeItem('rewardmate_mock_affiliate_links');
+        localStorage.setItem('rewardmate_cache_version', 'v4');
+      }
+    } catch (e) {
+      console.warn('Storage cache migration error:', e);
     }
   }, []);
 
