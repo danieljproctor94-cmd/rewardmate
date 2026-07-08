@@ -212,7 +212,8 @@ CREATE TRIGGER on_auth_user_created
 
 -- 8. Seed Live Campaigns and Profiles
 INSERT INTO public.profiles (id, email, full_name, user_type, approval_status, wallet_balance, onboarding_completed) VALUES
-('c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'info@danielproctor.com', 'Daniel Proctor (Admin)', 'admin', 'approved', 0.00, true)
+('c5ab1c29-8b39-4a36-9c80-f46ad36b7bfc', 'info@danielproctor.com', 'Daniel Proctor (Admin)', 'admin', 'approved', 0.00, true),
+('a9dd24da-573e-41df-9214-cc3533f81e40', 'sam@danielproctor.com', 'Sam Proctor', 'publisher', 'approved', 0.00, true)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.campaigns (id, advertiser_id, name, description, landing_page_url, payout_type, payout_amount, status, total_budget, spend, created_at) VALUES
