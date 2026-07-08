@@ -316,7 +316,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('rewardmate_mock_active_user_id', matched.id);
         setUser({ id: matched.id, email: matched.email });
         setProfile(matched);
-        toast.success(`Logged in as ${matched.full_name}`);
       } else {
         // Supabase Real Sign-in
         const { error } = await supabase.auth.signInWithPassword({
@@ -324,7 +323,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           password: password || 'password123',
         });
         if (error) throw error;
-        toast.success('Successfully logged in!');
       }
     } catch (err: any) {
       toast.error(err.message);
@@ -386,11 +384,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('rewardmate_mock_active_user_id');
         setUser(null);
         setProfile(null);
-        toast.success('Logged out successfully.');
       } else {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
-        toast.success('Logged out successfully.');
       }
     } catch (err: any) {
       toast.error(err.message);
