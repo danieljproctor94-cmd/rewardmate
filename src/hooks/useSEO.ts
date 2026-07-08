@@ -49,7 +49,17 @@ export function useSEO({ title, description, schema, noIndex = false }: SEOOptio
       element.setAttribute('content', value);
     });
 
-    // 5. Inject JSON-LD Schema
+    // 5. Update Canonical Link (Forcing HTTPS for search engine indexers)
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    const cleanUrl = window.location.href.replace('http://', 'https://');
+    canonical.setAttribute('href', cleanUrl);
+
+    // 6. Inject JSON-LD Schema
     let scriptSchema = document.querySelector('script[type="application/ld+json"]');
     if (schema) {
       if (!scriptSchema) {

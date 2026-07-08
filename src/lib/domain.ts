@@ -17,7 +17,6 @@ export function isAppDomain(): boolean {
 }
 
 export function getAppUrl(path: string = '/'): string {
-    const protocol = window.location.protocol;
     const hostname = window.location.hostname;
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -25,16 +24,15 @@ export function getAppUrl(path: string = '/'): string {
         return `${path}?domain=app`;
     }
 
-    return `${protocol}//${APP_DOMAIN}${path}`;
+    return `https://${APP_DOMAIN}${path}`;
 }
 
 export function getLandingUrl(path: string = '/'): string {
-    const protocol = window.location.protocol;
     const hostname = window.location.hostname;
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return path;
     }
 
-    return `${protocol}//${LANDING_DOMAIN}${path}`;
+    return `https://${LANDING_DOMAIN}${path}`;
 }

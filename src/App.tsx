@@ -16,7 +16,17 @@ import Onboarding from './pages/Onboarding';
 
 export default function App() {
   useEffect(() => {
-    // Clear legacy mock campaigns storage cache if version mismatches
+    // 1. Enforce HTTPS protocol in production
+    if (
+      window.location.protocol === 'http:' &&
+      !window.location.hostname.includes('localhost') &&
+      !window.location.hostname.includes('127.0.0.1')
+    ) {
+      window.location.replace(window.location.href.replace('http:', 'https:'));
+      return;
+    }
+
+    // 2. Clear legacy mock campaigns storage cache if version mismatches
     try {
       if (localStorage.getItem('rewardmate_cache_version') !== 'v4') {
         localStorage.removeItem('rewardmate_mock_campaigns');
