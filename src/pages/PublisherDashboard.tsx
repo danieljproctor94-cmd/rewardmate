@@ -22,8 +22,8 @@ export const formatUserId = (id: string | undefined): string => {
 };
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
-  const { isMock } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'offers' | 'my-links' | 'clicks-conv' | 'wallet' | 'messages'>('dashboard');
+  const { isMock, updateProfileDetails } = useAuth();
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'offers' | 'my-links' | 'clicks-conv' | 'wallet' | 'messages' | 'settings'>('dashboard');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [myLinks, setMyLinks] = useState<AffiliateLink[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
@@ -40,6 +40,73 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [showMessages, setShowMessages] = useState(false);
   const [selectedCampaignForModal, setSelectedCampaignForModal] = useState<Campaign | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Account Settings Form State
+  const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
+  const [settingsBusinessName, setSettingsBusinessName] = useState(profile?.business_name || '');
+  const [settingsWebsite, setSettingsWebsite] = useState(profile?.website || '');
+  const [settingsPayoutMethod, setSettingsPayoutMethod] = useState<'paypal' | 'bank' | null>(profile?.payout_method || null);
+  const [settingsPaypalEmail, setSettingsPaypalEmail] = useState(profile?.paypal_email || '');
+  const [settingsBankName, setSettingsBankName] = useState(profile?.bank_name || '');
+  const [settingsBankBsb, setSettingsBankBsb] = useState(profile?.bank_bsb || '');
+  const [settingsBankAccountNumber, setSettingsBankAccountNumber] = useState(profile?.bank_account_number || '');
+  const [settingsBankAccountName, setSettingsBankAccountName] = useState(profile?.bank_account_name || '');
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setSettingsFullName(profile.full_name || '');
+      setSettingsBusinessName(profile.business_name || '');
+      setSettingsWebsite(profile.website || '');
+      setSettingsPayoutMethod(profile.payout_method || null);
+      setSettingsPaypalEmail(profile.paypal_email || '');
+      setSettingsBankName(profile.bank_name || '');
+      setSettingsBankBsb(profile.bank_bsb || '');
+      setSettingsBankAccountNumber(profile.bank_account_number || '');
+      setSettingsBankAccountName(profile.bank_account_name || '');
+    }
+  }, [profile]);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveLoading(true);
+    try {
+      if (settingsPayoutMethod === 'paypal') {
+        if (!settingsPaypalEmail) {
+          throw new Error('Please enter your PayPal email address.');
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settingsPaypalEmail)) {
+          throw new Error('Please enter a valid email address for PayPal.');
+        }
+      } else if (settingsPayoutMethod === 'bank') {
+        if (!settingsBankName || !settingsBankBsb || !settingsBankAccountNumber || !settingsBankAccountName) {
+          throw new Error('Please fill in all Australian Bank Account details.');
+        }
+        const cleanBsb = settingsBankBsb.replace(/[-\s]/g, '');
+        if (!/^\d{6}$/.test(cleanBsb)) {
+          throw new Error('BSB must be exactly 6 digits (e.g. 062-900).');
+        }
+      }
+
+      await updateProfileDetails({
+        full_name: settingsFullName,
+        business_name: settingsBusinessName,
+        website: settingsWebsite,
+        payout_method: settingsPayoutMethod,
+        paypal_email: settingsPaypalEmail,
+        bank_name: settingsBankName,
+        bank_bsb: settingsBankBsb,
+        bank_account_number: settingsBankAccountNumber,
+        bank_account_name: settingsBankAccountName
+      });
+      
+      await loadData();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -141,11 +208,21 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       toast.error('Withdrawal amount exceeds your current wallet balance.');
       return;
     }
+    if (!profile.payout_method) {
+      toast.error('Please configure your preferred payout method in Account Settings before requesting a withdrawal.');
+      setActiveTab('settings');
+      return;
+    }
 
     try {
       await updateBalance(Number(withdrawAmount), 'withdrawal');
       setWithdrawAmount('');
-      toast.success('Withdrawal request processed!');
+      
+      const destination = profile.payout_method === 'paypal'
+        ? `PayPal: ${profile.paypal_email}`
+        : `AU Bank: ${profile.bank_name} (BSB: ${profile.bank_bsb}, Acc: ${profile.bank_account_number})`;
+
+      toast.success(`Withdrawal request processed! Payout will be sent to ${destination}.`);
       loadData();
     } catch (err) {}
   };
@@ -505,7 +582,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               const isActive = activeTab === item.id;
               
               const handleTabClick = () => {
-                if (item.id === 'opportunities' || item.id === 'creatives' || item.id === 'settings') {
+                if (item.id === 'opportunities' || item.id === 'creatives') {
                   toast.info(`${item.label} section will be live in premium rollout.`);
                   setActiveTab('dashboard');
                 } else {
@@ -745,7 +822,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     <button 
                       onClick={() => {
                         setShowUserDropdown(false);
-                        toast.info('Account Settings will be live in premium rollout.');
+                        setActiveTab('settings');
                       }}
                       className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
@@ -1302,7 +1379,39 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               <div className="bg-white rounded-2xl border border-slate-100 p-6 space-y-6 shadow-sm">
                 <div>
                   <h3 className="text-lg font-bold text-slate-800 font-sans">Withdraw Earnings</h3>
-                  <p className="text-xs text-slate-500 font-sans">Transfer your cleared wallet earnings directly to your bank account (AUD).</p>
+                  <p className="text-xs text-slate-500 font-sans">Transfer your cleared wallet earnings directly to your preferred payout method.</p>
+                </div>
+
+                {/* Display Configured Payout Method */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Destination</div>
+                  {profile.payout_method === 'paypal' ? (
+                    <div className="mt-1.5 flex items-center space-x-2.5">
+                      <div className="h-7 w-7 rounded-full bg-[#0052FF]/10 text-[#0052FF] flex items-center justify-center text-[10px] font-black">PP</div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-800">PayPal Wallet</div>
+                        <div className="text-[10px] text-slate-500 font-medium">{profile.paypal_email}</div>
+                      </div>
+                    </div>
+                  ) : profile.payout_method === 'bank' ? (
+                    <div className="mt-1.5 flex items-center space-x-2.5">
+                      <div className="h-7 w-7 rounded-full bg-[#0052FF]/10 text-[#0052FF] flex items-center justify-center text-[10px] font-black">AU</div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-800">{profile.bank_name}</div>
+                        <div className="text-[10px] text-slate-500 font-medium">BSB: {profile.bank_bsb} | Acc: {profile.bank_account_number}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-500">No payout method configured.</span>
+                      <button 
+                        onClick={() => setActiveTab('settings')}
+                        className="text-[10px] text-[#0052FF] font-black hover:underline cursor-pointer"
+                      >
+                        Set Up Now &rarr;
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <form onSubmit={handleWithdraw} className="space-y-4 font-sans">
@@ -1493,6 +1602,203 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 )}
               </div>
             </div>
+          )}
+
+          {/* TAB 7: ACCOUNT SETTINGS SECTION */}
+          {activeTab === 'settings' && (
+            <form onSubmit={handleSaveSettings} className="space-y-6 animate-in fade-in duration-300 max-w-4xl mx-auto font-sans text-left pb-12">
+              <div>
+                <h1 className="text-2xl font-extrabold text-slate-900 leading-tight text-left">Account Settings</h1>
+                <p className="text-xs text-slate-500 font-medium mt-1 text-left">Manage your account profile details, business name, and set up your payout channels for earnings withdrawal.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Left Panel: Profile & Business info */}
+                <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Profile & Business Details</h3>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Email Address</label>
+                    <input 
+                      type="email"
+                      value={profile.email}
+                      disabled
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-400 rounded-xl h-11 px-4 text-xs font-semibold cursor-not-allowed"
+                    />
+                    <span className="text-[9px] text-slate-400 font-semibold block mt-1">Your registered email address cannot be changed.</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Contact Full Name</label>
+                    <input 
+                      type="text"
+                      value={settingsFullName}
+                      onChange={(e) => setSettingsFullName(e.target.value)}
+                      placeholder="e.g. Sarah Connor"
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Business Name</label>
+                    <input 
+                      type="text"
+                      value={settingsBusinessName}
+                      onChange={(e) => setSettingsBusinessName(e.target.value)}
+                      placeholder="e.g. Connor Marketing Ltd"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Website / Media URL</label>
+                    <input 
+                      type="url"
+                      value={settingsWebsite}
+                      onChange={(e) => setSettingsWebsite(e.target.value)}
+                      placeholder="https://mywebsite.com"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Panel: Payout Settings */}
+                <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">Payout Configurations</h3>
+                  
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Select Preferred Method</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* PayPal option */}
+                    <div 
+                      onClick={() => setSettingsPayoutMethod('paypal')}
+                      className={`border p-4 rounded-2xl cursor-pointer text-center space-y-2 transition-all hover:border-slate-350 select-none ${
+                        settingsPayoutMethod === 'paypal' 
+                          ? 'border-[#0052FF] bg-blue-50/20' 
+                          : 'border-slate-200 bg-white'
+                      }`}
+                    >
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center mx-auto text-xs font-extrabold ${
+                        settingsPayoutMethod === 'paypal' ? 'bg-[#0052FF] text-white' : 'bg-slate-150 text-slate-500'
+                      }`}>
+                        PP
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-800">PayPal</div>
+                      <div className="text-[9px] text-slate-400 font-semibold leading-tight">Instant digital transfers.</div>
+                    </div>
+
+                    {/* Bank Transfer option */}
+                    <div 
+                      onClick={() => setSettingsPayoutMethod('bank')}
+                      className={`border p-4 rounded-2xl cursor-pointer text-center space-y-2 transition-all hover:border-slate-350 select-none ${
+                        settingsPayoutMethod === 'bank' 
+                          ? 'border-[#0052FF] bg-blue-50/20' 
+                          : 'border-slate-200 bg-white'
+                      }`}
+                    >
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center mx-auto text-xs font-extrabold ${
+                        settingsPayoutMethod === 'bank' ? 'bg-[#0052FF] text-white' : 'bg-slate-150 text-slate-500'
+                      }`}>
+                        AU
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-800">AU Bank Transfer</div>
+                      <div className="text-[9px] text-slate-400 font-semibold leading-tight">Direct bank wire transfers.</div>
+                    </div>
+                  </div>
+
+                  {/* Payout Details input fields */}
+                  {settingsPayoutMethod === 'paypal' && (
+                    <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">PayPal Email Address</label>
+                        <input 
+                          type="email"
+                          value={settingsPaypalEmail}
+                          onChange={(e) => setSettingsPaypalEmail(e.target.value)}
+                          placeholder="paypal@yourdomain.com"
+                          required
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                        />
+                        <span className="text-[9px] text-slate-400 font-semibold block mt-1">Earnings will be transferred to this PayPal wallet destination.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsPayoutMethod === 'bank' && (
+                    <div className="space-y-3 pt-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Bank Name</label>
+                          <input 
+                            type="text"
+                            value={settingsBankName}
+                            onChange={(e) => setSettingsBankName(e.target.value)}
+                            placeholder="e.g. CommBank"
+                            required
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">BSB (6 digits)</label>
+                          <input 
+                            type="text"
+                            value={settingsBankBsb}
+                            onChange={(e) => setSettingsBankBsb(e.target.value)}
+                            placeholder="e.g. 062-900"
+                            required
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Account Number</label>
+                        <input 
+                          type="text"
+                          value={settingsBankAccountNumber}
+                          onChange={(e) => setSettingsBankAccountNumber(e.target.value)}
+                          placeholder="e.g. 12345678"
+                          required
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Account Holder Name</label>
+                        <input 
+                          type="text"
+                          value={settingsBankAccountName}
+                          onChange={(e) => setSettingsBankAccountName(e.target.value)}
+                          placeholder="e.g. Sarah Connor"
+                          required
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {!settingsPayoutMethod && (
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center text-slate-400">
+                      <p className="text-xs font-bold font-sans">No payout channel selected yet. Select PayPal or Bank Transfer above to get started.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit panel */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={saveLoading}
+                  className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-xs h-11 px-6 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow shadow-blue-500/10 disabled:opacity-50"
+                >
+                  {saveLoading ? (
+                    <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                  ) : (
+                    <span>Save Account Settings</span>
+                  )}
+                </button>
+              </div>
+            </form>
           )}
 
         </main>

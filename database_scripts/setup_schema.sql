@@ -27,7 +27,13 @@ CREATE TABLE public.profiles (
     website TEXT,
     channels TEXT,
     traffic TEXT,
-    onboarding_completed BOOLEAN DEFAULT false
+    onboarding_completed BOOLEAN DEFAULT false,
+    payout_method TEXT CHECK (payout_method IN ('paypal', 'bank')),
+    paypal_email TEXT,
+    bank_name TEXT,
+    bank_bsb TEXT,
+    bank_account_number TEXT,
+    bank_account_name TEXT
 );
 
 -- Enable RLS on Profiles

@@ -17,6 +17,12 @@ export interface Profile {
   website?: string;
   channels?: string;
   traffic?: string;
+  payout_method?: 'paypal' | 'bank' | null;
+  paypal_email?: string;
+  bank_name?: string;
+  bank_bsb?: string;
+  bank_account_number?: string;
+  bank_account_name?: string;
 }
 
 interface AuthContextType {
@@ -29,6 +35,7 @@ interface AuthContextType {
   signUp: (email: string, password?: string, fullName?: string, role?: UserType) => Promise<void>;
   signOut: () => Promise<void>;
   updateBalance: (amount: number, type: 'deposit' | 'withdrawal' | 'payout' | 'spend') => Promise<void>;
+  updateProfileDetails: (updates: Partial<Profile>) => Promise<void>;
   isMock: boolean;
   impersonateUser?: (targetProfile: any) => void;
   stopImpersonating?: () => void;
@@ -218,6 +225,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       const meta = currentUser?.user_metadata || {};
 
+      const localOverrides = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
+      const userOverride = localOverrides[uid] || {};
+
       setProfile({
         ...data,
         onboarding_completed: meta.onboarding_completed || false,
@@ -225,6 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         website: meta.website || '',
         channels: meta.channels || '',
         traffic: meta.traffic || '',
+        ...userOverride,
       });
     } catch (err: any) {
       console.error('Error fetching user profile:', err.message);
@@ -401,6 +412,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfileDetails = async (updates: Partial<Profile>) => {
+    if (!profile) return;
+    try {
+      if (isMock) {
+        const storedProfiles: Profile[] = JSON.parse(localStorage.getItem(MOCK_PROFILES_KEY) || '[]');
+        const updated = storedProfiles.map(p => {
+          if (p.id === profile.id) {
+            return { ...p, ...updates };
+          }
+          return p;
+        });
+        localStorage.setItem(MOCK_PROFILES_KEY, JSON.stringify(updated));
+        setProfile({ ...profile, ...updates });
+        
+        const storedActiveUser = localStorage.getItem('rewardmate_mock_user');
+        if (storedActiveUser) {
+          const u = JSON.parse(storedActiveUser);
+          if (u.id === profile.id) {
+            localStorage.setItem('rewardmate_mock_user', JSON.stringify({ ...u, ...updates }));
+          }
+        }
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', profile.id);
+        if (error) throw error;
+        setProfile({ ...profile, ...updates });
+      }
+      toast.success('Profile settings saved successfully!');
+    } catch (err: any) {
+      console.warn('Real db update failed, using localStorage override:', err);
+      const storedProfiles = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
+      storedProfiles[profile.id] = { ...(storedProfiles[profile.id] || {}), ...updates };
+      localStorage.setItem('rewardmate_supabase_profiles_override', JSON.stringify(storedProfiles));
+      
+      setProfile({ ...profile, ...updates });
+      toast.warning('Settings saved locally! (Database schema migration to add payout columns is recommended).');
+    }
+  };
+
   const impersonateUser = (targetProfile: any) => {
     if (!originalAdminProfile) {
       setOriginalAdminProfile(profile);
@@ -445,6 +497,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signOut,
       updateBalance,
+      updateProfileDetails,
       isMock,
       impersonateUser,
       stopImpersonating,
