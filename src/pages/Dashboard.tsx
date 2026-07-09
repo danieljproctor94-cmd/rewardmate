@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
-  ChevronLeft, ChevronRight, Menu, Sliders, Building
+  ChevronLeft, ChevronRight, Menu, Sliders, Building, LayoutDashboard
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -972,7 +972,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('campaign-approvals');
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
 
@@ -1421,6 +1421,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             {/* Navigation stack */}
             <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
               {[
+                { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                 { id: 'campaign-approvals', label: 'Campaigns', icon: FolderKanban },
                 { id: 'conversion-approvals', label: 'Conversions', icon: DollarSign },
                 { id: 'brands', label: 'Brands', icon: Building },
@@ -1546,6 +1547,18 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
           {/* Navigation Links stack */}
           <nav className={`space-y-1.5 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
+            <button
+              onClick={() => setActiveTab('overview')}
+              title="Overview"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'overview' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <LayoutDashboard className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Overview</span>}
+            </button>
             <button
               onClick={() => setActiveTab('campaign-approvals')}
               title={`Offer Approvals (${pendingCamps})`}
@@ -1886,31 +1899,97 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
         {/* 3. SCROLLABLE CONTENT AREA */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50">
           
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network Volume</div>
-              <div className="text-2xl font-extrabold text-[#0052FF]">${networkVolume.toFixed(2)} AUD</div>
-              <p className="text-[10px] text-slate-500 mt-1">Approved payouts across network</p>
-            </div>
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network traffic</div>
-              <div className="text-2xl font-extrabold text-slate-900">{clicks.length} Clicks</div>
-              <p className="text-[10px] text-slate-500 mt-1">Raw visitor redirects logged</p>
-            </div>
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Offer reviews</div>
-              <div className="text-2xl font-extrabold text-amber-600">{pendingCamps} Campaigns</div>
-              <p className="text-[10px] text-slate-500 mt-1">Requires admin approval</p>
-            </div>
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lead audits</div>
-              <div className="text-2xl font-extrabold text-amber-600">{pendingConvs} Leads</div>
-              <p className="text-[10px] text-slate-500 mt-1">Requires audit to credit wallet</p>
-            </div>
-          </div>
-
           {/* Tab Contents */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 font-sans">Network Overview</h3>
+                <p className="text-xs text-slate-550 font-medium">Real-time performance metrics, pending review items, and platform volume audits.</p>
+              </div>
+
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network Volume</div>
+                  <div className="text-2xl font-extrabold text-[#0052FF]">${networkVolume.toFixed(2)} AUD</div>
+                  <p className="text-[10px] text-slate-500 mt-1">Approved payouts across network</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network traffic</div>
+                  <div className="text-2xl font-extrabold text-slate-900">{clicks.length} Clicks</div>
+                  <p className="text-[10px] text-slate-500 mt-1">Raw visitor redirects logged</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Offer reviews</div>
+                  <div className="text-2xl font-extrabold text-amber-600">{pendingCamps} Campaigns</div>
+                  <p className="text-[10px] text-slate-500 mt-1">Requires admin approval</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lead audits</div>
+                  <div className="text-2xl font-extrabold text-amber-600">{pendingConvs} Leads</div>
+                  <p className="text-[10px] text-slate-500 mt-1">Requires audit to credit wallet</p>
+                </div>
+              </div>
+
+              {/* Expanded Stats Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Audits & Approvals</h4>
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Pending Brands</span>
+                      <span className="font-bold text-slate-800">{profiles.filter(p => p.user_type === 'advertiser' && p.approval_status === 'pending').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Pending Affiliates</span>
+                      <span className="font-bold text-slate-800">{profiles.filter(p => p.user_type === 'publisher' && p.approval_status === 'pending').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-500">New Contact Inquiries</span>
+                      <span className="font-bold text-[#0052FF]">{contactInquiries.filter(i => !i.replied).length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Total User Accounts</h4>
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Advertisers (Brands)</span>
+                      <span className="font-bold text-slate-800">{profiles.filter(p => p.user_type === 'advertiser').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Publishers (Affiliates)</span>
+                      <span className="font-bold text-slate-800">{profiles.filter(p => p.user_type === 'publisher').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-500">System Administrators</span>
+                      <span className="font-bold text-slate-800">{profiles.filter(p => p.user_type === 'admin').length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Campaign Stats Summary</h4>
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Active Offers</span>
+                      <span className="font-bold text-emerald-600">{campaigns.filter(c => c.status === 'active').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                      <span className="text-slate-500">Pending Offers</span>
+                      <span className="font-bold text-amber-600">{campaigns.filter(c => c.status === 'pending_approval').length}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-500">Total System Offers</span>
+                      <span className="font-bold text-slate-800">{campaigns.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'campaign-approvals' && (
             <div className="space-y-6">
               <div>
