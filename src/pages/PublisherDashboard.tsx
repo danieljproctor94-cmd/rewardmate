@@ -1812,11 +1812,15 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                               : 'hover:bg-slate-50 border border-transparent text-slate-700'
                           }`}
                         >
-                          <div className={`h-9 w-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 text-slate-755 flex items-center justify-center font-extrabold text-xs shadow-sm uppercase ${
-                            isSelected ? 'from-[#0052FF] to-blue-600 text-white' : ''
-                          }`}>
-                            {cInitials}
-                          </div>
+                          {c.avatar_url ? (
+                            <img src={c.avatar_url} className="h-9 w-9 rounded-xl object-cover shrink-0 border border-slate-200 shadow-sm" alt="" />
+                          ) : (
+                            <div className={`h-9 w-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 text-slate-755 flex items-center justify-center font-extrabold text-xs shadow-sm uppercase ${
+                              isSelected ? 'from-[#0052FF] to-blue-600 text-white' : ''
+                            }`}>
+                              {cInitials}
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <h4 className="text-xs font-bold truncate font-sans">{c.full_name || c.email}</h4>
