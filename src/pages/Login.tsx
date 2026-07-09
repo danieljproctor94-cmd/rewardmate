@@ -289,16 +289,16 @@ export default function Login() {
  
             {/* Remember Me Checkbox */}
             {!isRegister && (
-              <div className="flex items-center pt-1">
+              <div className="flex items-center pt-1 select-none">
                 <input
                   id="remember_me"
                   name="remember_me"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-[#0052FF] focus:ring-[#0052FF] border-slate-300 rounded cursor-pointer"
+                  className="appearance-none h-4.5 w-4.5 bg-slate-50 border border-slate-200 rounded-md checked:bg-[#0052FF] checked:border-[#0052FF] transition-all relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 flex items-center justify-center after:content-[''] after:absolute after:w-1 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 after:-translate-y-[1px] after:opacity-0 checked:after:opacity-100 shrink-0"
                 />
-                <label htmlFor="remember_me" className="ml-2 block text-xs font-bold text-slate-500 select-none cursor-pointer">
+                <label htmlFor="remember_me" className="ml-2.5 block text-xs font-bold text-slate-500 cursor-pointer">
                   Remember me
                 </label>
               </div>
