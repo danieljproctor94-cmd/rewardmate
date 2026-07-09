@@ -250,10 +250,32 @@ CREATE TABLE IF NOT EXISTS public.messages (
 -- Enable RLS on Messages
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow users to access their own messages" ON public.messages
-    FOR ALL USING (
+CREATE POLICY "Allow users to read their own messages" ON public.messages
+    FOR SELECT USING (
         auth.uid()::text = sender_id OR 
         auth.uid()::text = receiver_id
+    );
+
+CREATE POLICY "Allow message inserts between valid roles" ON public.messages
+    FOR INSERT WITH CHECK (
+        auth.uid()::text = sender_id
+        AND (
+            -- Admin can message anyone
+            EXISTS (
+                SELECT 1 FROM public.profiles 
+                WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+            )
+            OR
+            -- Non-admin rules: Publisher & Advertiser cannot message same-type roles
+            EXISTS (
+                SELECT 1 FROM public.profiles sender 
+                CROSS JOIN public.profiles receiver
+                WHERE sender.id = auth.uid() 
+                  AND receiver.id::text = receiver_id 
+                  AND NOT (sender.user_type = 'publisher' AND receiver.user_type = 'publisher')
+                  AND NOT (sender.user_type = 'advertiser' AND receiver.user_type = 'advertiser')
+            )
+        )
     );
 
 -- 10. Contact Inquiries Table

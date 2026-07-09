@@ -416,6 +416,43 @@ export const getMessages = async (userId: string): Promise<Message[]> => {
 };
 
 export const sendMessage = async (msg: Omit<Message, 'id' | 'created_at' | 'read'>): Promise<Message> => {
+  // Validate sender and receiver roles to prevent messaging between restricted roles (e.g. affiliate to affiliate or brand to brand)
+  let senderRole = '';
+  let receiverRole = '';
+
+  if (!isSupabaseConfigured) {
+    const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    const sender = stored.find((p: any) => p.id === msg.sender_id);
+    const receiver = stored.find((p: any) => p.id === msg.receiver_id);
+    if (sender) senderRole = sender.user_type;
+    if (receiver) receiverRole = receiver.user_type;
+  } else {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, user_type')
+        .in('id', [msg.sender_id, msg.receiver_id]);
+      if (!error && profiles) {
+        const sender = profiles.find(p => p.id === msg.sender_id);
+        const receiver = profiles.find(p => p.id === msg.receiver_id);
+        if (sender) senderRole = sender.user_type;
+        if (receiver) receiverRole = receiver.user_type;
+      }
+    } catch (err) {
+      console.warn('Failed to query profiles for message validation:', err);
+    }
+  }
+
+  // Restrict same-type messaging for non-admin accounts
+  if (senderRole && receiverRole) {
+    if (senderRole === 'publisher' && receiverRole === 'publisher') {
+      throw new Error('Affiliates are not permitted to message other affiliates.');
+    }
+    if (senderRole === 'advertiser' && receiverRole === 'advertiser') {
+      throw new Error('Brands are not permitted to message other brands.');
+    }
+  }
+
   const newMsg: Message = {
     ...msg,
     id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
