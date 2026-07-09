@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getAppUrl } from '../../lib/domain';
-import { Mail, Phone, MapPin, Clock, Send, ChevronDown, Search, Zap, Mic, BookOpen, HelpCircle, Menu, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, ChevronDown, Search, Zap, Mic, BookOpen, HelpCircle, Menu, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSEO } from '../../hooks/useSEO';
 import { saveContactInquiry } from '../../lib/mockDatabase';
@@ -23,6 +23,7 @@ export default function Contact() {
   const [inquiryType, setInquiryType] = useState('advertiser');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +42,6 @@ export default function Contact() {
         inquiry_type: inquiryType,
         message: message
       });
-      toast.success('Your message has been sent successfully! Our team will contact you within 24 business hours.');
       // Reset form
       setFullName('');
       setEmail('');
@@ -49,6 +49,7 @@ export default function Contact() {
       setCompany('');
       setInquiryType('advertiser');
       setMessage('');
+      setIsSubmitted(true);
     } catch (err: any) {
       toast.error(err.message || 'Failed to send inquiry. Please try again.');
     } finally {
@@ -294,101 +295,123 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Right Column: Interactive Form */}
-          <div className="lg:col-span-7 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-sm">
-            <h3 className="text-xl font-extrabold text-slate-900 mb-6">Send an Online Inquiry</h3>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Name *</label>
-                  <input 
-                    type="text" 
-                    placeholder=""
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
-                    required
-                  />
+          {/* Right Column: Interactive Form or Success State */}
+          <div className="lg:col-span-7 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-sm flex flex-col justify-center min-h-[480px]">
+            {isSubmitted ? (
+              <div className="text-center space-y-6 py-8 animate-in fade-in zoom-in duration-300 font-sans">
+                <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto border border-emerald-100 shadow-sm">
+                  <Check className="h-8 w-8" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Business Email *</label>
-                  <input 
-                    type="email" 
-                    placeholder=""
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
-                    required
-                  />
+                  <h3 className="text-xl font-extrabold text-slate-900 leading-tight">Inquiry Sent Successfully</h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed font-semibold">
+                    Thank you for reaching out to Reward Mate. Our partnerships team has received your message and will respond within 24 business hours to the email address provided.
+                  </p>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder=""
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Company Name</label>
-                  <input 
-                    type="text" 
-                    placeholder=""
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Inquiry Type *</label>
-                <select 
-                  value={inquiryType} 
-                  onChange={(e) => setInquiryType(e.target.value)}
-                  className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-655 font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer text-xs self-center"
                 >
-                  <option value="advertiser">Advertiser / Brand onboarding query</option>
-                  <option value="publisher">Publisher / Affiliate partnership inquiry</option>
-                  <option value="technical">API & Tracking setup support</option>
-                  <option value="billing">Wallet deposits & billing support</option>
-                  <option value="other">Other general inquiry</option>
-                </select>
+                  Send another message
+                </button>
               </div>
+            ) : (
+              <>
+                <h3 className="text-xl font-extrabold text-slate-900 mb-6">Send an Online Inquiry</h3>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Name *</label>
+                      <input 
+                        type="text" 
+                        placeholder=""
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Business Email *</label>
+                      <input 
+                        type="email" 
+                        placeholder=""
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Message details *</label>
-                <textarea 
-                  placeholder=""
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={5}
-                  className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all resize-none"
-                  required
-                />
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Phone Number</label>
+                      <input 
+                        type="tel" 
+                        placeholder=""
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Company Name</label>
+                      <input 
+                        type="text" 
+                        placeholder=""
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                      />
+                    </div>
+                  </div>
 
-              <button
-                type="submit"
-                disabled={sending}
-                className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/10 disabled:opacity-50 mt-2"
-              >
-                {sending ? (
-                  <div className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" />
-                    Send Inquiry
-                  </>
-                )}
-              </button>
-            </form>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Inquiry Type *</label>
+                    <select 
+                      value={inquiryType} 
+                      onChange={(e) => setInquiryType(e.target.value)}
+                      className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                    >
+                      <option value="advertiser">Advertiser / Brand onboarding query</option>
+                      <option value="publisher">Publisher / Affiliate partnership inquiry</option>
+                      <option value="technical">API & Tracking setup support</option>
+                      <option value="billing">Wallet deposits & billing support</option>
+                      <option value="other">Other general inquiry</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Message details *</label>
+                    <textarea 
+                      placeholder=""
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={5}
+                      className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all resize-none font-sans"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/10 disabled:opacity-50 mt-2 cursor-pointer"
+                  >
+                    {sending ? (
+                      <div className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4" />
+                        <span className="font-sans">Send Inquiry</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
 
         </div>
