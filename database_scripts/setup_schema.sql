@@ -179,7 +179,7 @@ CREATE POLICY "Allow users to read their own transactions" ON public.transaction
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name, avatar_url, user_type, approval_status, wallet_balance)
+  INSERT INTO public.profiles (id, email, full_name, avatar_url, user_type, approval_status, wallet_balance, business_name, website, channels, traffic, onboarding_completed)
   VALUES (
     new.id,
     new.email,
@@ -187,21 +187,40 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'avatar_url', ''),
     COALESCE(new.raw_user_meta_data->>'user_type', 'publisher'),
     CASE 
-      WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') = 'publisher' THEN 'pending'
+      WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') IN ('publisher', 'advertiser') THEN 'pending'
       ELSE 'approved'
     END,
     CASE 
       WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') = 'advertiser' THEN 1000.00 -- Initial advertiser demo funds
       ELSE 0.00
-    END
+    END,
+    COALESCE(new.raw_user_meta_data->>'business_name', ''),
+    COALESCE(new.raw_user_meta_data->>'website', ''),
+    COALESCE(new.raw_user_meta_data->>'channels', ''),
+    COALESCE(new.raw_user_meta_data->>'traffic', ''),
+    COALESCE((new.raw_user_meta_data->>'onboarding_completed')::boolean, false)
   );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER on_auth_user_created
+CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 7b. Trigger to auto-confirm new signups automatically (no verification email required)
+CREATE OR REPLACE FUNCTION public.auto_confirm_new_user()
+RETURNS trigger AS $$
+BEGIN
+  NEW.email_confirmed_at := NOW();
+  NEW.confirmed_at := NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created_confirm
+  BEFORE INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.auto_confirm_new_user();
 
 -- Migration snippet to run in Supabase SQL editor for existing tables:
 -- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS business_name TEXT;
