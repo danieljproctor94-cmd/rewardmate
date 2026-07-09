@@ -532,7 +532,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       sender: m.sender_name,
       subject: m.subject,
       preview: m.body,
-      time: new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+      time: new Date(m.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }),
+      sender_id: m.sender_id
     }));
 
   // Link generator search filtering
@@ -824,7 +825,18 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       <div className="text-center py-6 text-xs text-slate-400 font-sans">No messages.</div>
                     ) : (
                       liveMessages.map(m => (
-                        <div key={m.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-left space-y-1">
+                        <div 
+                          key={m.id} 
+                          onClick={() => {
+                            const matchingContact = contacts.find(c => c.id === m.sender_id);
+                            if (matchingContact) {
+                              setSelectedContact(matchingContact);
+                            }
+                            setActiveTab('messages');
+                            setShowMessages(false);
+                          }}
+                          className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-left space-y-1 cursor-pointer hover:bg-slate-100 transition-all"
+                        >
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-bold text-slate-800">{m.sender}</span>
                             <span className="text-[9px] text-slate-400 font-semibold">{m.time}</span>
@@ -1862,7 +1874,32 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         messages.filter(m => (m.sender_id === profile.id && m.receiver_id === selectedContact.id) || (m.sender_id === selectedContact.id && m.receiver_id === profile.id)).map((m) => {
                           const isMe = m.sender_id === profile.id;
                           return (
-                            <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} w-full`}>
+                            <div key={m.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full space-y-1`}>
+                              <div className="flex items-center space-x-1.5 text-[9px] font-bold text-slate-500 select-none">
+                                {isMe ? (
+                                  <>
+                                    <span>{profile.full_name || 'Me'}</span>
+                                    {profile.avatar_url ? (
+                                      <img src={profile.avatar_url} className="h-4 w-4 rounded-full object-cover shrink-0 border border-slate-200" alt="" />
+                                    ) : (
+                                      <div className="h-4 w-4 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-[8px] border border-blue-100 shrink-0">
+                                        {(profile.full_name || 'Me').charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    {selectedContact.avatar_url ? (
+                                      <img src={selectedContact.avatar_url} className="h-4 w-4 rounded-full object-cover shrink-0 border border-slate-200" alt="" />
+                                    ) : (
+                                      <div className="h-4 w-4 rounded-full bg-blue-50 text-[#0052FF] flex items-center justify-center font-extrabold text-[8px] border border-blue-100 shrink-0">
+                                        {(selectedContact.business_name || selectedContact.full_name || selectedContact.email).charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <span>{selectedContact.business_name || selectedContact.full_name || selectedContact.email}</span>
+                                  </>
+                                )}
+                              </div>
                               <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-xs shadow-sm leading-relaxed ${
                                 isMe 
                                   ? 'bg-[#0052FF] text-white rounded-tr-none' 
