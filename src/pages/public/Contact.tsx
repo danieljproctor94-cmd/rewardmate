@@ -3,6 +3,7 @@ import { getAppUrl } from '../../lib/domain';
 import { Mail, Phone, MapPin, Clock, Send, ChevronDown, Search, Zap, Mic, BookOpen, HelpCircle, Menu, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSEO } from '../../hooks/useSEO';
+import { saveContactInquiry } from '../../lib/mockDatabase';
 
 export default function Contact() {
   useSEO({
@@ -23,7 +24,7 @@ export default function Contact() {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email || !message) {
       toast.error('Please fill in all required fields.');
@@ -31,8 +32,15 @@ export default function Contact() {
     }
 
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
+    try {
+      await saveContactInquiry({
+        full_name: fullName,
+        email: email,
+        phone: phone || '',
+        company: company || '',
+        inquiry_type: inquiryType,
+        message: message
+      });
       toast.success('Your message has been sent successfully! Our team will contact you within 24 business hours.');
       // Reset form
       setFullName('');
@@ -41,7 +49,11 @@ export default function Contact() {
       setCompany('');
       setInquiryType('advertiser');
       setMessage('');
-    }, 1200);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send inquiry. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (

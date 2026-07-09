@@ -6,9 +6,10 @@ import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
   getCampaigns, createCampaign, updateCampaignStatus, 
   getClicks, getConversions, updateConversionStatus,
-  getMessages, sendMessage, getAllAffiliateLinks
+  getMessages, sendMessage, getAllAffiliateLinks,
+  getContactInquiries, markContactInquiryReplied
 } from '../lib/mockDatabase';
-import type { Campaign, Click, Conversion, AffiliateLink } from '../lib/mockDatabase';
+import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
@@ -971,7 +972,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings'>('campaign-approvals');
+  const [activeTab, setActiveTab] = useState<'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('campaign-approvals');
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
 
@@ -1054,6 +1055,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [conversions, setConversions] = useState<Conversion[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
+  const [contactInquiries, setContactInquiries] = useState<ContactInquiry[]>([]);
   const [showMessages, setShowMessages] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -1229,9 +1231,25 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           setProfiles(usersData);
         }
       }
+
+      // Fetch contact inquiries
+      const inqs = await getContactInquiries();
+      setContactInquiries(inqs);
+
       await loadMessages();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleMarkInquiryReplied = async (inquiryId: string) => {
+    try {
+      await markContactInquiryReplied(inquiryId);
+      toast.success('Inquiry marked as replied successfully!');
+      const inqs = await getContactInquiries();
+      setContactInquiries(inqs);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update inquiry status.');
     }
   };
 
@@ -1408,6 +1426,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 { id: 'brands', label: 'Brands', icon: Building },
                 { id: 'affiliates', label: 'Affiliates', icon: Users },
                 { id: 'messages', label: 'Messages', icon: Mail },
+                { id: 'contact-messages', label: 'Contact Messages', icon: Bell },
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -1419,14 +1438,21 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       setActiveTab(item.id as any);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isActive 
                         ? 'bg-white/10 text-white border-l-4 border-purple-500 pl-2.5' 
                         : 'text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
+                    <div className="flex items-center">
+                      <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.id === 'contact-messages' && contactInquiries.filter(i => !i.replied).length > 0 && (
+                      <span className="bg-amber-500 text-white text-[7px] font-black h-3.5 px-1.5 rounded-full flex items-center justify-center min-w-3.5 border border-[#0d0f17]">
+                        {contactInquiries.filter(i => !i.replied).length}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -1560,7 +1586,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Affiliates</span>}
             </button>
-            <button
+             <button
               onClick={() => setActiveTab('messages')}
               title="Messages"
               className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
@@ -1571,6 +1597,27 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             >
               <Mail className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Messages</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('contact-messages')}
+              title="Contact Messages"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'contact-messages' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <div className="relative flex items-center shrink-0">
+                <Bell className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+                {contactInquiries.filter(i => !i.replied).length > 0 && (
+                  <span className={`absolute bg-amber-500 text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-[#0d0f17] ${
+                    isSidebarCollapsed ? '-top-1.5 -right-1' : '-top-2 left-2'
+                  }`}>
+                    {contactInquiries.filter(i => !i.replied).length}
+                  </span>
+                )}
+              </div>
+              {!isSidebarCollapsed && <span>Contact Messages</span>}
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -2576,6 +2623,96 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 </div>
               </div>
             )}
+
+          {/* TAB: CONTACT MESSAGES */}
+          {activeTab === 'contact-messages' && (
+            <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 font-sans">Contact Messages</h3>
+                <p className="text-xs text-slate-550 font-medium">Review and respond to general inquiries and partnerships leads submitted via the public contact form.</p>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
+                        <th className="py-4 px-6">Sender Details</th>
+                        <th className="py-4 px-6">Inquiry Category</th>
+                        <th className="py-4 px-6">Message details</th>
+                        <th className="py-4 px-6">Submitted At</th>
+                        <th className="py-4 px-6 text-center">Status</th>
+                        <th className="py-4 px-6 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {contactInquiries.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-400 font-bold">No contact messages received yet.</td>
+                        </tr>
+                      ) : (
+                        contactInquiries.map((inq) => {
+                          const typeLabel = (() => {
+                            switch (inq.inquiry_type) {
+                              case 'advertiser': return 'Brand Onboarding';
+                              case 'publisher': return 'Publisher Partnership';
+                              case 'technical': return 'API & Technical Support';
+                              case 'billing': return 'Billing & Deposits';
+                              default: return 'General Inquiry';
+                            }
+                          })();
+                          return (
+                            <tr key={inq.id} className="hover:bg-slate-50 transition-colors">
+                              <td className="py-4 px-6">
+                                <div className="space-y-1">
+                                  <div className="font-bold text-slate-800">{inq.full_name}</div>
+                                  <div className="text-[10px] text-slate-400 font-medium">{inq.email}</div>
+                                  {inq.phone && <div className="text-[9px] text-slate-400 font-mono">{inq.phone}</div>}
+                                  {inq.company && <div className="text-[9px] text-[#0052FF] font-bold uppercase tracking-wider">{inq.company}</div>}
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="inline-block bg-blue-50 text-[#0052FF] border border-blue-100 font-bold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                  {typeLabel}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 max-w-xs">
+                                <p className="text-slate-655 font-medium leading-relaxed break-words whitespace-pre-line">{inq.message}</p>
+                              </td>
+                              <td className="py-4 px-6 text-slate-455 font-semibold">
+                                {new Date(inq.created_at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                {inq.replied ? (
+                                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-150 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                                    <Check className="h-3 w-3" /> Replied
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-150 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                                    <Bell className="h-3 w-3 animate-pulse" /> New Inquiry
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                {!inq.replied && (
+                                  <button
+                                    onClick={() => handleMarkInquiryReplied(inq.id)}
+                                    className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                  >
+                                    Mark as Replied
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TAB 4: MESSAGES SECTION */}
           {activeTab === 'messages' && (

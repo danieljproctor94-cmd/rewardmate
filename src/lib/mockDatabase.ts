@@ -467,3 +467,112 @@ export const getAllAffiliateLinks = async (): Promise<AffiliateLink[]> => {
     return [];
   }
 };
+
+// ----------------------------------------------------
+// CONTACT INQUIRIES DATABASE INTERFACE & METHODS
+// ----------------------------------------------------
+const CONTACT_INQUIRIES_KEY = 'rewardmate_mock_contact_inquiries';
+
+export interface ContactInquiry {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  inquiry_type: string;
+  message: string;
+  replied: boolean;
+  created_at: string;
+}
+
+export const getContactInquiries = async (): Promise<ContactInquiry[]> => {
+  if (!isSupabaseConfigured) {
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    // Seed standard dummy inquiry if empty, just so the admin sees something
+    if (list.length === 0) {
+      const dummy: ContactInquiry = {
+        id: 'inq-dummy-1',
+        full_name: 'Sarah Jenkins',
+        email: 'sarah.j@activebrand.com.au',
+        phone: '0412 345 678',
+        company: 'Active Brand Pty Ltd',
+        inquiry_type: 'advertiser',
+        message: 'Hi Support, we would like to launch a CPA campaign targeting retail audiences in Australia. What are the integration steps for Shopify store click tracking?',
+        replied: false,
+        created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() // 4 hours ago
+      };
+      list.push(dummy);
+      localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(list));
+    }
+    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('contact_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.warn('Supabase contact_inquiries fetch failed, falling back to localStorage:', err);
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+};
+
+export const saveContactInquiry = async (inquiry: Omit<ContactInquiry, 'id' | 'replied' | 'created_at'>): Promise<ContactInquiry> => {
+  const newInq: ContactInquiry = {
+    ...inquiry,
+    id: `inq-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    replied: false,
+    created_at: new Date().toISOString()
+  };
+
+  if (!isSupabaseConfigured) {
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    list.push(newInq);
+    localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(list));
+    return newInq;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('contact_inquiries')
+      .insert(newInq)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('Supabase contact_inquiries save failed, falling back to localStorage:', err);
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    list.push(newInq);
+    localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(list));
+    return newInq;
+  }
+};
+
+export const markContactInquiryReplied = async (inquiryId: string): Promise<boolean> => {
+  if (!isSupabaseConfigured) {
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    const updated = list.map(inq => inq.id === inquiryId ? { ...inq, replied: true } : inq);
+    localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(updated));
+    return true;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('contact_inquiries')
+      .update({ replied: true })
+      .eq('id', inquiryId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.warn('Supabase contact_inquiries update failed, falling back to localStorage:', err);
+    const list: ContactInquiry[] = JSON.parse(localStorage.getItem(CONTACT_INQUIRIES_KEY) || '[]');
+    const updated = list.map(inq => inq.id === inquiryId ? { ...inq, replied: true } : inq);
+    localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(updated));
+    return true;
+  }
+};
