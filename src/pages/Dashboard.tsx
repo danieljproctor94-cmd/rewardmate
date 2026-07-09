@@ -1315,7 +1315,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       } else {
         const { data, error } = await supabase
           .from('profiles')
-          .update({ approval_status: 'approved' })
+          .update({ approval_status: 'approved', onboarding_completed: true })
           .eq('id', userId)
           .select();
         if (error) throw error;
@@ -2028,7 +2028,14 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                         </div>
                                       )}
                                       <div className="space-y-0.5 min-w-0">
-                                        <div className="font-bold text-slate-800 truncate">{p.business_name || p.full_name || 'No Name'}</div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="font-bold text-slate-800 truncate">{p.business_name || p.full_name || 'No Name'}</span>
+                                          {p.approval_status === 'pending' && (
+                                            <span className="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
+                                              Pending Review
+                                            </span>
+                                          )}
+                                        </div>
                                         <div className="flex items-center gap-1.5 text-[10px] text-slate-455">
                                           <span className="truncate">{p.email}</span>
                                           <span className="text-[9px] bg-slate-100 text-slate-500 font-mono font-bold px-1 rounded">
@@ -2051,6 +2058,14 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                   </td>
                                   <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center justify-center gap-2">
+                                      {p.approval_status === 'pending' && (
+                                        <button
+                                          onClick={() => handleApproveUser(p.id)}
+                                          className="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-600 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
+                                        >
+                                          Approve
+                                        </button>
+                                      )}
                                       <button
                                         onClick={() => impersonateUser?.(p)}
                                         className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-650 font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer text-[10px]"
@@ -2073,13 +2088,22 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                       <div className="bg-white rounded-2xl border border-slate-150 p-5 space-y-6 shadow-sm animate-in slide-in-from-top-2 duration-200 text-left">
                                         
                                         {/* Brand Profile Details */}
-                                        <div>
-                                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Account Details</h4>
-                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-slate-655 bg-slate-50/40 border border-slate-150 p-4 rounded-xl">
-                                            <div><span className="text-slate-400 font-bold">Website:</span> {p.website ? <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] underline ml-1">{p.website}</a> : 'Not provided'}</div>
-                                            <div><span className="text-slate-400 font-bold">Contact Name:</span> {p.full_name || 'Not provided'}</div>
-                                            <div><span className="text-slate-400 font-bold">Registered:</span> {new Date(p.created_at).toLocaleDateString('en-AU')}</div>
-                                            <div><span className="text-slate-400 font-bold">Role ID:</span> <span className="font-mono bg-slate-100 px-1 py-0.5 rounded text-[10px]">{p.id}</span></div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                          <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Account Details</h4>
+                                            <div className="space-y-2 bg-slate-50/40 border border-slate-150 p-4 rounded-xl font-semibold text-slate-655 text-xs">
+                                              <div><span className="text-slate-400 font-bold">Contact Name:</span> {p.full_name || 'Not provided'}</div>
+                                              <div><span className="text-slate-400 font-bold">Registered:</span> {new Date(p.created_at).toLocaleDateString('en-AU')}</div>
+                                              <div><span className="text-slate-400 font-bold">Role ID:</span> <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{p.id}</span></div>
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Brand Onboarding Details</h4>
+                                            <div className="space-y-2 bg-slate-50/40 border border-slate-150 p-4 rounded-xl font-semibold text-slate-655 text-xs">
+                                              <div><span className="text-slate-400 font-bold">Company Website:</span> {p.website ? <a href={p.website} target="_blank" rel="noreferrer" className="text-[#0052FF] underline ml-1">{p.website}</a> : 'Not provided'}</div>
+                                              <div><span className="text-slate-400 font-bold">Industry Category:</span> {p.channels || 'Not provided'}</div>
+                                              <div><span className="text-slate-400 font-bold">Monthly Ad Budget:</span> {p.traffic || 'Not provided'}</div>
+                                            </div>
                                           </div>
                                         </div>
 

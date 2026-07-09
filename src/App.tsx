@@ -103,7 +103,7 @@ export default function App() {
           path="/dashboard" 
           element={
             isAuthenticated ? (
-              profile?.user_type === 'publisher' && (!profile.onboarding_completed || !profile.business_name || !profile.website || profile.approval_status === 'pending') ? (
+              (profile?.user_type === 'publisher' || profile?.user_type === 'advertiser') && (!profile.onboarding_completed || !profile.business_name || !profile.website || profile.approval_status === 'pending') ? (
                 <Onboarding onOnboardingComplete={() => {
                   window.location.reload();
                 }} />
