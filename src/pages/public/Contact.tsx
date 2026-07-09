@@ -292,7 +292,7 @@ export default function Contact() {
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Name *</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. John Doe"
+                    placeholder=""
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
@@ -303,7 +303,7 @@ export default function Contact() {
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Business Email *</label>
                   <input 
                     type="email" 
-                    placeholder="e.g. name@company.com.au"
+                    placeholder=""
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
@@ -317,7 +317,7 @@ export default function Contact() {
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Phone Number</label>
                   <input 
                     type="tel" 
-                    placeholder="e.g. 0400 000 000"
+                    placeholder=""
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
@@ -327,7 +327,7 @@ export default function Contact() {
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Company Name</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. Acme Corporation"
+                    placeholder=""
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
@@ -353,7 +353,7 @@ export default function Contact() {
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Message details *</label>
                 <textarea 
-                  placeholder="How can we assist your business performance campaign today?"
+                  placeholder=""
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={5}
