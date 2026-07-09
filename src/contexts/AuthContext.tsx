@@ -32,7 +32,7 @@ interface AuthContextType {
   loading: boolean;
   userType: UserType | null;
   signIn: (email: string, password?: string) => Promise<void>;
-  signUp: (email: string, password?: string, fullName?: string, role?: UserType) => Promise<void>;
+  signUp: (email: string, password?: string, fullName?: string, role?: UserType, extraData?: Partial<Profile>) => Promise<void>;
   signOut: () => Promise<void>;
   updateBalance: (amount: number, type: 'deposit' | 'withdrawal' | 'payout' | 'spend') => Promise<void>;
   updateProfileDetails: (updates: Partial<Profile>) => Promise<void>;
@@ -330,7 +330,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password?: string, fullName?: string, role: UserType = 'publisher') => {
+  const signUp = async (email: string, password?: string, fullName?: string, role: UserType = 'publisher', extraData?: Partial<Profile>) => {
     try {
       if (isMock) {
         // Mock Sign-up Logic
@@ -345,9 +345,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           full_name: fullName || email.split('@')[0],
           avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(fullName || email)}`,
           user_type: role,
-          approval_status: role === 'publisher' ? 'pending' : 'approved',
+          approval_status: (role === 'publisher' || role === 'advertiser') ? 'pending' : 'approved',
           wallet_balance: role === 'advertiser' ? 1000.00 : 0.00,
-          onboarding_completed: role !== 'publisher',
+          onboarding_completed: role === 'advertiser' ? true : (role !== 'publisher'),
+          ...extraData
         };
 
         const updated = [...storedProfiles, newProfile];
@@ -356,7 +357,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('rewardmate_mock_active_user_id', newProfile.id);
         setUser({ id: newProfile.id, email: newProfile.email });
         setProfile(newProfile);
-        toast.success(`Registered successfully as ${role}!`);
+        if (role !== 'advertiser') {
+          toast.success(`Registered successfully as ${role}!`);
+        }
       } else {
         // Supabase Real Sign-up
         const { error } = await supabase.auth.signUp({
@@ -366,14 +369,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             data: {
               full_name: fullName,
               user_type: role,
+              ...extraData
             }
           }
         });
         if (error) throw error;
-        toast.success('Registration successful! Please check your email or log in.');
+        if (role !== 'advertiser') {
+          toast.success('Registration successful! Please check your email or log in.');
+        }
       }
     } catch (err: any) {
-      toast.error(err.message);
+      if (role !== 'advertiser') {
+        toast.error(err.message);
+      }
       throw err;
     }
   };

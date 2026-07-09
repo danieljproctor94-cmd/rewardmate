@@ -106,7 +106,7 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
     }
   };
 
-  const publisherName = profile?.full_name || profile?.email.split('@')[0];
+
 
   if (submitted || profile?.approval_status === 'pending') {
     return (
@@ -118,10 +118,10 @@ export default function Onboarding({ onOnboardingComplete }: { onOnboardingCompl
 
           <div className="space-y-2 text-center">
             <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
-              {isBrand ? 'Brand Under Review' : 'Application Under Review'}
+              Application Pending Review
             </h1>
             <p className="text-xs text-slate-550 leading-relaxed font-sans font-medium">
-              Hi <strong>{publisherName}</strong>, your {isBrand ? 'brand' : 'publisher'} application details have been submitted. Our administrators manually verify all new {isBrand ? 'advertiser brands' : 'partner accounts'}.
+              Your account is pending. Please allow 24-48 hours for our team to review the application.
             </p>
           </div>
 
