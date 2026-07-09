@@ -216,5 +216,55 @@ INSERT INTO public.profiles (id, email, full_name, user_type, approval_status, w
 ('a9dd24da-573e-41df-9214-cc3533f81e40', 'sam@danielproctor.com', 'Sam Proctor', 'publisher', 'approved', 0.00, true)
 ON CONFLICT (id) DO NOTHING;
 
+-- 9. Messages Table
+CREATE TABLE IF NOT EXISTS public.messages (
+    id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL,
+    sender_name TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    receiver_name TEXT NOT NULL,
+    subject TEXT,
+    body TEXT NOT NULL,
+    read BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on Messages
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow users to access their own messages" ON public.messages
+    FOR ALL USING (
+        auth.uid()::text = sender_id OR 
+        auth.uid()::text = receiver_id
+    );
+
+-- 10. Contact Inquiries Table
+CREATE TABLE IF NOT EXISTS public.contact_inquiries (
+    id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    company TEXT,
+    inquiry_type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    replied BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on Contact Inquiries
+ALTER TABLE public.contact_inquiries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert to contact inquiries" ON public.contact_inquiries
+    FOR INSERT TO public
+    WITH CHECK (true);
+
+CREATE POLICY "Allow admins to manage contact inquiries" ON public.contact_inquiries
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );
+
 
 
