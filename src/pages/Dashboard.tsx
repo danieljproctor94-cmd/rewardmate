@@ -1434,9 +1434,17 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => {
+                    onClick={async () => {
                       setActiveTab(item.id as any);
                       setMobileMenuOpen(false);
+                      if (item.id === 'contact-messages') {
+                        try {
+                          const inqs = await getContactInquiries();
+                          setContactInquiries(inqs);
+                        } catch (err) {
+                          console.error('Error reloading contact messages on mobile click:', err);
+                        }
+                      }
                     }}
                     className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isActive 
@@ -1599,7 +1607,15 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               {!isSidebarCollapsed && <span>Messages</span>}
             </button>
             <button
-              onClick={() => setActiveTab('contact-messages')}
+              onClick={async () => {
+                setActiveTab('contact-messages');
+                try {
+                  const inqs = await getContactInquiries();
+                  setContactInquiries(inqs);
+                } catch (err) {
+                  console.error('Error reloading contact messages on click:', err);
+                }
+              }}
               title="Contact Messages"
               className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'contact-messages' 
