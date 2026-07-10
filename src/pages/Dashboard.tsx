@@ -2572,6 +2572,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
+  const [adminChartRange, setAdminChartRange] = useState<'1m' | '3m' | '6m' | '12m' | 'ytd'>('3m');
 
   // Account Settings Form State
   const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
@@ -3603,6 +3604,328 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       <span className="text-slate-500">Total System Offers</span>
                       <span className="font-bold text-slate-800">{campaigns.length}</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Performance Audit Chart */}
+              <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Network Performance Audit</h3>
+                    <p className="text-[10px] text-slate-400 font-bold">Auditing clicks, total sales, and affiliate payout commissions</p>
+                  </div>
+                  
+                  {/* Time Range Filters */}
+                  <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-150 text-[10px] font-black shrink-0 select-none">
+                    {(['1m', '3m', '6m', '12m', 'ytd'] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setAdminChartRange(r)}
+                        className={`h-7 px-3.5 rounded-lg transition-all cursor-pointer ${
+                          adminChartRange === r 
+                            ? 'bg-white text-slate-900 shadow-sm border border-slate-150' 
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {r === '1m' ? '1 Month' :
+                         r === '3m' ? '3 Months' :
+                         r === '6m' ? '6 Months' :
+                         r === '12m' ? '12 Months' : 'YTD'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Graph Grid */}
+                {(() => {
+                  const { labels, clicksData, salesData, commData } = (() => {
+                    const now = new Date();
+                    let cutoffDate = new Date();
+                    let bucketCount = 6;
+                    let bucketUnit: 'day' | 'month' = 'month';
+
+                    if (adminChartRange === '1m') {
+                      cutoffDate.setDate(now.getDate() - 30);
+                      bucketCount = 30;
+                      bucketUnit = 'day';
+                    } else if (adminChartRange === '3m') {
+                      cutoffDate.setMonth(now.getMonth() - 3);
+                      bucketCount = 3;
+                      bucketUnit = 'month';
+                    } else if (adminChartRange === '6m') {
+                      cutoffDate.setMonth(now.getMonth() - 6);
+                      bucketCount = 6;
+                      bucketUnit = 'month';
+                    } else if (adminChartRange === '12m') {
+                      cutoffDate.setMonth(now.getMonth() - 12);
+                      bucketCount = 12;
+                      bucketUnit = 'month';
+                    } else if (adminChartRange === 'ytd') {
+                      cutoffDate = new Date(now.getFullYear(), 0, 1);
+                      bucketCount = now.getMonth() + 1;
+                      bucketUnit = 'month';
+                    }
+
+                    const lbs: string[] = [];
+                    const clks: number[] = [];
+                    const sls: number[] = [];
+                    const cms: number[] = [];
+
+                    if (bucketUnit === 'day') {
+                      for (let i = bucketCount - 1; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(now.getDate() - i);
+                        lbs.push(d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }));
+
+                        const dStart = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+                        const dEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+
+                        const dayClicks = clicks.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= dStart && dt <= dEnd;
+                        }).length;
+
+                        const approvedConvs = conversions.filter(c => c.status === 'approved');
+                        const daySales = approvedConvs.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= dStart && dt <= dEnd;
+                        }).reduce((sum, c) => sum + Number(c.sale_amount || 0), 0);
+
+                        const dayComm = approvedConvs.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= dStart && dt <= dEnd;
+                        }).reduce((sum, c) => sum + Number(c.payout || 0), 0);
+
+                        clks.push(dayClicks);
+                        sls.push(daySales);
+                        cms.push(dayComm);
+                      }
+                    } else {
+                      for (let i = bucketCount - 1; i >= 0; i--) {
+                        const d = new Date();
+                        d.setMonth(now.getMonth() - i);
+                        lbs.push(d.toLocaleDateString('en-AU', { month: 'short', year: '2-digit' }));
+
+                        const year = d.getFullYear();
+                        const month = d.getMonth();
+                        const mStart = new Date(year, month, 1);
+                        const mEnd = new Date(year, month + 1, 0, 23, 59, 59);
+
+                        const mClicks = clicks.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= mStart && dt <= mEnd;
+                        }).length;
+
+                        const approvedConvs = conversions.filter(c => c.status === 'approved');
+                        const mSales = approvedConvs.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= mStart && dt <= mEnd;
+                        }).reduce((sum, c) => sum + Number(c.sale_amount || 0), 0);
+
+                        const mComm = approvedConvs.filter(c => {
+                          const dt = new Date(c.created_at);
+                          return dt >= mStart && dt <= mEnd;
+                        }).reduce((sum, c) => sum + Number(c.payout || 0), 0);
+
+                        clks.push(mClicks);
+                        sls.push(mSales);
+                        cms.push(mComm);
+                      }
+                    }
+
+                    return { labels: lbs, clicksData: clks, salesData: sls, commData: cms };
+                  })();
+
+                  const maxClicks = Math.max(...clicksData) || 1;
+                  const maxSales = Math.max(...salesData) || 1;
+                  const maxComm = Math.max(...commData) || 1;
+
+                  return (
+                    <div className="space-y-4">
+                      {/* Vertical bars layout */}
+                      <div className="h-64 flex items-end justify-between px-2 gap-4 relative border-b border-slate-100">
+                        {/* Grid lines */}
+                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 border-b border-slate-200">
+                          <div className="border-b border-slate-200 w-full"></div>
+                          <div className="border-b border-slate-200 w-full"></div>
+                          <div className="border-b border-slate-200 w-full"></div>
+                        </div>
+
+                        {labels.map((lbl, idx) => {
+                          const clickPct = (clicksData[idx] / maxClicks) * 100;
+                          const salePct = (salesData[idx] / maxSales) * 100;
+                          const commPct = (commData[idx] / maxComm) * 100;
+
+                          return (
+                            <div key={idx} className="flex-1 flex flex-col items-center group relative h-full justify-end z-10">
+                              {/* Hover Tooltip card details */}
+                              <div className="absolute bottom-full mb-2 bg-[#090b16] text-white text-[10px] font-bold p-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-xl pointer-events-none z-50 min-w-[140px] space-y-1">
+                                <div className="text-[9px] uppercase tracking-wider text-slate-400 border-b border-slate-805 pb-1 mb-1">{lbl} Details</div>
+                                <div className="flex justify-between gap-4">
+                                  <span className="text-slate-400">Clicks:</span>
+                                  <span>{clicksData[idx]}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                  <span className="text-slate-400">Sales:</span>
+                                  <span className="text-emerald-400">${salesData[idx].toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                  <span className="text-slate-400">Commission:</span>
+                                  <span className="text-[#0052FF]">${commData[idx].toFixed(2)}</span>
+                                </div>
+                              </div>
+
+                              {/* Three side-by-side series bars */}
+                              <div className="w-full flex items-end justify-center gap-1.5 h-[80%] pb-1">
+                                {/* Clicks Bar */}
+                                <div 
+                                  className="w-2.5 sm:w-4 bg-indigo-500/80 group-hover:bg-indigo-650 rounded-t-sm transition-all duration-300"
+                                  style={{ height: `${clickPct * 0.9}%` }}
+                                  title={`Clicks: ${clicksData[idx]}`}
+                                ></div>
+                                {/* Sales Bar */}
+                                <div 
+                                  className="w-2.5 sm:w-4 bg-emerald-400/80 group-hover:bg-emerald-500 rounded-t-sm transition-all duration-300"
+                                  style={{ height: `${salePct * 0.9}%` }}
+                                  title={`Sales Volume: $${salesData[idx].toFixed(2)}`}
+                                ></div>
+                                {/* Commission Bar */}
+                                <div 
+                                  className="w-2.5 sm:w-4 bg-[#0052FF]/80 group-hover:bg-[#0052FF] rounded-t-sm transition-all duration-300"
+                                  style={{ height: `${commPct * 0.9}%` }}
+                                  title={`Commission: $${commData[idx].toFixed(2)}`}
+                                ></div>
+                              </div>
+
+                              {/* Label */}
+                              <span className="text-[9px] font-bold text-slate-400 mt-2 truncate w-full text-center">{lbl}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Legend Row */}
+                      <div className="flex flex-wrap items-center justify-center gap-6 text-[10px] font-black text-slate-600 pt-2 select-none">
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-3 bg-indigo-500 rounded-sm"></div>
+                          <span>Clicks Logged</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-3 bg-emerald-400 rounded-sm"></div>
+                          <span>Sales Volume ($ AUD)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-3 bg-[#0052FF] rounded-sm"></div>
+                          <span>Commissions Generated ($ AUD)</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Latest Registered Entities Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Latest Brands */}
+                <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm space-y-4 text-left">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Latest Brands</h3>
+                    <p className="text-[10px] text-slate-400 font-bold font-sans">Most recently registered advertiser profiles</p>
+                  </div>
+                  
+                  <div className="divide-y divide-slate-50 font-sans text-xs">
+                    {(() => {
+                      const latestBrands = profiles
+                        .filter(p => p.user_type === 'advertiser')
+                        .slice(-5)
+                        .reverse();
+                      if (latestBrands.length === 0) {
+                        return <div className="text-slate-400 italic py-6 text-center">No brands registered.</div>;
+                      }
+                      return latestBrands.map((b) => (
+                        <div key={b.id} className="flex items-center justify-between py-3 hover:bg-slate-50/50 px-2 rounded-xl transition-all">
+                          <div className="flex items-center space-x-3 text-left min-w-0">
+                            <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-slate-100 flex items-center justify-center font-bold text-slate-700 overflow-hidden shrink-0">
+                              {b.avatar_url ? (
+                                <img src={b.avatar_url} className="h-full w-full object-cover" alt="" />
+                              ) : (
+                                (b.business_name || b.full_name || 'B').charAt(0).toUpperCase()
+                              )}
+                            </div>
+                            <div className="truncate">
+                              <div className="font-extrabold text-slate-800 truncate">{b.business_name || b.full_name}</div>
+                              <div className="text-[10px] text-slate-400 font-medium truncate">{b.email}</div>
+                            </div>
+                          </div>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[8px] font-black uppercase border ${
+                            b.approval_status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                            b.approval_status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                            'bg-rose-50 border-rose-100 text-rose-700'
+                          }`}>
+                            {b.approval_status}
+                          </span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+
+                {/* Latest Affiliates */}
+                <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm space-y-4 text-left">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Latest Affiliates</h3>
+                    <p className="text-[10px] text-slate-400 font-bold font-sans">Most recently registered partner profiles</p>
+                  </div>
+                  
+                  <div className="divide-y divide-slate-50 font-sans text-xs">
+                    {(() => {
+                      const latestAffs = profiles
+                        .filter(p => p.user_type === 'publisher')
+                        .slice(-5)
+                        .reverse();
+                      if (latestAffs.length === 0) {
+                        return <div className="text-slate-400 italic py-6 text-center">No affiliates registered.</div>;
+                      }
+                      return latestAffs.map((a) => (
+                        <div key={a.id} className="flex items-center justify-between py-3 hover:bg-slate-50/50 px-2 rounded-xl transition-all">
+                          <div className="flex items-center space-x-3 text-left min-w-0">
+                            <div className="h-8 w-8 rounded-lg bg-[#0052FF]/5 border border-slate-100 flex items-center justify-center font-bold text-slate-700 overflow-hidden shrink-0">
+                              {a.avatar_url ? (
+                                <img src={a.avatar_url} className="h-full w-full object-cover" alt="" />
+                              ) : (
+                                (a.business_name || a.full_name || 'A').charAt(0).toUpperCase()
+                              )}
+                            </div>
+                            <div className="truncate">
+                              <div className="font-extrabold text-slate-800 truncate">{a.business_name || a.full_name}</div>
+                              <div className="text-[10px] text-slate-400 font-medium truncate flex items-center gap-1.5">
+                                <span>{a.email}</span>
+                                {a.media_kit_url && (
+                                  <a 
+                                    href={a.media_kit_url} 
+                                    target="_blank" 
+                                    rel="noreferrer" 
+                                    className="text-emerald-600 hover:text-emerald-700 font-extrabold flex items-center gap-0.5 hover:underline"
+                                    title="Open Media Kit"
+                                  >
+                                    • Media Kit
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[8px] font-black uppercase border ${
+                            a.approval_status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                            a.approval_status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                            'bg-rose-50 border-rose-100 text-rose-700'
+                          }`}>
+                            {a.approval_status}
+                          </span>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               </div>
