@@ -96,6 +96,24 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [selectedPublisherForModal, setSelectedPublisherForModal] = useState<any | null>(null);
+  const [hasClickedAffiliates, setHasClickedAffiliates] = useState(false);
+  const [prevPendingCount, setPrevPendingCount] = useState(0);
+  
+  const pendingApplicationsCount = programApplications.filter(app => app.status === 'pending').length;
+
+  useEffect(() => {
+    if (activeTab === 'affiliates') {
+      setHasClickedAffiliates(true);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (pendingApplicationsCount > prevPendingCount) {
+      setHasClickedAffiliates(false);
+    }
+    setPrevPendingCount(pendingApplicationsCount);
+  }, [pendingApplicationsCount]);
+
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
@@ -414,6 +432,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
+                const showBadge = item.id === 'affiliates' && !hasClickedAffiliates && pendingApplicationsCount > 0;
                 
                 return (
                   <button
@@ -428,8 +447,17 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         : 'text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {showBadge && (
+                        <span className="bg-[#0052FF] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full select-none shrink-0">
+                          {pendingApplicationsCount}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -554,14 +582,26 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
              <button
               onClick={() => setActiveTab('affiliates')}
               title="Affiliates"
-              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} ${
                 activeTab === 'affiliates' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
                   : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
-              {!isSidebarCollapsed && <span>Affiliates</span>}
+              <div className="flex items-center truncate">
+                <div className="relative">
+                  <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+                  {isSidebarCollapsed && !hasClickedAffiliates && pendingApplicationsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#0052FF]" />
+                  )}
+                </div>
+                {!isSidebarCollapsed && <span>Affiliates</span>}
+              </div>
+              {!isSidebarCollapsed && !hasClickedAffiliates && pendingApplicationsCount > 0 && (
+                <span className="bg-[#0052FF] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full select-none shrink-0 ml-2">
+                  {pendingApplicationsCount}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setActiveTab('brand-settings')}
@@ -1280,7 +1320,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                               </td>
                               <td className="py-4 px-6 text-right">
                                 {app.status === 'pending' ? (
-                                  <div className="flex justify-end space-x-2">
+                                  <div className="flex justify-end space-x-2 font-sans animate-in fade-in duration-200">
                                     <button
                                       onClick={async () => {
                                         try {
@@ -1291,7 +1331,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                                           toast.error(err.message || 'Failed to approve application.');
                                         }
                                       }}
-                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] h-7 px-3 rounded-lg transition-colors cursor-pointer"
+                                      className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer"
                                     >
                                       Approve
                                     </button>
@@ -1305,7 +1345,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                                           toast.error(err.message || 'Failed to decline application.');
                                         }
                                       }}
-                                      className="bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] h-7 px-3 rounded-lg transition-colors cursor-pointer"
+                                      className="border border-slate-200 hover:bg-slate-50 text-slate-650 hover:text-slate-800 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer"
                                     >
                                       Decline
                                     </button>
