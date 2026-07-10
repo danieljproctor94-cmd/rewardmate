@@ -40,7 +40,8 @@ CREATE TABLE public.profiles (
     target_countries TEXT,
     year_founded INTEGER,
     facebook_url TEXT,
-    instagram_url TEXT
+    instagram_url TEXT,
+    auto_approve BOOLEAN DEFAULT false
 );
 
 -- Enable RLS on Profiles

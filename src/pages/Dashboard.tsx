@@ -1334,6 +1334,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     const program_terms = (form.elements.namedItem('program_terms') as HTMLTextAreaElement).value;
                     const facebook_url = (form.elements.namedItem('facebook_url') as HTMLInputElement).value;
                     const instagram_url = (form.elements.namedItem('instagram_url') as HTMLInputElement).value;
+                    const auto_approve = (form.elements.namedItem('auto_approve') as HTMLInputElement).checked;
                     const target_countries = selectedCountries.join(',');
 
                     try {
@@ -1349,7 +1350,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         program_terms,
                         target_countries,
                         facebook_url,
-                        instagram_url
+                        instagram_url,
+                        auto_approve
                       });
                       toast.success('Brand settings updated successfully!');
                       setTimeout(() => {
@@ -1545,6 +1547,21 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       placeholder="Outline commission terms, brand guidelines, and disallowed traffic sources..."
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] h-24 font-sans"
                     />
+                  </div>
+
+                  {/* Auto Approve Toggle */}
+                  <div className="flex items-center space-x-3 py-3 border-t border-b border-slate-100/70">
+                    <input 
+                      type="checkbox" 
+                      name="auto_approve"
+                      id="auto_approve_toggle"
+                      defaultChecked={profile.auto_approve || false}
+                      className="rounded border-slate-300 text-[#0052FF] focus:ring-[#0052FF] h-4 w-4 cursor-pointer"
+                    />
+                    <label htmlFor="auto_approve_toggle" className="text-xs font-extrabold text-slate-800 cursor-pointer select-none">
+                      Auto-Approve Affiliates
+                      <span className="text-[10px] text-slate-400 font-bold block mt-0.5">Automatically approve publishers who apply to your campaign.</span>
+                    </label>
                   </div>
 
                   <button

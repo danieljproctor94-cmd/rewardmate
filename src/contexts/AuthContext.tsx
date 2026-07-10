@@ -24,6 +24,7 @@ export interface Profile {
   year_founded?: number;
   facebook_url?: string;
   instagram_url?: string;
+  auto_approve?: boolean;
   payout_method?: 'paypal' | 'bank' | null;
   paypal_email?: string;
   bank_name?: string;
@@ -513,6 +514,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.channels !== undefined) newMeta.channels = updates.channels;
         if (updates.traffic !== undefined) newMeta.traffic = updates.traffic;
         if (updates.avatar_url !== undefined) newMeta.avatar_url = updates.avatar_url;
+        if (updates.auto_approve !== undefined) newMeta.auto_approve = updates.auto_approve;
 
         const { error: authError } = await supabase.auth.updateUser({
           data: newMeta
@@ -539,6 +541,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.year_founded !== undefined) dbUpdates.year_founded = updates.year_founded;
         if (updates.facebook_url !== undefined) dbUpdates.facebook_url = updates.facebook_url;
         if (updates.instagram_url !== undefined) dbUpdates.instagram_url = updates.instagram_url;
+        if (updates.auto_approve !== undefined) dbUpdates.auto_approve = updates.auto_approve;
 
         if (Object.keys(dbUpdates).length > 0) {
           const { error: dbError } = await supabase

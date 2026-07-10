@@ -762,24 +762,56 @@ export const createProgramApplication = async (publisherId: string, campaignId: 
     const existing = list.find(a => a.publisher_id === publisherId && a.campaign_id === campaignId);
     if (existing) return existing;
 
+    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    const camp = campaigns.find(c => c.id === campaignId);
+    const adv = profiles.find((p: any) => p.id === camp?.advertiser_id);
+    const overrides = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
+    const advOverride = camp ? overrides[camp.advertiser_id] : null;
+
+    const autoApprove = advOverride?.auto_approve || adv?.auto_approve || false;
+    const initialStatus = autoApprove ? 'approved' : 'pending';
+
     const newApp: ProgramApplication = {
       id: `app-${Date.now()}`,
       publisher_id: publisherId,
       campaign_id: campaignId,
-      status: 'pending',
+      status: initialStatus,
       created_at: new Date().toISOString()
     };
     list.push(newApp);
     localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(list));
+
+    if (autoApprove) {
+      await generateAffiliateLink(publisherId, campaignId);
+    }
     return newApp;
   }
 
+  // 1. Fetch campaign and advertiser's auto-approve configuration
+  const { data: campData } = await supabase
+    .from('campaigns')
+    .select('*, profiles:advertiser_id(auto_approve)')
+    .eq('id', campaignId)
+    .single();
+
+  const autoApprove = campData?.profiles?.auto_approve || false;
+  const initialStatus = autoApprove ? 'approved' : 'pending';
+
   const { data, error } = await supabase
     .from('program_applications')
-    .insert({ publisher_id: publisherId, campaign_id: campaignId, status: 'pending' })
+    .insert({ publisher_id: publisherId, campaign_id: campaignId, status: initialStatus })
     .select()
     .single();
   if (error) throw error;
+
+  if (autoApprove) {
+    try {
+      await generateAffiliateLink(publisherId, campaignId);
+    } catch (e) {
+      console.error('Failed to auto-generate link:', e);
+    }
+  }
   return data;
 };
 
