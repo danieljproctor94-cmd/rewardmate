@@ -88,14 +88,31 @@ const setStored = <T>(key: string, data: T[]) => {
 
 export const getCampaigns = async (): Promise<Campaign[]> => {
   if (!isSupabaseConfigured) {
-    return getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    return campaigns.map(c => {
+      const adv = profiles.find((p: any) => p.id === c.advertiser_id);
+      return {
+        ...c,
+        logo_url: adv?.avatar_url || c.logo_url || c.name.charAt(0).toUpperCase(),
+        advertiser_name: adv?.business_name || adv?.full_name || 'Partner Brand'
+      };
+    });
   }
   try {
-    const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('*, profiles:advertiser_id(avatar_url, business_name, full_name)')
+      .order('created_at', { ascending: false });
+      
     if (error) throw error;
     if (!data) return [];
-    return data.map((camp: Campaign) => {
+    return data.map((camp: any) => {
       const matchedMock = DEFAULT_CAMPAIGNS.find(c => c.name.toLowerCase() === camp.name.toLowerCase());
+      const adv = camp.profiles;
+      const logoUrl = adv?.avatar_url || (matchedMock ? matchedMock.logo_url : camp.name.charAt(0).toUpperCase());
+      const advertiserName = adv?.business_name || adv?.full_name || 'Partner Brand';
+      
       if (matchedMock) {
         return {
           ...camp,
@@ -107,22 +124,28 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
           cr: matchedMock.cr,
           epc: matchedMock.epc,
           avg_payout_days: matchedMock.avg_payout_days,
-          logo_url: matchedMock.logo_url,
-          logo_bg: matchedMock.logo_bg
+          logo_url: logoUrl,
+          logo_bg: matchedMock.logo_bg,
+          advertiser_name: advertiserName
         };
       }
       return {
         ...camp,
         itp_support: 'Yes',
         target_markets: 'AU',
-        commission_rate: camp.payout_type === 'cpa' ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` : `$${Number(camp.payout_amount).toFixed(2)} per Click`,
+        commission_rate: camp.payout_type === 'revshare' 
+          ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` 
+          : camp.payout_type === 'cpc'
+            ? `$${Number(camp.payout_amount).toFixed(2)} per Click`
+            : `$${Number(camp.payout_amount).toFixed(2)} per Sale`,
         avc: '-',
         aov: '-',
         cr: '-',
         epc: '-',
         avg_payout_days: '30',
-        logo_url: camp.name.charAt(0).toUpperCase(),
-        logo_bg: 'bg-[#0052FF]'
+        logo_url: logoUrl,
+        logo_bg: 'bg-[#0052FF]',
+        advertiser_name: advertiserName
       };
     });
   } catch (err) {

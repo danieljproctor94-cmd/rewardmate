@@ -194,7 +194,11 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               ...camp,
               itp_support: 'Yes',
               target_markets: 'AU',
-              commission_rate: camp.payout_type === 'cpa' ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` : `$${Number(camp.payout_amount).toFixed(2)} per Click`,
+              commission_rate: camp.payout_type === 'revshare' 
+                ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` 
+                : camp.payout_type === 'cpc'
+                  ? `$${Number(camp.payout_amount).toFixed(2)} per Click`
+                  : `$${Number(camp.payout_amount).toFixed(2)} per Sale`,
               avc: '-',
               aov: '-',
               cr: '-',
@@ -1069,15 +1073,14 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     const grad = colors[camp.id.charCodeAt(camp.id.length - 1) % colors.length] || colors[0];
 
                     const commRate = (() => {
-                      if (camp.id === 'campaign-1') return '5% Comm.';
-                      if (camp.id === 'campaign-2') return '6% Comm.';
-                      if (camp.id === 'campaign-3') return '7% Comm.';
-                      if (camp.id === 'campaign-4') return '8% Comm.';
-                      if (camp.id === 'campaign-5') return '10% Comm.';
-                      if (camp.id === 'campaign-6') return '5% Comm.';
-                      if (camp.id === 'campaign-7') return '10% Comm.';
-                      const charCode = camp.id.charCodeAt(camp.id.length - 1) || 0;
-                      return `${5 + (charCode % 4)}% Comm.`;
+                      if (camp.payout_type === 'revshare') {
+                        return `${camp.payout_amount}% Comm.`;
+                      } else if (camp.payout_type === 'cpa') {
+                        return `$${camp.payout_amount} CPA`;
+                      } else if (camp.payout_type === 'cpc') {
+                        return `$${camp.payout_amount} CPC`;
+                      }
+                      return `${camp.payout_amount}% Comm.`;
                     })();
 
                     return (
@@ -1087,14 +1090,20 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         className="w-40 shrink-0 lg:w-full lg:shrink-1 bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center space-y-3 relative overflow-hidden"
                       >
                         {/* Logo Circle */}
-                        <div className={`h-14 w-14 rounded-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm shadow-sm transition-transform group-hover:scale-105 duration-200`}>
-                          {initials}
+                        <div className="h-14 w-14 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-extrabold text-sm shadow-sm transition-transform group-hover:scale-105 duration-200 shrink-0">
+                          {camp.logo_url && (camp.logo_url.startsWith('http') || camp.logo_url.startsWith('data:')) ? (
+                            <img src={camp.logo_url} className="h-full w-full object-cover" alt={camp.name} />
+                          ) : (
+                            <div className={`h-full w-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-extrabold text-sm`}>
+                              {initials}
+                            </div>
+                          )}
                         </div>
 
                         {/* Brand Details */}
                         <div className="w-full truncate">
                           <h4 className="text-[11px] font-black text-slate-800 truncate font-sans group-hover:text-[#0052FF] transition-colors">{camp.name}</h4>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">Daniel Proctor</span>
+                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">{camp.advertiser_name || 'Daniel Proctor'}</span>
                         </div>
 
                         {/* Commission Pill */}
@@ -1492,8 +1501,14 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                 </td>
                                 <td className="py-3.5 px-4">
                                   <div className="flex items-center space-x-3 text-left">
-                                    <div className={`h-7 w-7 rounded-full flex items-center justify-center text-white text-[9px] font-black shadow-sm shrink-0 ${camp.logo_bg || 'bg-slate-500'}`}>
-                                      {camp.logo_url || camp.name.charAt(0)}
+                                    <div className="h-7 w-7 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-extrabold text-[9px] shadow-sm shrink-0">
+                                      {camp.logo_url && (camp.logo_url.startsWith('http') || camp.logo_url.startsWith('data:')) ? (
+                                        <img src={camp.logo_url} className="h-full w-full object-cover" alt={camp.name} />
+                                      ) : (
+                                        <div className={`h-full w-full flex items-center justify-center text-white font-black ${camp.logo_bg || 'bg-slate-500'}`}>
+                                          {camp.name.charAt(0).toUpperCase()}
+                                        </div>
+                                      )}
                                     </div>
                                     <div>
                                       <div className="font-bold text-slate-800 hover:text-[#0052FF] cursor-pointer text-xs" onClick={() => setSelectedCampaignForModal(camp)}>
@@ -1559,8 +1574,14 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         <div key={camp.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all text-left">
                           <div className="space-y-3">
                             <div className="flex items-center space-x-3">
-                              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-sm shrink-0 ${camp.logo_bg || 'bg-slate-500'}`}>
-                                {camp.logo_url || camp.name.charAt(0)}
+                              <div className="h-8 w-8 rounded-full bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-extrabold text-[10px] shadow-sm shrink-0">
+                                {camp.logo_url && (camp.logo_url.startsWith('http') || camp.logo_url.startsWith('data:')) ? (
+                                  <img src={camp.logo_url} className="h-full w-full object-cover" alt={camp.name} />
+                                ) : (
+                                  <div className={`h-full w-full flex items-center justify-center text-white font-black ${camp.logo_bg || 'bg-slate-500'}`}>
+                                    {camp.name.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <h4 className="text-xs font-bold text-slate-800 leading-none mb-1">{camp.name}</h4>
@@ -2271,8 +2292,14 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
-                  {selectedCampaignForModal.name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-extrabold text-xs shadow-sm shrink-0">
+                  {selectedCampaignForModal.logo_url && (selectedCampaignForModal.logo_url.startsWith('http') || selectedCampaignForModal.logo_url.startsWith('data:')) ? (
+                    <img src={selectedCampaignForModal.logo_url} className="h-full w-full object-cover" alt={selectedCampaignForModal.name} />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-xs">
+                      {selectedCampaignForModal.name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-800 leading-none mb-1">{selectedCampaignForModal.name}</h3>
