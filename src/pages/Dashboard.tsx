@@ -95,6 +95,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [campPayoutAmount, setCampPayoutAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
+  const [selectedPublisherForModal, setSelectedPublisherForModal] = useState<any | null>(null);
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
@@ -1255,7 +1256,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                                     {pubName.charAt(0).toUpperCase()}
                                   </div>
                                   <div>
-                                    <div className="font-bold text-slate-900 text-xs">{pubName}</div>
+                                    <div 
+                                      className="font-bold text-slate-900 text-xs hover:text-[#0052FF] cursor-pointer hover:underline"
+                                      onClick={() => setSelectedPublisherForModal(app.publisher)}
+                                      title="Click to view affiliate profile, stats, and traffic sources"
+                                    >
+                                      {pubName}
+                                    </div>
                                     <div className="text-[10px] text-slate-400 font-medium">{pubEmail}</div>
                                   </div>
                                 </div>
@@ -1829,6 +1836,126 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           </div>
         </div>
       )}
+      {/* Affiliate Details Modal */}
+      {selectedPublisherForModal && (() => {
+        const pub = selectedPublisherForModal;
+        const tsKey = `rewardmate_publisher_traffic_sources_${pub.id}`;
+        const sources = JSON.parse(localStorage.getItem(tsKey) || '[]');
+        
+        // Compute stats
+        const allApps = JSON.parse(localStorage.getItem('rewardmate_mock_applications') || '[]');
+        const pubApps = allApps.filter((a: any) => a.publisher_id === pub.id);
+        const appliedCount = pubApps.length;
+        const approvedCount = pubApps.filter((a: any) => a.status === 'approved').length;
+        const acceptanceRate = appliedCount > 0 ? Math.round((approvedCount / appliedCount) * 100) : 100;
+
+        const pubClicks = clicks.filter(c => c.publisher_id === pub.id).length;
+        const pubConvs = conversions.filter(c => c.publisher_id === pub.id).length;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl animate-in scale-in duration-205 border border-slate-100 flex flex-col max-h-[90vh]">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center space-x-3 text-left">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
+                    {pub.full_name?.charAt(0).toUpperCase() || 'P'}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-800 leading-none mb-1">{pub.full_name || 'Affiliate Publisher'}</h3>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{pub.email}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedPublisherForModal(null)}
+                  className="h-8 w-8 rounded-lg hover:bg-slate-50 flex items-center justify-center text-slate-450 hover:text-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 space-y-6 overflow-y-auto no-scrollbar flex-1 text-left font-sans">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-sans">Program Acceptance</div>
+                    <div className="text-lg font-black text-[#0052FF] mt-1">{acceptanceRate}%</div>
+                    <div className="text-[8px] text-slate-400 font-bold mt-0.5">{approvedCount} of {appliedCount} approved</div>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-sans">Generated Clicks</div>
+                    <div className="text-lg font-black text-slate-900 mt-1">{pubClicks || 0}</div>
+                    <div className="text-[8px] text-slate-400 font-bold mt-0.5">Redirect traffic total</div>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-sans">Approved Sales</div>
+                    <div className="text-lg font-black text-slate-900 mt-1">{pubConvs || 0}</div>
+                    <div className="text-[8px] text-slate-400 font-bold mt-0.5">Approved acquisitions</div>
+                  </div>
+                </div>
+
+                {/* Primary Website Info */}
+                <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/20 space-y-1.5">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider font-sans">Primary Channel Details</h4>
+                  <div className="text-xs font-bold text-slate-800">
+                    Website: <a href={pub.website} target="_blank" rel="noreferrer" className="text-[#0052FF] hover:underline font-mono">{pub.website || 'Not specified'}</a>
+                  </div>
+                  <div className="text-xs font-bold text-slate-800">
+                    Traffic Volume: <span className="text-slate-600">{pub.traffic || 'Not specified'}</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-800">
+                    Promo Type / Channels: <span className="text-slate-600">{pub.channels || 'Not specified'}</span>
+                  </div>
+                </div>
+
+                {/* Registered Traffic Sources List */}
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider font-sans">Linked Traffic Sources ({sources.length})</h4>
+                  {sources.length === 0 ? (
+                    <div className="text-xs font-bold text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      No additional traffic sources registered by this publisher.
+                    </div>
+                  ) : (
+                    <div className="grid gap-2 max-h-48 overflow-y-auto pr-1">
+                      {sources.map((src: any) => (
+                        <div key={src.id} className="border border-slate-100 rounded-xl p-3 bg-slate-50/40 flex justify-between items-center text-xs">
+                          <div className="truncate pr-4 space-y-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-extrabold text-slate-850 truncate">{src.name}</span>
+                              <span className="text-[8px] bg-slate-200 text-slate-600 px-1 py-0.5 rounded font-extrabold uppercase">
+                                {src.type}
+                              </span>
+                              {src.is_default && (
+                                <span className="text-[8px] bg-[#0052FF]/10 text-[#0052FF] px-1 py-0.5 rounded font-extrabold uppercase">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <a href={src.url.startsWith('http') ? src.url : `https://${src.url}`} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-slate-400 hover:text-[#0052FF] truncate block font-mono">
+                              {src.url}
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end font-sans">
+                <button 
+                  onClick={() => setSelectedPublisherForModal(null)}
+                  className="px-5 py-2.5 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+                >
+                  Close Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
