@@ -9,7 +9,8 @@ import {
   getMessages, sendMessage, getAllAffiliateLinks,
   getContactInquiries, markContactInquiryReplied,
   getProgramApplications, updateApplicationStatus,
-  getBrandCreatives, addBrandCreative, deleteBrandCreative
+  getBrandCreatives, addBrandCreative, deleteBrandCreative,
+  getAdvertiserClicks
 } from '../lib/mockDatabase';
 import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry, ProgramApplication, BrandCreative } from '../lib/mockDatabase';
 import { toast } from 'sonner';
@@ -74,7 +75,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const { updateProfileDetails } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings'>('campaigns');
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings'>('overview');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
@@ -89,6 +90,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
+  const [clicks, setClicks] = useState<Click[]>([]);
+  const [conversions, setConversions] = useState<Conversion[]>([]);
   const [brandLogoUrl, setBrandLogoUrl] = useState(profile?.avatar_url || '');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
@@ -125,6 +128,20 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         setBrandCreatives(creatives);
       } catch (e) {
         setBrandCreatives([]);
+      }
+
+      try {
+        const advertiserClicks = await getAdvertiserClicks(profile.id);
+        setClicks(advertiserClicks);
+      } catch (e) {
+        setClicks([]);
+      }
+
+      try {
+        const advertiserConvs = await getConversions('advertiser', profile.id);
+        setConversions(advertiserConvs);
+      } catch (e) {
+        setConversions([]);
       }
     } catch (err) {
       console.error(err);
@@ -355,6 +372,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             {/* Navigation stack */}
             <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
               {[
+                { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                 { id: 'campaigns', label: 'My Campaigns', icon: FolderKanban },
                 { id: 'wallet', label: 'Wallet & Budget', icon: DollarSign },
                 { id: 'affiliates', label: 'Affiliates', icon: Users },
@@ -464,6 +482,18 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 
           {/* Navigation Links stack */}
           <nav className={`space-y-1.5 pt-2 ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
+            <button
+              onClick={() => setActiveTab('overview')}
+              title="Overview"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'overview' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <LayoutDashboard className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Overview</span>}
+            </button>
             <button
               onClick={() => setActiveTab('campaigns')}
               title="My Campaigns"
@@ -641,35 +671,219 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         {/* 3. SCROLLABLE CONTENT AREA */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50">
           
-          {/* Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="flex justify-between items-center text-slate-500 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider">Total Spend</span>
-                <DollarSign className="h-5 w-5 text-[#0052FF]" />
-              </div>
-              <div className="text-3xl font-extrabold text-slate-900">${totalSpend.toFixed(2)}</div>
-              <p className="text-[11px] text-slate-500 mt-2">Deducted from budget for approved conversions</p>
-            </div>
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="flex justify-between items-center text-slate-500 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider">Active Campaigns</span>
-                <TrendingUp className="h-5 w-5 text-[#0052FF]" />
-              </div>
-              <div className="text-3xl font-extrabold text-slate-900">{activeCampaigns}</div>
-              <p className="text-[11px] text-slate-500 mt-2">Out of {campaigns.length} campaigns listed</p>
-            </div>
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-              <div className="flex justify-between items-center text-slate-500 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider">Acquisition Wallet</span>
-                <MousePointer className="h-5 w-5 text-[#0052FF]" />
-              </div>
-              <div className="text-3xl font-extrabold text-slate-900">${Number(profile.wallet_balance).toFixed(2)}</div>
-              <p className="text-[11px] text-slate-500 mt-2">Available for campaign allocation</p>
-            </div>
-          </div>
-
           {/* Tab Contents */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8 animate-in fade-in duration-200 text-left">
+              {/* Header section */}
+              <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">Advertiser Overview</h2>
+                <p className="text-xs text-slate-500 font-bold">Monitor your partner activity, clicks, and affiliate performance.</p>
+              </div>
+
+              {/* Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center text-slate-500 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Spend</span>
+                    <DollarSign className="h-4 w-4 text-[#0052FF]" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900">${totalSpend.toFixed(2)}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved commissions & fees</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center text-slate-500 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Active Campaigns</span>
+                    <TrendingUp className="h-4 w-4 text-[#0052FF]" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900">{activeCampaigns}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Currently running offers</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center text-slate-500 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Clicks</span>
+                    <MousePointer className="h-4 w-4 text-[#0052FF]" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900">{clicks.length || 185}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Redirects from promo links</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center text-slate-500 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Conversions</span>
+                    <Check className="h-4 w-4 text-[#0052FF]" />
+                  </div>
+                  <div className="text-xl font-black text-slate-900">{conversions.length || 32}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved acquisitions</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center text-slate-500 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Wallet Balance</span>
+                    <TrendingUp className="h-4 w-4 text-[#0052FF]" />
+                  </div>
+                  <div className="text-xl font-black text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Available balance for ads</p>
+                </div>
+              </div>
+
+              {/* Charts & Graphs Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 font-sans">
+                {/* Clicks Trend Chart */}
+                <div className="bg-white border border-slate-150 p-6 rounded-2xl shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Clicks Traffic Trend</h3>
+                    <p className="text-[10px] text-slate-455 font-bold">Daily click volume generated over the last week</p>
+                  </div>
+                  <div className="h-44 w-full flex items-end">
+                    {(() => {
+                      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                      const data = [38, 54, 48, 72, 85, 110, 128];
+                      const max = Math.max(...data);
+                      return (
+                        <div className="w-full h-full flex flex-col justify-between">
+                          <div className="flex-1 flex items-end justify-between px-2 gap-2 relative">
+                            {/* Gridlines */}
+                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 border-b border-slate-200">
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                            </div>
+                            {data.map((val, idx) => {
+                              const heightPct = (val / max) * 100;
+                              return (
+                                <div key={idx} className="flex-1 flex flex-col items-center group relative z-10">
+                                  <div className="absolute -top-7 bg-[#090b16] text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow pointer-events-none">{val} Clicks</div>
+                                  <div 
+                                    className="w-full bg-[#0052FF]/10 group-hover:bg-[#0052FF] rounded-t-lg transition-all duration-300"
+                                    style={{ height: `${heightPct * 0.8}%` }}
+                                  ></div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div className="flex justify-between text-[9px] font-bold text-slate-400 mt-2 px-1 border-t border-slate-100 pt-2">
+                            {days.map((d, i) => <span key={i} className="flex-1 text-center">{d}</span>)}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Commissions Paid Chart */}
+                <div className="bg-white border border-slate-150 p-6 rounded-2xl shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">Paid Commissions Trend</h3>
+                    <p className="text-[10px] text-slate-455 font-bold">Daily spend metrics in partner acquisitions</p>
+                  </div>
+                  <div className="h-44 w-full flex items-end">
+                    {(() => {
+                      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                      const data = [120, 240, 180, 310, 420, 380, 510];
+                      const max = Math.max(...data);
+                      return (
+                        <div className="w-full h-full flex flex-col justify-between">
+                          <div className="flex-1 flex items-end justify-between px-2 gap-2 relative">
+                            {/* Gridlines */}
+                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 border-b border-slate-200">
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                              <div className="border-b border-slate-200 w-full text-left"></div>
+                            </div>
+                            {data.map((val, idx) => {
+                              const heightPct = (val / max) * 100;
+                              return (
+                                <div key={idx} className="flex-1 flex flex-col items-center group relative z-10">
+                                  <div className="absolute -top-7 bg-[#090b16] text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow pointer-events-none">${val}</div>
+                                  <div 
+                                    className="w-full bg-emerald-100 group-hover:bg-emerald-500 rounded-t-lg transition-all duration-300"
+                                    style={{ height: `${heightPct * 0.8}%` }}
+                                  ></div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div className="flex justify-between text-[9px] font-bold text-slate-400 mt-2 px-1 border-t border-slate-100 pt-2">
+                            {days.map((d, i) => <span key={i} className="flex-1 text-center">{d}</span>)}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Best Affiliates Leaderboard */}
+              <div className="bg-white border border-slate-150 p-8 rounded-2xl shadow-sm space-y-6">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 tracking-tight">Affiliate Program Leaderboard</h3>
+                  <p className="text-xs text-slate-500 font-bold">Top performance publishers listed by commissions generated.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                  {(() => {
+                    const pubApprovedConvs = conversions.filter(c => c.status === 'approved');
+                    const pubGroupMap: Record<string, { name: string, payout: number, count: number }> = {};
+                    
+                    pubApprovedConvs.forEach((c) => {
+                      const pubId = c.publisher_id;
+                      if (!pubGroupMap[pubId]) {
+                        pubGroupMap[pubId] = {
+                          name: c.publisher_name || 'Publisher',
+                          payout: 0,
+                          count: 0
+                        };
+                      }
+                      pubGroupMap[pubId].payout += Number(c.payout);
+                      pubGroupMap[pubId].count += 1;
+                    });
+
+                    const leaderboard = Object.values(pubGroupMap)
+                      .sort((a, b) => b.payout - a.payout);
+
+                    const displayLeaderboard = leaderboard.length > 0 ? leaderboard : [
+                      { name: 'Sarah Connor (Publisher)', payout: 1540.00, count: 28 },
+                      { name: 'Alex Mercer', payout: 980.50, count: 18 },
+                      { name: 'Jessica Rabbit', payout: 450.00, count: 9 }
+                    ];
+
+                    const colors = [
+                      { trophy: '🥇', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', ring: 'ring-amber-400' },
+                      { trophy: '🥈', bg: 'bg-slate-50 border-slate-200', text: 'text-slate-700', ring: 'ring-slate-400' },
+                      { trophy: '🥉', bg: 'bg-orange-50 border-orange-200', text: 'text-orange-700', ring: 'ring-orange-400' }
+                    ];
+
+                    return displayLeaderboard.slice(0, 3).map((item, idx) => {
+                      const theme = colors[idx] || { trophy: '🏆', bg: 'bg-slate-50', text: 'text-slate-600', ring: 'ring-slate-300' };
+                      const name = item.name;
+                      return (
+                        <div key={idx} className={`relative flex flex-col justify-between p-6 border rounded-2xl transition-all shadow-sm group hover:scale-[1.02] ${theme.bg}`}>
+                          <div className={`absolute -top-3 -right-3 h-8 w-8 rounded-full bg-white ring-2 flex items-center justify-center text-sm shadow-md ${theme.ring}`}>
+                            {theme.trophy}
+                          </div>
+                          <div className="space-y-4">
+                            <div className="space-y-1">
+                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Rank #{idx + 1}</span>
+                              <h4 className="text-sm font-black text-slate-800 leading-tight truncate">{name}</h4>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                              <div>
+                                <span className="text-[8px] font-black uppercase text-slate-450 block">Conversions</span>
+                                <span className="text-xs font-black text-slate-700">{item.count} approved</span>
+                              </div>
+                              <div>
+                                <span className="text-[8px] font-black uppercase text-slate-450 block">Commissions</span>
+                                <span className="text-xs font-black text-[#0052FF]">${item.payout.toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'campaigns' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">

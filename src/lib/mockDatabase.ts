@@ -791,6 +791,25 @@ export const updateApplicationStatus = async (applicationId: string, status: 'ap
   }
 };
 
+export const getAdvertiserClicks = async (advertiserId: string): Promise<Click[]> => {
+  if (!isSupabaseConfigured) {
+    const clicks = getStored(CLICKS_KEY, DEFAULT_CLICKS);
+    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const advertiserCampIds = campaigns.filter(camp => camp.advertiser_id === advertiserId).map(camp => camp.id);
+    const filtered = clicks.filter(c => advertiserCampIds.includes(c.campaign_id));
+    return filtered.map(c => ({
+      ...c,
+      campaign: campaigns.find(camp => camp.id === c.campaign_id)
+    }));
+  }
+  const { data, error } = await supabase
+    .from('clicks')
+    .select('*, campaign:campaigns!inner(*)')
+    .eq('campaign.advertiser_id', advertiserId);
+  if (error) throw error;
+  return data || [];
+};
+
 export const getBrandCreatives = async (advertiserId?: string): Promise<BrandCreative[]> => {
   if (!isSupabaseConfigured) {
     const list: BrandCreative[] = JSON.parse(localStorage.getItem(CREATIVES_KEY) || '[]');
