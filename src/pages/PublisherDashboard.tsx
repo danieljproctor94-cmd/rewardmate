@@ -69,8 +69,9 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [settingsBankBsb, setSettingsBankBsb] = useState(profile?.bank_bsb || '');
   const [settingsBankAccountNumber, setSettingsBankAccountNumber] = useState(profile?.bank_account_number || '');
   const [settingsBankAccountName, setSettingsBankAccountName] = useState(profile?.bank_account_name || '');
+  const [settingsMediaKitUrl, setSettingsMediaKitUrl] = useState(profile?.media_kit_url || '');
   const [saveLoading, setSaveLoading] = useState(false);
-
+ 
   useEffect(() => {
     if (profile) {
       setSettingsFullName(profile.full_name || '');
@@ -85,6 +86,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       setSettingsBankBsb(profile.bank_bsb || '');
       setSettingsBankAccountNumber(profile.bank_account_number || '');
       setSettingsBankAccountName(profile.bank_account_name || '');
+      setSettingsMediaKitUrl(profile.media_kit_url || '');
     }
   }, [profile]);
 
@@ -136,6 +138,29 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
     reader.readAsDataURL(file);
   };
 
+  const handleMediaKitFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed for media kits.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Media kit PDF must be under 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      setSettingsMediaKitUrl(base64Str);
+      toast.success('Media kit PDF loaded! Save settings to apply.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveLoading(true);
@@ -169,7 +194,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         bank_name: settingsBankName,
         bank_bsb: settingsBankBsb,
         bank_account_number: settingsBankAccountNumber,
-        bank_account_name: settingsBankAccountName
+        bank_account_name: settingsBankAccountName,
+        media_kit_url: settingsMediaKitUrl
       });
       
       await loadData();
@@ -2372,6 +2398,51 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       <option>50,000 - 100,000 views</option>
                       <option>Over 100,000 views</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-1 pt-2 border-t border-slate-100/70">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Media Kit PDF</label>
+                    <div className="flex items-center gap-3">
+                      <label className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider cursor-pointer transition-colors select-none flex items-center gap-1.5 shadow-sm">
+                        <svg className="h-4 w-4 text-slate-505" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+                        Upload PDF
+                        <input 
+                          type="file" 
+                          accept="application/pdf" 
+                          className="hidden" 
+                          onChange={handleMediaKitFileChange} 
+                        />
+                      </label>
+                      
+                      {settingsMediaKitUrl ? (
+                        <div className="flex items-center gap-2">
+                          <a 
+                            href={settingsMediaKitUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="bg-blue-50 text-[#0052FF] hover:bg-blue-100 border border-blue-100 font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            </svg>
+                            View Media Kit
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setSettingsMediaKitUrl('')}
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider cursor-pointer transition-colors border border-rose-100/50"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-semibold italic">No media kit uploaded yet.</span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-slate-400 font-semibold block mt-1">PDF format under 5MB. Visible to brands during application review.</span>
                   </div>
                 </div>
 
