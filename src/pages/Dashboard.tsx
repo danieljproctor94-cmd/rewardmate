@@ -849,7 +849,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                     <span className="text-[10px] font-bold uppercase tracking-wider">Total Sales</span>
                     <DollarSign className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">${(totalSales || 3420).toFixed(2)}</div>
+                  <div className="text-xl font-black text-slate-900">${totalSales.toFixed(2)}</div>
                   <p className="text-[9px] text-slate-400 mt-1 font-bold">Revenue generated from promotions</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
@@ -857,7 +857,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                     <span className="text-[10px] font-bold uppercase tracking-wider">Total Affiliates</span>
                     <TrendingUp className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">{totalAffiliatesCount || 3}</div>
+                  <div className="text-xl font-black text-slate-900">{totalAffiliatesCount}</div>
                   <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved partners on program</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
@@ -865,7 +865,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                     <span className="text-[10px] font-bold uppercase tracking-wider">Total Clicks</span>
                     <MousePointer className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">{clicks.length || 185}</div>
+                  <div className="text-xl font-black text-slate-900">{clicks.length}</div>
                   <p className="text-[9px] text-slate-400 mt-1 font-bold">Redirects from promo links</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
@@ -873,7 +873,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                     <span className="text-[10px] font-bold uppercase tracking-wider">Conversions</span>
                     <Check className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">{conversions.length || 32}</div>
+                  <div className="text-xl font-black text-slate-900">{conversions.length}</div>
                   <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved acquisitions</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
@@ -897,8 +897,13 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                   <div className="h-44 w-full flex items-end">
                     {(() => {
                       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                      const data = [38, 54, 48, 72, 85, 110, 128];
-                      const max = Math.max(...data);
+                      const data = [0, 0, 0, 0, 0, 0, 0];
+                      clicks.forEach(click => {
+                        const clickDate = new Date(click.created_at);
+                        const dayIndex = (clickDate.getDay() + 6) % 7; // Mon=0, Sun=6
+                        data[dayIndex] += 1;
+                      });
+                      const max = Math.max(...data) || 1;
                       return (
                         <div className="w-full h-full flex flex-col justify-between">
                           <div className="flex-1 flex items-end justify-between px-2 gap-2 relative">
@@ -939,8 +944,15 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                   <div className="h-44 w-full flex items-end">
                     {(() => {
                       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                      const data = [120, 240, 180, 310, 420, 380, 510];
-                      const max = Math.max(...data);
+                      const data = [0, 0, 0, 0, 0, 0, 0];
+                      conversions.forEach(c => {
+                        if (c.status === 'approved') {
+                          const convDate = new Date(c.created_at);
+                          const dayIndex = (convDate.getDay() + 6) % 7; // Mon=0, Sun=6
+                          data[dayIndex] += Number(c.payout);
+                        }
+                      });
+                      const max = Math.max(...data) || 1;
                       return (
                         <div className="w-full h-full flex flex-col justify-between">
                           <div className="flex-1 flex items-end justify-between px-2 gap-2 relative">
@@ -954,7 +966,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                               const heightPct = (val / max) * 100;
                               return (
                                 <div key={idx} className="flex-1 flex flex-col items-center group relative z-10">
-                                  <div className="absolute -top-7 bg-[#090b16] text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow pointer-events-none">${val}</div>
+                                  <div className="absolute -top-7 bg-[#090b16] text-white text-[9px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow pointer-events-none">${val.toFixed(2)}</div>
                                   <div 
                                     className="w-full bg-emerald-100 group-hover:bg-emerald-500 rounded-t-lg transition-all duration-300"
                                     style={{ height: `${heightPct * 0.8}%` }}
@@ -1001,11 +1013,13 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                     const leaderboard = Object.values(pubGroupMap)
                       .sort((a, b) => b.payout - a.payout);
 
-                    const displayLeaderboard = leaderboard.length > 0 ? leaderboard : [
-                      { name: 'Sarah Connor (Publisher)', payout: 1540.00, count: 28 },
-                      { name: 'Alex Mercer', payout: 980.50, count: 18 },
-                      { name: 'Jessica Rabbit', payout: 450.00, count: 9 }
-                    ];
+                    if (leaderboard.length === 0) {
+                      return (
+                        <div className="col-span-full py-8 text-center text-xs text-slate-400 font-bold italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          No active affiliate performance logged yet.
+                        </div>
+                      );
+                    }
 
                     const colors = [
                       { trophy: '🥇', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', ring: 'ring-amber-400' },
@@ -1013,7 +1027,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                       { trophy: '🥉', bg: 'bg-orange-50 border-orange-200', text: 'text-orange-700', ring: 'ring-orange-400' }
                     ];
 
-                    return displayLeaderboard.slice(0, 3).map((item, idx) => {
+                    return leaderboard.slice(0, 3).map((item, idx) => {
                       const theme = colors[idx] || { trophy: '🏆', bg: 'bg-slate-50', text: 'text-slate-600', ring: 'ring-slate-300' };
                       const name = item.name;
                       return (
@@ -1028,11 +1042,11 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                             </div>
                             <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
                               <div>
-                                <span className="text-[8px] font-black uppercase text-slate-450 block">Conversions</span>
+                                <span className="text-[8px] font-black uppercase text-slate-455 block">Conversions</span>
                                 <span className="text-xs font-black text-slate-700">{item.count} approved</span>
                               </div>
                               <div>
-                                <span className="text-[8px] font-black uppercase text-slate-450 block">Commissions</span>
+                                <span className="text-[8px] font-black uppercase text-slate-455 block">Commissions</span>
                                 <span className="text-xs font-black text-[#0052FF]">${item.payout.toFixed(2)}</span>
                               </div>
                             </div>
@@ -1489,7 +1503,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                           </tr>
                         ) : (
                           advertiserConvs.map((txn) => {
-                            const pubName = txn.publisher_name || 'Sarah Connor (Publisher)';
+                            const pubName = txn.publisher_name || 'Publisher';
                             const dateStr = new Date(txn.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                             return (
                               <tr key={txn.id} className="hover:bg-slate-50/40 transition-colors">
