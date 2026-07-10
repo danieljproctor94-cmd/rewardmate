@@ -18,7 +18,7 @@ import {
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
   ChevronLeft, ChevronRight, Menu, Sliders, Building, LayoutDashboard,
-  Image as ImageIcon
+  Image as ImageIcon, Receipt
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -81,7 +81,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   const { updateProfileDetails } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings' | 'transactions'>('overview');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -502,6 +502,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                 { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                 { id: 'campaigns', label: 'My Campaigns', icon: FolderKanban },
                 { id: 'wallet', label: 'Invoices', icon: DollarSign },
+                { id: 'transactions', label: 'Transactions', icon: Receipt },
                 { id: 'affiliates', label: 'Affiliates', icon: Users },
                 { id: 'brand-settings', label: 'Brand Settings', icon: Sliders },
                 { id: 'messages', label: 'Messages', icon: Mail },
@@ -654,6 +655,18 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
             >
               <DollarSign className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Invoices</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('transactions')}
+              title="Transactions"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'transactions' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Receipt className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Transactions</span>}
             </button>
              <button
               onClick={() => setActiveTab('affiliates')}
@@ -1257,12 +1270,13 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
 
                 {/* Contacts Stream */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
-                  {contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).length === 0 ? (
+                  {contacts.filter(c => (c.business_name || c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).length === 0 ? (
                     <div className="text-center py-12 text-xs text-slate-400 font-sans font-semibold">No contacts found.</div>
                   ) : (
-                    contacts.filter(c => (c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).map((c) => {
+                    contacts.filter(c => (c.business_name || c.full_name || c.email).toLowerCase().includes(searchContactText.toLowerCase())).map((c) => {
                       const isSelected = selectedContact?.id === c.id;
-                      const cInitials = (c.full_name || c.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
+                      const contactDisplayName = c.business_name || c.full_name || c.email;
+                      const cInitials = contactDisplayName.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
                       const lastMessage = messages
                         .filter(m => (m.sender_id === profile.id && m.receiver_id === c.id) || (m.sender_id === c.id && m.receiver_id === profile.id))
                         .pop();
@@ -1288,7 +1302,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold truncate font-sans">{c.full_name || c.email}</h4>
+                              <h4 className="text-xs font-bold truncate font-sans">{contactDisplayName}</h4>
                               {lastMessage && (
                                 <span className="text-[8px] text-slate-400 font-medium">
                                   {new Date(lastMessage.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
@@ -1321,12 +1335,16 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
-                      <div className="flex items-center space-x-3">
-                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
-                          {(selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
-                        </div>
+                       <div className="flex items-center space-x-3">
+                        {selectedContact.avatar_url ? (
+                          <img src={selectedContact.avatar_url} className="h-9 w-9 rounded-xl object-cover shrink-0 border border-slate-200 shadow-sm" alt="" />
+                        ) : (
+                          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0052FF] to-blue-600 text-white flex items-center justify-center font-extrabold text-xs shadow-sm uppercase">
+                            {(selectedContact.business_name || selectedContact.full_name || selectedContact.email).split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
                         <div>
-                          <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.full_name || selectedContact.email}</h3>
+                          <h3 className="text-xs font-extrabold text-slate-800 leading-none mb-0.5">{selectedContact.business_name || selectedContact.full_name || selectedContact.email}</h3>
                           <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{selectedContact.user_type}</span>
                         </div>
                       </div>
@@ -1412,6 +1430,117 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
             </div>
           )}
 
+          {activeTab === 'transactions' && (() => {
+            const advertiserCampIds = campaigns.map(camp => camp.id);
+            const advertiserConvs = conversions.filter(c => advertiserCampIds.includes(c.campaign_id));
+            
+            return (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="flex justify-between items-center text-left">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Transactions Ledger</h2>
+                    <p className="text-xs text-slate-500 font-bold">Track customer purchases and commissions generated by your affiliate partners.</p>
+                  </div>
+                </div>
+
+                {/* Ledger Summary Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Approved Commission Volume</span>
+                    <h3 className="text-lg font-black text-slate-900 mt-1">
+                      ${advertiserConvs.filter(c => c.status === 'approved').reduce((sum, c) => sum + Number(c.payout), 0).toFixed(2)} AUD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Total Sales Value Generated</span>
+                    <h3 className="text-lg font-black text-[#0052FF] mt-1">
+                      ${advertiserConvs.filter(c => c.status === 'approved').reduce((sum, c) => sum + Number(c.sale_amount || 0), 0).toFixed(2)} AUD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Voided Transactions</span>
+                    <h3 className="text-lg font-black text-rose-600 mt-1">
+                      {advertiserConvs.filter(c => c.status === 'voided').length} / {advertiserConvs.length}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Transactions Table */}
+                <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm font-sans border-collapse text-left">
+                      <thead>
+                        <tr className="bg-slate-50/75 border-b border-slate-150 text-[10px] font-black uppercase text-slate-455 tracking-wider">
+                          <th className="py-3.5 px-6">Transaction ID & Date</th>
+                          <th className="py-3.5 px-6">Campaign</th>
+                          <th className="py-3.5 px-6">Affiliate</th>
+                          <th className="py-3.5 px-6 text-right">Sale Amount</th>
+                          <th className="py-3.5 px-6 text-right">Commission Payout</th>
+                          <th className="py-3.5 px-6 text-center">Status</th>
+                          <th className="py-3.5 px-6 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {advertiserConvs.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-12 text-center text-slate-400 font-bold text-xs">
+                              No transactions recorded yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          advertiserConvs.map((txn) => {
+                            const pubName = txn.publisher_name || 'Sarah Connor (Publisher)';
+                            const dateStr = new Date(txn.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            return (
+                              <tr key={txn.id} className="hover:bg-slate-50/40 transition-colors">
+                                <td className="py-4 px-6">
+                                  <div className="font-mono text-xs text-slate-900 font-black">{txn.transaction_id || formatUserId(txn.id)}</div>
+                                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">{dateStr}</div>
+                                </td>
+                                <td className="py-4 px-6 text-xs font-bold text-slate-800">{txn.campaign?.name || txn.campaign_name || 'Campaign'}</td>
+                                <td className="py-4 px-6 text-xs text-slate-600">{pubName}</td>
+                                <td className="py-4 px-6 text-right text-xs font-extrabold text-slate-950">${Number(txn.sale_amount || 0).toFixed(2)}</td>
+                                <td className="py-4 px-6 text-right text-xs font-black text-[#0052FF]">${Number(txn.payout).toFixed(2)}</td>
+                                <td className="py-4 px-6 text-center">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide border ${
+                                    txn.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                                    txn.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                                    txn.status === 'voided' ? 'bg-rose-50 border-rose-100 text-rose-700 line-through' :
+                                    'bg-slate-50 border-slate-200 text-slate-500'
+                                  }`}>
+                                    {txn.status}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-6 text-right">
+                                  {txn.status === 'approved' && (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await updateConversionStatus(txn.id, 'voided');
+                                          toast.success('Transaction voided successfully and excluded from commissions!');
+                                          loadData();
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to void transaction.');
+                                        }
+                                      }}
+                                      className="border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer"
+                                    >
+                                      Void
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {activeTab === 'affiliates' && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex justify-between items-center text-left">
@@ -1442,16 +1571,20 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                         </tr>
                       ) : (
                         programApplications.map((app) => {
-                          const pubName = app.publisher?.full_name || app.publisher?.email || 'Publisher';
+                          const pubName = app.publisher?.business_name || app.publisher?.full_name || app.publisher?.email || 'Publisher';
                           const pubEmail = app.publisher?.email || '';
                           const dateStr = new Date(app.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'numeric', year: 'numeric' });
                           return (
                             <tr key={app.id} className="hover:bg-slate-50/40 transition-colors">
                               <td className="py-4 px-6">
                                 <div className="flex items-center space-x-3">
-                                  <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-xs shadow-sm">
-                                    {pubName.charAt(0).toUpperCase()}
-                                  </div>
+                                  {app.publisher?.avatar_url ? (
+                                    <img src={app.publisher.avatar_url} className="h-8 w-8 rounded-full object-cover shrink-0 border border-slate-200 shadow-sm" alt="" />
+                                  ) : (
+                                    <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-xs shadow-sm">
+                                      {pubName.charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
                                   <div>
                                     <div 
                                       className="font-bold text-slate-900 text-xs hover:text-[#0052FF] cursor-pointer hover:underline"
@@ -2068,12 +2201,16 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
               {/* Modal Header */}
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center space-x-3 text-left">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
-                    {pub.full_name?.charAt(0).toUpperCase() || 'P'}
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#0052FF] to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-sm overflow-hidden shrink-0">
+                    {pub.avatar_url ? (
+                      <img src={pub.avatar_url} className="h-10 w-10 object-cover" alt="" />
+                    ) : (
+                      (pub.business_name || pub.full_name || 'P').charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-800 leading-none mb-1">{pub.full_name || 'Affiliate Publisher'}</h3>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{pub.email}</span>
+                    <h3 className="text-sm font-extrabold text-slate-800 leading-none mb-1">{pub.business_name || pub.full_name || 'Affiliate Publisher'}</h3>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{pub.full_name} ({pub.email})</span>
                   </div>
                 </div>
                 <button 

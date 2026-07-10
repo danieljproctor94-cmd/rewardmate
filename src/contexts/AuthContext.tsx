@@ -75,6 +75,7 @@ const DEFAULT_MOCK_PROFILES: Profile[] = [
     id: 'mock-publisher-id',
     email: 'publisher@rewardmate.com.au',
     full_name: 'Sarah Connor (Publisher)',
+    business_name: 'Sarah Connor Promotions',
     avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
     user_type: 'publisher',
     approval_status: 'approved',
@@ -130,6 +131,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let updated = false;
         const newProfiles = profiles.map((p: any) => {
           let name = p.full_name;
+          let business_name = p.business_name;
+          if (p.id === 'mock-publisher-id' && !business_name) {
+            business_name = 'Sarah Connor Promotions';
+            updated = true;
+          }
           if (name && name.includes('David')) {
             name = name.replace(/David/g, 'Daniel');
             updated = true;
@@ -138,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name = 'Daniel Proctor';
             updated = true;
           }
-          return { ...p, full_name: name };
+          return { ...p, full_name: name, business_name };
         });
         if (updated) {
           localStorage.setItem(MOCK_PROFILES_KEY, JSON.stringify(newProfiles));
