@@ -38,7 +38,9 @@ CREATE TABLE public.profiles (
     program_terms TEXT,
     about_us TEXT,
     target_countries TEXT,
-    year_founded INTEGER
+    year_founded INTEGER,
+    facebook_url TEXT,
+    instagram_url TEXT
 );
 
 -- Enable RLS on Profiles

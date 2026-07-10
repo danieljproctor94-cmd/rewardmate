@@ -1092,6 +1092,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     const year_founded = parseInt((form.elements.namedItem('year_founded') as HTMLInputElement).value);
                     const about_us = (form.elements.namedItem('about_us') as HTMLTextAreaElement).value;
                     const program_terms = (form.elements.namedItem('program_terms') as HTMLTextAreaElement).value;
+                    const facebook_url = (form.elements.namedItem('facebook_url') as HTMLInputElement).value;
+                    const instagram_url = (form.elements.namedItem('instagram_url') as HTMLInputElement).value;
                     const target_countries = selectedCountries.join(',');
 
                     try {
@@ -1105,7 +1107,9 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         year_founded: isNaN(year_founded) ? undefined : year_founded,
                         about_us,
                         program_terms,
-                        target_countries
+                        target_countries,
+                        facebook_url,
+                        instagram_url
                       });
                       toast.success('Brand settings updated successfully!');
                       setTimeout(() => {
@@ -1199,6 +1203,29 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
                       required
                     />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-slate-455">Facebook URL</label>
+                      <input 
+                        type="url" 
+                        name="facebook_url"
+                        defaultValue={profile.facebook_url || ''}
+                        placeholder="https://facebook.com/..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-slate-455">Instagram URL</label>
+                      <input 
+                        type="url" 
+                        name="instagram_url"
+                        defaultValue={profile.instagram_url || ''}
+                        placeholder="https://instagram.com/..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase text-slate-455">Industry Category</label>

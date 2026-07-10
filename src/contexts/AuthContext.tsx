@@ -22,6 +22,8 @@ export interface Profile {
   about_us?: string;
   target_countries?: string;
   year_founded?: number;
+  facebook_url?: string;
+  instagram_url?: string;
   payout_method?: 'paypal' | 'bank' | null;
   paypal_email?: string;
   bank_name?: string;
