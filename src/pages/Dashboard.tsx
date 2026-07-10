@@ -89,6 +89,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
+  const [brandLogoUrl, setBrandLogoUrl] = useState(profile?.avatar_url || '');
+
+  useEffect(() => {
+    if (profile) {
+      setBrandLogoUrl(profile.avatar_url || '');
+    }
+  }, [profile]);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -119,6 +126,54 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     }
   };
 
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      toast.error('Image file must be under 1MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 128;
+        const MAX_HEIGHT = 128;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          setBrandLogoUrl(compressedBase64);
+          toast.success('Brand logo loaded! Save settings to apply.');
+        }
+      };
+      img.src = base64Str;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const loadMessages = async () => {
     try {
       const allMsgs = await getMessages(profile.id);
@@ -140,6 +195,21 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           fetchedContacts = data;
         }
       }
+
+      // Filter contacts for advertisers to only those with existing message history
+      if (profile.user_type === 'advertiser') {
+        const activeUserIds = new Set<string>();
+        allMsgs.forEach((m: any) => {
+          if (m.sender_id === profile.id) {
+            activeUserIds.add(m.receiver_id);
+          }
+          if (m.receiver_id === profile.id) {
+            activeUserIds.add(m.sender_id);
+          }
+        });
+        fetchedContacts = fetchedContacts.filter((c: any) => activeUserIds.has(c.id));
+      }
+
       setContacts(fetchedContacts);
       
       // Auto-select first contact if none selected
@@ -1012,7 +1082,6 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     const website = (form.elements.namedItem('website') as HTMLInputElement).value;
                     const channels = (form.elements.namedItem('channels') as HTMLInputElement).value;
                     const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value;
-                    const avatar_url = (form.elements.namedItem('avatar_url') as HTMLInputElement).value;
 
                     try {
                       setLoading(true);
@@ -1021,7 +1090,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         website,
                         channels,
                         full_name,
-                        avatar_url
+                        avatar_url: brandLogoUrl
                       });
                       toast.success('Brand settings updated successfully!');
                       setTimeout(() => {
@@ -1035,6 +1104,57 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   }}
                   className="space-y-4 font-semibold text-slate-700 text-xs"
                 >
+                  {/* Logo Preview & Upload */}
+                  <div className="flex items-center space-x-4 py-2 border-b border-slate-100/70">
+                    <div className="relative group shrink-0">
+                      {brandLogoUrl ? (
+                        <img 
+                          src={brandLogoUrl} 
+                          className="h-16 w-16 rounded-full object-cover border-2 border-slate-200" 
+                          alt="Brand Logo Preview" 
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-extrabold text-xl shadow border border-[#0052FF]/10 shrink-0">
+                          {(profile.business_name || profile.full_name || 'B').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Brand Logo Image</label>
+                      <div className="flex items-center gap-2">
+                        <label className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-colors select-none">
+                          Upload File
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={handleLogoFileChange} 
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSeed = `https://api.dicebear.com/7.x/identicon/svg?seed=${Date.now()}`;
+                            setBrandLogoUrl(newSeed);
+                            toast.success('Generated a premium brand icon seed!');
+                          }}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-750 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-all shrink-0"
+                        >
+                          Auto-Gen
+                        </button>
+                        {brandLogoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setBrandLogoUrl('')}
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-colors border border-rose-100/50"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase text-slate-450">Contact Person Name</label>
                     <input 
@@ -1075,32 +1195,6 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
                       required
                     />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-455">Brand Logo URL</label>
-                    <div className="flex space-x-2">
-                      <input 
-                        type="text" 
-                        name="avatar_url"
-                        id="brand_settings_avatar_url"
-                        defaultValue={profile.avatar_url || ''}
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const input = document.getElementById('brand_settings_avatar_url') as HTMLInputElement;
-                          if (input) {
-                            const newSeed = `https://api.dicebear.com/7.x/identicon/svg?seed=${Date.now()}`;
-                            input.value = newSeed;
-                            toast.success('Generated a premium brand icon seed!');
-                          }
-                        }}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 rounded-xl text-[10px] font-bold transition-all shrink-0 cursor-pointer"
-                      >
-                        Auto-Gen
-                      </button>
-                    </div>
                   </div>
                   <button
                     type="submit"
