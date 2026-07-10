@@ -94,6 +94,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   const [campPayoutAmount, setCampPayoutAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
+  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [selectedPublisherForModal, setSelectedPublisherForModal] = useState<any | null>(null);
   const [hasClickedAffiliates, setHasClickedAffiliates] = useState(false);
   const [prevPendingCount, setPrevPendingCount] = useState(0);
@@ -254,6 +255,13 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
         setConversions(advertiserConvs);
       } catch (e) {
         setConversions([]);
+      }
+
+      try {
+        const links = await getAllAffiliateLinks();
+        setAffiliateLinks(links);
+      } catch (e) {
+        setAffiliateLinks([]);
       }
     } catch (err) {
       console.error(err);
@@ -1614,14 +1622,20 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                               <td className="py-4 px-6 text-slate-800 text-xs font-bold">{app.campaign?.name || 'Unknown Offer'}</td>
                               <td className="py-4 px-6 text-xs text-slate-500">{dateStr}</td>
                               <td className="py-4 px-6 text-center">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
-                                  app.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
-                                  app.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
-                                  app.status === 'suspended' ? 'bg-rose-50 border-rose-100 text-rose-700 line-through' :
-                                  'bg-slate-50 border-slate-200 text-slate-500' // rejected / default
-                                }`}>
-                                  {app.status.toUpperCase()}
-                                </span>
+                                {(() => {
+                                  const hasLink = affiliateLinks.some(l => l.campaign_id === app.campaign_id && l.publisher_id === app.publisher_id);
+                                  const isSuspended = app.status === 'rejected' && hasLink;
+                                  return (
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                      app.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                                      app.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                                      isSuspended ? 'bg-rose-50 border-rose-100 text-rose-700 line-through' :
+                                      'bg-slate-50 border-slate-200 text-slate-500' // rejected / declined
+                                    }`}>
+                                      {isSuspended ? 'SUSPENDED' : app.status === 'rejected' ? 'DECLINED' : app.status.toUpperCase()}
+                                    </span>
+                                  );
+                                })()}
                               </td>
                               <td className="py-4 px-6 text-right">
                                 <div className="flex justify-end items-center space-x-2 font-sans">
@@ -1636,8 +1650,84 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                                     <Mail className="h-4 w-4" />
                                   </button>
 
-                                  {app.status === 'pending' ? (
-                                    <>
+                                  {(() => {
+                                    const hasLink = affiliateLinks.some(l => l.campaign_id === app.campaign_id && l.publisher_id === app.publisher_id);
+                                    const isSuspended = app.status === 'rejected' && hasLink;
+
+                                    if (app.status === 'pending') {
+                                      return (
+                                        <>
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                await updateApplicationStatus(app.id, 'approved');
+                                                toast.success('Affiliate approved successfully!');
+                                                loadData();
+                                              } catch (err: any) {
+                                                toast.error(err.message || 'Failed to approve application.');
+                                              }
+                                            }}
+                                            className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0"
+                                          >
+                                            Approve
+                                          </button>
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                await updateApplicationStatus(app.id, 'rejected');
+                                                toast.success('Affiliate application declined.');
+                                                loadData();
+                                              } catch (err: any) {
+                                                toast.error(err.message || 'Failed to decline application.');
+                                              }
+                                            }}
+                                            className="border border-slate-200 hover:bg-slate-50 text-slate-650 hover:text-slate-800 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0"
+                                          >
+                                            Decline
+                                          </button>
+                                        </>
+                                      );
+                                    }
+
+                                    if (app.status === 'approved') {
+                                      return (
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              await updateApplicationStatus(app.id, 'rejected');
+                                              toast.success('Affiliate suspended successfully.');
+                                              loadData();
+                                            } catch (err: any) {
+                                              toast.error(err.message || 'Failed to suspend affiliate.');
+                                            }
+                                          }}
+                                          className="border border-rose-200 hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0"
+                                        >
+                                          Suspend
+                                        </button>
+                                      );
+                                    }
+
+                                    if (isSuspended) {
+                                      return (
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              await updateApplicationStatus(app.id, 'approved');
+                                              toast.success('Affiliate reactivated successfully!');
+                                              loadData();
+                                            } catch (err: any) {
+                                              toast.error(err.message || 'Failed to reactivate affiliate.');
+                                            }
+                                          }}
+                                          className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0"
+                                        >
+                                          Reactivate
+                                        </button>
+                                      );
+                                    }
+
+                                    return (
                                       <button
                                         onClick={async () => {
                                           try {
@@ -1645,61 +1735,15 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                                             toast.success('Affiliate approved successfully!');
                                             loadData();
                                           } catch (err: any) {
-                                            toast.error(err.message || 'Failed to approve application.');
+                                            toast.error(err.message || 'Failed to approve affiliate.');
                                           }
                                         }}
                                         className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0"
                                       >
                                         Approve
                                       </button>
-                                      <button
-                                        onClick={async () => {
-                                          try {
-                                            await updateApplicationStatus(app.id, 'rejected');
-                                            toast.success('Affiliate application declined.');
-                                            loadData();
-                                          } catch (err: any) {
-                                            toast.error(err.message || 'Failed to decline application.');
-                                          }
-                                        }}
-                                        className="border border-slate-200 hover:bg-slate-50 text-slate-650 hover:text-slate-800 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0"
-                                      >
-                                        Decline
-                                      </button>
-                                    </>
-                                  ) : app.status === 'approved' ? (
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await updateApplicationStatus(app.id, 'suspended');
-                                          toast.success('Affiliate suspended successfully.');
-                                          loadData();
-                                        } catch (err: any) {
-                                          toast.error(err.message || 'Failed to suspend affiliate.');
-                                        }
-                                      }}
-                                      className="border border-rose-200 hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0 animate-in fade-in"
-                                    >
-                                      Suspend
-                                    </button>
-                                  ) : app.status === 'suspended' ? (
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await updateApplicationStatus(app.id, 'approved');
-                                          toast.success('Affiliate reactivated successfully!');
-                                          loadData();
-                                        } catch (err: any) {
-                                          toast.error(err.message || 'Failed to reactivate affiliate.');
-                                        }
-                                      }}
-                                      className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0 animate-in fade-in"
-                                    >
-                                      Reactivate
-                                    </button>
-                                  ) : (
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase select-none shrink-0">{app.status}</span>
-                                  )}
+                                    );
+                                  })()}
                                 </div>
                               </td>
                             </tr>
