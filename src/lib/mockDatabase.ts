@@ -747,7 +747,7 @@ export interface ProgramApplication {
   id: string;
   publisher_id: string;
   campaign_id: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
   created_at: string;
   campaign?: Campaign;
   publisher?: Profile;
@@ -859,7 +859,7 @@ export const createProgramApplication = async (publisherId: string, campaignId: 
   return data;
 };
 
-export const updateApplicationStatus = async (applicationId: string, status: 'approved' | 'rejected'): Promise<void> => {
+export const updateApplicationStatus = async (applicationId: string, status: 'approved' | 'rejected' | 'suspended'): Promise<void> => {
   if (!isSupabaseConfigured) {
     const list: ProgramApplication[] = JSON.parse(localStorage.getItem(APPLICATIONS_KEY) || '[]');
     const updated = list.map(a => a.id === applicationId ? { ...a, status } : a);

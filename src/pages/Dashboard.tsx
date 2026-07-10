@@ -1617,7 +1617,8 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
                                   app.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
                                   app.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
-                                  'bg-rose-50 border-rose-100 text-rose-700'
+                                  app.status === 'suspended' ? 'bg-rose-50 border-rose-100 text-rose-700 line-through' :
+                                  'bg-slate-50 border-slate-200 text-slate-500' // rejected / default
                                 }`}>
                                   {app.status.toUpperCase()}
                                 </span>
@@ -1629,7 +1630,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                                       setSelectedContact(app.publisher);
                                       setActiveTab('messages');
                                     }}
-                                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-450 hover:text-[#0052FF] transition-all cursor-pointer mr-1 shrink-0"
+                                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-455 hover:text-[#0052FF] transition-all cursor-pointer mr-1 shrink-0"
                                     title="Send Direct Message"
                                   >
                                     <Mail className="h-4 w-4" />
@@ -1666,6 +1667,36 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                                         Decline
                                       </button>
                                     </>
+                                  ) : app.status === 'approved' ? (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await updateApplicationStatus(app.id, 'suspended');
+                                          toast.success('Affiliate suspended successfully.');
+                                          loadData();
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to suspend affiliate.');
+                                        }
+                                      }}
+                                      className="border border-rose-200 hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0 animate-in fade-in"
+                                    >
+                                      Suspend
+                                    </button>
+                                  ) : app.status === 'suspended' ? (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await updateApplicationStatus(app.id, 'approved');
+                                          toast.success('Affiliate reactivated successfully!');
+                                          loadData();
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to reactivate affiliate.');
+                                        }
+                                      }}
+                                      className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0 animate-in fade-in"
+                                    >
+                                      Reactivate
+                                    </button>
                                   ) : (
                                     <span className="text-[10px] text-slate-400 font-bold uppercase select-none shrink-0">{app.status}</span>
                                   )}
