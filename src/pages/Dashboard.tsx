@@ -92,6 +92,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
+  const [creativeImageUrl, setCreativeImageUrl] = useState('');
   const [brandLogoUrl, setBrandLogoUrl] = useState(profile?.avatar_url || '');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
@@ -192,6 +193,24 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         }
       };
       img.src = base64Str;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCreativeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Creative image file must be under 2MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      setCreativeImageUrl(base64Str);
+      toast.success('Creative image loaded! Ready to submit.');
     };
     reader.readAsDataURL(file);
   };
@@ -1584,8 +1603,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     e.preventDefault();
                     const form = e.currentTarget;
                     const title = (form.elements.namedItem('creative_title') as HTMLInputElement).value;
-                    const image_url = (form.elements.namedItem('creative_url') as HTMLInputElement).value;
+                    const image_url = creativeImageUrl || (form.elements.namedItem('creative_url') as HTMLInputElement).value;
                     const banner_size = (form.elements.namedItem('creative_size') as HTMLSelectElement).value;
+
+                    if (!image_url) {
+                      toast.error('Please choose a file to upload or paste a creative URL.');
+                      return;
+                    }
 
                     try {
                       setLoading(true);
@@ -1596,6 +1620,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         banner_size
                       });
                       toast.success('Creative banner added!');
+                      setCreativeImageUrl('');
                       form.reset();
                       loadData();
                     } catch (err: any) {
@@ -1630,16 +1655,42 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       </select>
                     </div>
                   </div>
+
+                  <div className="space-y-1 pt-1">
+                    <label className="text-[9px] font-black uppercase text-slate-455 block">Creative Banner Image file</label>
+                    <div className="flex items-center gap-2">
+                      <label className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-colors select-none">
+                        Upload File
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleCreativeFileChange} 
+                        />
+                      </label>
+                      <span className="text-[10px] text-slate-400 font-semibold">or paste a URL below</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase text-slate-455">Creative Asset Image URL</label>
                     <input 
-                      type="url" 
+                      type="text" 
                       name="creative_url"
-                      placeholder="e.g. https://images.unsplash.com/photo-... or your banner link"
+                      value={creativeImageUrl}
+                      onChange={(e) => setCreativeImageUrl(e.target.value)}
+                      placeholder="e.g. Upload a file above or paste your banner link here"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
-                      required
                     />
                   </div>
+
+                  {creativeImageUrl && (
+                    <div className="p-3 bg-slate-50 border border-slate-150 rounded-xl space-y-1">
+                      <span className="text-[8px] font-black uppercase text-slate-400 block">Banner Preview</span>
+                      <img src={creativeImageUrl} className="max-h-24 w-auto rounded border border-slate-200 object-contain animate-in fade-in" alt="Creative Preview" />
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={loading}
