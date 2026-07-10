@@ -362,7 +362,68 @@ CREATE POLICY "Allow admins to manage contact inquiries" ON public.contact_inqui
             SELECT 1 FROM public.profiles 
             WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
         )
+    );-- 11. Affiliate/Program Applications Table (Affiliates apply to Brand Campaigns/Offers)
+CREATE TABLE IF NOT EXISTS public.program_applications (
+    id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    publisher_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    campaign_id UUID REFERENCES public.campaigns(id) ON DELETE CASCADE NOT NULL,
+    status TEXT CHECK (status IN ('pending', 'approved', 'rejected')) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(publisher_id, campaign_id)
+);
+
+-- Enable RLS on Program Applications
+ALTER TABLE public.program_applications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow users to read related applications" ON public.program_applications
+    FOR SELECT USING (
+        auth.uid() = publisher_id OR
+        EXISTS (
+            SELECT 1 FROM public.campaigns 
+            WHERE campaigns.id = campaign_id AND campaigns.advertiser_id = auth.uid()
+        ) OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
     );
 
+CREATE POLICY "Allow publishers to apply" ON public.program_applications
+    FOR INSERT WITH CHECK (auth.uid() = publisher_id);
 
+CREATE POLICY "Allow advertisers or admin to update status" ON public.program_applications
+    FOR UPDATE USING (
+        EXISTS (
+            SELECT 1 FROM public.campaigns 
+            WHERE campaigns.id = campaign_id AND campaigns.advertiser_id = auth.uid()
+        ) OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );
 
+-- 12. Brand Creatives Table (Banners/Assets uploaded by Brands)
+CREATE TABLE IF NOT EXISTS public.brand_creatives (
+    id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    advertiser_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    title TEXT NOT NULL,
+    image_url TEXT NOT NULL,
+    banner_size TEXT NOT NULL DEFAULT '728x90',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS on Brand Creatives
+ALTER TABLE public.brand_creatives ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow anyone to read brand creatives" ON public.brand_creatives
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow advertisers to manage their own creatives" ON public.brand_creatives
+    FOR ALL USING (
+        auth.uid() = advertiser_id OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );

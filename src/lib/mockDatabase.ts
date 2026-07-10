@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import type { Profile } from '../contexts/AuthContext';
 
 export interface Campaign {
   id: string;
@@ -669,4 +670,170 @@ export const markContactInquiryReplied = async (inquiryId: string): Promise<bool
     localStorage.setItem(CONTACT_INQUIRIES_KEY, JSON.stringify(updated));
     return true;
   }
+};
+
+// --- Program Applications & Brand Creatives Helpers ---
+
+export interface ProgramApplication {
+  id: string;
+  publisher_id: string;
+  campaign_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  campaign?: Campaign;
+  publisher?: Profile;
+}
+
+export interface BrandCreative {
+  id: string;
+  advertiser_id: string;
+  title: string;
+  image_url: string;
+  banner_size: string;
+  created_at: string;
+}
+
+const APPLICATIONS_KEY = 'rewardmate_mock_applications';
+const CREATIVES_KEY = 'rewardmate_mock_creatives';
+
+export const getProgramApplications = async (
+  role: 'publisher' | 'advertiser' | 'admin', 
+  userId: string
+): Promise<ProgramApplication[]> => {
+  if (!isSupabaseConfigured) {
+    const list: ProgramApplication[] = JSON.parse(localStorage.getItem(APPLICATIONS_KEY) || '[]');
+    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    
+    let filtered = list;
+    if (role === 'publisher') {
+      filtered = list.filter(a => a.publisher_id === userId);
+    } else if (role === 'advertiser') {
+      const advertiserCampIds = campaigns.filter(c => c.advertiser_id === userId).map(c => c.id);
+      filtered = list.filter(a => advertiserCampIds.includes(a.campaign_id));
+    }
+    
+    return filtered.map(a => ({
+      ...a,
+      campaign: campaigns.find(c => c.id === a.campaign_id),
+      publisher: profiles.find((p: any) => p.id === a.publisher_id)
+    }));
+  }
+
+  let query = supabase.from('program_applications').select('*, campaign:campaigns(*), publisher:profiles(*)');
+  if (role === 'publisher') {
+    query = query.eq('publisher_id', userId);
+  } else if (role === 'advertiser') {
+    query = supabase.from('program_applications').select('*, campaign:campaigns!inner(*), publisher:profiles(*)').eq('campaign.advertiser_id', userId);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+};
+
+export const createProgramApplication = async (publisherId: string, campaignId: string): Promise<ProgramApplication> => {
+  if (!isSupabaseConfigured) {
+    const list: ProgramApplication[] = JSON.parse(localStorage.getItem(APPLICATIONS_KEY) || '[]');
+    const existing = list.find(a => a.publisher_id === publisherId && a.campaign_id === campaignId);
+    if (existing) return existing;
+
+    const newApp: ProgramApplication = {
+      id: `app-${Date.now()}`,
+      publisher_id: publisherId,
+      campaign_id: campaignId,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+    list.push(newApp);
+    localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(list));
+    return newApp;
+  }
+
+  const { data, error } = await supabase
+    .from('program_applications')
+    .insert({ publisher_id: publisherId, campaign_id: campaignId, status: 'pending' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const updateApplicationStatus = async (applicationId: string, status: 'approved' | 'rejected'): Promise<void> => {
+  if (!isSupabaseConfigured) {
+    const list: ProgramApplication[] = JSON.parse(localStorage.getItem(APPLICATIONS_KEY) || '[]');
+    const updated = list.map(a => a.id === applicationId ? { ...a, status } : a);
+    localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(updated));
+
+    if (status === 'approved') {
+      const app = list.find(a => a.id === applicationId);
+      if (app) {
+        await generateAffiliateLink(app.publisher_id, app.campaign_id);
+      }
+    }
+    return;
+  }
+
+  const { error } = await supabase
+    .from('program_applications')
+    .update({ status })
+    .eq('id', applicationId);
+  if (error) throw error;
+
+  if (status === 'approved') {
+    const { data: app } = await supabase
+      .from('program_applications')
+      .select('*')
+      .eq('id', applicationId)
+      .single();
+    if (app) {
+      await generateAffiliateLink(app.publisher_id, app.campaign_id);
+    }
+  }
+};
+
+export const getBrandCreatives = async (advertiserId?: string): Promise<BrandCreative[]> => {
+  if (!isSupabaseConfigured) {
+    const list: BrandCreative[] = JSON.parse(localStorage.getItem(CREATIVES_KEY) || '[]');
+    return advertiserId ? list.filter(c => c.advertiser_id === advertiserId) : list;
+  }
+
+  let query = supabase.from('brand_creatives').select('*');
+  if (advertiserId) query = query.eq('advertiser_id', advertiserId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+};
+
+export const addBrandCreative = async (creative: Omit<BrandCreative, 'id' | 'created_at'>): Promise<BrandCreative> => {
+  if (!isSupabaseConfigured) {
+    const list: BrandCreative[] = JSON.parse(localStorage.getItem(CREATIVES_KEY) || '[]');
+    const newCreative: BrandCreative = {
+      ...creative,
+      id: `creative-${Date.now()}`,
+      created_at: new Date().toISOString()
+    };
+    list.push(newCreative);
+    localStorage.setItem(CREATIVES_KEY, JSON.stringify(list));
+    return newCreative;
+  }
+
+  const { data, error } = await supabase
+    .from('brand_creatives')
+    .insert(creative)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+export const deleteBrandCreative = async (id: string): Promise<void> => {
+  if (!isSupabaseConfigured) {
+    const list: BrandCreative[] = JSON.parse(localStorage.getItem(CREATIVES_KEY) || '[]');
+    const updated = list.filter(c => c.id !== id);
+    localStorage.setItem(CREATIVES_KEY, JSON.stringify(updated));
+    return;
+  }
+
+  const { error } = await supabase.from('brand_creatives').delete().eq('id', id);
+  if (error) throw error;
 };

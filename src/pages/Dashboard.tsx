@@ -7,14 +7,17 @@ import {
   getCampaigns, createCampaign, updateCampaignStatus, 
   getClicks, getConversions, updateConversionStatus,
   getMessages, sendMessage, getAllAffiliateLinks,
-  getContactInquiries, markContactInquiryReplied
+  getContactInquiries, markContactInquiryReplied,
+  getProgramApplications, updateApplicationStatus,
+  getBrandCreatives, addBrandCreative, deleteBrandCreative
 } from '../lib/mockDatabase';
-import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry } from '../lib/mockDatabase';
+import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry, ProgramApplication, BrandCreative } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
-  ChevronLeft, ChevronRight, Menu, Sliders, Building, LayoutDashboard
+  ChevronLeft, ChevronRight, Menu, Sliders, Building, LayoutDashboard,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -68,9 +71,10 @@ export default function Dashboard() {
 // 1. ADVERTISER DASHBOARD
 // ----------------------------------------------------
 function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
+  const { updateProfileDetails } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages'>('campaigns');
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings'>('campaigns');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
@@ -83,6 +87,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [campPayoutType, setCampPayoutType] = useState<'cpa' | 'revshare' | 'cpc'>('cpa');
   const [campPayoutAmount, setCampPayoutAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
+  const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -94,6 +100,20 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     try {
       const all = await getCampaigns();
       setCampaigns(all.filter(c => c.advertiser_id === profile.id));
+
+      try {
+        const apps = await getProgramApplications('advertiser', profile.id);
+        setProgramApplications(apps);
+      } catch (e) {
+        setProgramApplications([]);
+      }
+
+      try {
+        const creatives = await getBrandCreatives(profile.id);
+        setBrandCreatives(creatives);
+      } catch (e) {
+        setBrandCreatives([]);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -390,6 +410,30 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             >
               <DollarSign className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Deposit & Wallet</span>}
+            </button>
+             <button
+              onClick={() => setActiveTab('affiliates')}
+              title="Affiliates"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'affiliates' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Users className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Affiliates</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('brand-settings')}
+              title="Brand Settings"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'brand-settings' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Sliders className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Brand Settings</span>}
             </button>
             <button
               onClick={() => setActiveTab('messages')}
@@ -843,6 +887,348 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     <p className="text-xs font-bold font-sans">Select a publisher to view conversation.</p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'affiliates' && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              <div className="flex justify-between items-center text-left">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Affiliates & Partners</h2>
+                  <p className="text-xs text-slate-500 font-bold">Review applications from publishers seeking to promote your offers.</p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm font-sans border-collapse text-left">
+                    <thead>
+                      <tr className="bg-slate-50/75 border-b border-slate-150 text-[10px] font-black uppercase text-slate-450 tracking-wider">
+                        <th className="py-3 px-6">Publisher</th>
+                        <th className="py-3 px-6">Offer / Program</th>
+                        <th className="py-3 px-6">Applied Date</th>
+                        <th className="py-3 px-6 text-center">Status</th>
+                        <th className="py-3 px-6 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                      {programApplications.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center text-slate-400 font-bold text-xs">
+                            No applications submitted yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        programApplications.map((app) => {
+                          const pubName = app.publisher?.full_name || app.publisher?.email || 'Publisher';
+                          const pubEmail = app.publisher?.email || '';
+                          const dateStr = new Date(app.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'numeric', year: 'numeric' });
+                          return (
+                            <tr key={app.id} className="hover:bg-slate-50/40 transition-colors">
+                              <td className="py-4 px-6">
+                                <div className="flex items-center space-x-3">
+                                  <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-xs shadow-sm">
+                                    {pubName.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-slate-900 text-xs">{pubName}</div>
+                                    <div className="text-[10px] text-slate-400 font-medium">{pubEmail}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6 text-slate-800 text-xs font-bold">{app.campaign?.name || 'Unknown Offer'}</td>
+                              <td className="py-4 px-6 text-xs text-slate-500">{dateStr}</td>
+                              <td className="py-4 px-6 text-center">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                  app.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                                  app.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                                  'bg-rose-50 border-rose-100 text-rose-700'
+                                }`}>
+                                  {app.status.toUpperCase()}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-right">
+                                {app.status === 'pending' ? (
+                                  <div className="flex justify-end space-x-2">
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await updateApplicationStatus(app.id, 'approved');
+                                          toast.success('Affiliate approved successfully!');
+                                          loadData();
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to approve application.');
+                                        }
+                                      }}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] h-7 px-3 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      Approve
+                                    </button>
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await updateApplicationStatus(app.id, 'rejected');
+                                          toast.success('Affiliate application declined.');
+                                          loadData();
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to decline application.');
+                                        }
+                                      }}
+                                      className="bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] h-7 px-3 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      Decline
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase">Processed</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'brand-settings' && (
+            <div className="grid md:grid-cols-2 gap-8 font-sans animate-in fade-in duration-200 text-left">
+              {/* Profile Details Edit Form */}
+              <div className="bg-white border border-slate-150 p-8 rounded-2xl space-y-6 shadow-sm">
+                <div>
+                  <h3 className="text-base font-black text-slate-900 tracking-tight">Brand Settings</h3>
+                  <p className="text-xs text-slate-500 font-bold">Edit your business profile information.</p>
+                </div>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const business_name = (form.elements.namedItem('business_name') as HTMLInputElement).value;
+                    const website = (form.elements.namedItem('website') as HTMLInputElement).value;
+                    const channels = (form.elements.namedItem('channels') as HTMLInputElement).value;
+                    const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value;
+                    const avatar_url = (form.elements.namedItem('avatar_url') as HTMLInputElement).value;
+
+                    try {
+                      setLoading(true);
+                      await updateProfileDetails({
+                        business_name,
+                        website,
+                        channels,
+                        full_name,
+                        avatar_url
+                      });
+                      toast.success('Brand settings updated successfully!');
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 800);
+                    } catch (err: any) {
+                      toast.error(err.message || 'Failed to update brand details.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="space-y-4 font-semibold text-slate-700 text-xs"
+                >
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-450">Contact Person Name</label>
+                    <input 
+                      type="text" 
+                      name="full_name"
+                      defaultValue={profile.full_name || ''}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-450">Brand / Business Name</label>
+                    <input 
+                      type="text" 
+                      name="business_name"
+                      defaultValue={profile.business_name || ''}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">Company Website URL</label>
+                    <input 
+                      type="url" 
+                      name="website"
+                      defaultValue={profile.website || ''}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">Industry Category</label>
+                    <input 
+                      type="text" 
+                      name="channels"
+                      defaultValue={profile.channels || ''}
+                      placeholder="e.g. Retail, Finance, Technology"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">Brand Logo URL</label>
+                    <div className="flex space-x-2">
+                      <input 
+                        type="text" 
+                        name="avatar_url"
+                        id="brand_settings_avatar_url"
+                        defaultValue={profile.avatar_url || ''}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('brand_settings_avatar_url') as HTMLInputElement;
+                          if (input) {
+                            const newSeed = `https://api.dicebear.com/7.x/identicon/svg?seed=${Date.now()}`;
+                            input.value = newSeed;
+                            toast.success('Generated a premium brand icon seed!');
+                          }
+                        }}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 rounded-xl text-[10px] font-bold transition-all shrink-0 cursor-pointer"
+                      >
+                        Auto-Gen
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-[#0052FF] text-white font-bold h-11 rounded-xl text-xs flex items-center justify-center hover:bg-blue-650 transition-colors shadow shadow-blue-500/10 cursor-pointer disabled:opacity-50"
+                  >
+                    {loading ? 'Saving...' : 'Save Settings'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Brand Creatives / Banners Upload Module */}
+              <div className="bg-white border border-slate-150 p-8 rounded-2xl space-y-6 shadow-sm flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 tracking-tight">Creatives & Banners</h3>
+                    <p className="text-xs text-slate-500 font-bold">Add promotional banners and creatives for your publishers to use.</p>
+                  </div>
+
+                  {/* List of existing creatives */}
+                  <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+                    {brandCreatives.length === 0 ? (
+                      <div className="py-8 border-2 border-dashed border-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-400 space-y-1">
+                        <ImageIcon className="h-6 w-6 text-slate-300" />
+                        <span className="text-[10px] font-bold">No creatives added yet.</span>
+                      </div>
+                    ) : (
+                      brandCreatives.map((creative) => (
+                        <div key={creative.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <div className="flex items-center space-x-3">
+                            <a href={creative.image_url} target="_blank" rel="noreferrer" className="h-10 w-10 rounded bg-slate-200 border border-slate-300 overflow-hidden shrink-0 flex items-center justify-center">
+                              <img src={creative.image_url} alt={creative.title} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+                            </a>
+                            <div>
+                              <div className="font-bold text-slate-800 text-xs leading-none mb-1">{creative.title}</div>
+                              <span className="bg-[#0052FF]/10 text-[#0052FF] px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">{creative.banner_size}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await deleteBrandCreative(creative.id);
+                                toast.success('Creative deleted successfully!');
+                                loadData();
+                              } catch (err: any) {
+                                toast.error(err.message || 'Failed to delete creative.');
+                              }
+                            }}
+                            className="text-rose-500 hover:text-rose-700 font-bold text-[10px] hover:underline cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Add new creative form */}
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const title = (form.elements.namedItem('creative_title') as HTMLInputElement).value;
+                    const image_url = (form.elements.namedItem('creative_url') as HTMLInputElement).value;
+                    const banner_size = (form.elements.namedItem('creative_size') as HTMLSelectElement).value;
+
+                    try {
+                      setLoading(true);
+                      await addBrandCreative({
+                        advertiser_id: profile.id,
+                        title,
+                        image_url,
+                        banner_size
+                      });
+                      toast.success('Creative banner added!');
+                      form.reset();
+                      loadData();
+                    } catch (err: any) {
+                      toast.error(err.message || 'Failed to add creative.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="space-y-3 pt-4 border-t border-slate-100 font-semibold text-slate-700 text-xs"
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-455">Creative Name</label>
+                      <input 
+                        type="text" 
+                        name="creative_title"
+                        placeholder="e.g. Summer Promo 728x90"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-455">Banner Size</label>
+                      <select
+                        name="creative_size"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-semibold text-slate-850 focus:outline-none focus:border-[#0052FF]"
+                      >
+                        <option value="728x90">Leaderboard (728x90)</option>
+                        <option value="300x250">Square Banner (300x250)</option>
+                        <option value="160x600">Skyscraper (160x600)</option>
+                        <option value="1080x1080">Social Media (1080x1080)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-slate-455">Creative Asset Image URL</label>
+                    <input 
+                      type="url" 
+                      name="creative_url"
+                      placeholder="e.g. https://images.unsplash.com/photo-... or your banner link"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-[#0052FF] text-white font-bold h-10 rounded-xl text-xs flex items-center justify-center hover:bg-blue-650 transition-colors shadow shadow-blue-500/10 cursor-pointer disabled:opacity-50"
+                  >
+                    Add Creative Asset
+                  </button>
+                </form>
               </div>
             </div>
           )}

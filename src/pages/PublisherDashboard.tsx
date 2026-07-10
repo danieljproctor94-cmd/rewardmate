@@ -4,9 +4,9 @@ import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
   getCampaigns, getAffiliateLinks, generateAffiliateLink, 
   logClick, getClicks, getConversions, createConversion,
-  getMessages, sendMessage
+  getMessages, sendMessage, getProgramApplications, createProgramApplication
 } from '../lib/mockDatabase';
-import type { Campaign, AffiliateLink, Click, Conversion } from '../lib/mockDatabase';
+import type { Campaign, AffiliateLink, Click, Conversion, ProgramApplication } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
@@ -28,6 +28,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [myLinks, setMyLinks] = useState<AffiliateLink[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
   const [conversions, setConversions] = useState<Conversion[]>([]);
+  const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -233,6 +234,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       } catch (e) {
         setConversions([]);
       }
+
+      try {
+        const apps = await getProgramApplications('publisher', profile.id);
+        setProgramApplications(apps);
+      } catch (e) {
+        setProgramApplications([]);
+      }
       
       await loadMessages();
     } catch (err) {
@@ -283,6 +291,16 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       loadData();
     } catch (err: any) {
       toast.error(err.message);
+    }
+  };
+
+  const handleApplyProgram = async (campaignId: string) => {
+    try {
+      await createProgramApplication(profile.id, campaignId);
+      toast.success('Application submitted to the Brand! You will be notified once approved.');
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit application.');
     }
   };
 
@@ -1461,7 +1479,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         </thead>
                         <tbody className="divide-y divide-slate-150">
                           {filteredCampaigns.map((camp) => {
-                            const joined = myLinks.some(l => l.campaign_id === camp.id);
+                            const app = programApplications.find(a => a.campaign_id === camp.id);
+                            const isApproved = app?.status === 'approved' || myLinks.some(l => l.campaign_id === camp.id);
+                            const isPending = app?.status === 'pending';
+                            const isRejected = app?.status === 'rejected';
                             const dateStr = new Date(camp.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'numeric', year: 'numeric' });
                             
                             return (
@@ -1478,7 +1499,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                       <div className="font-bold text-slate-800 hover:text-[#0052FF] cursor-pointer text-xs" onClick={() => setSelectedCampaignForModal(camp)}>
                                         {camp.name}
                                       </div>
-                                      <div className="text-[9px] text-slate-450 font-bold">({camp.id.replace('campaign-', '')})</div>
+                                      <div className="text-[9px] text-slate-455 font-bold">({camp.id.replace('campaign-', '')})</div>
                                     </div>
                                   </div>
                                 </td>
@@ -1496,16 +1517,24 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                 <td className="py-3.5 px-4 font-bold text-slate-700">{camp.epc || '-'}</td>
                                 <td className="py-3.5 px-4 font-bold text-slate-500">{camp.avg_payout_days || '30'}</td>
                                 <td className="py-3.5 px-4">
-                                  {joined ? (
+                                  {isApproved ? (
                                     <span className="text-emerald-600 font-bold bg-emerald-50/50 px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1 w-fit text-[10px]">
-                                      <Check className="h-3 w-3" /> Joined
+                                      <Check className="h-3 w-3" /> Partnered
+                                    </span>
+                                  ) : isPending ? (
+                                    <span className="text-amber-600 font-bold bg-amber-50/50 px-2 py-0.5 rounded border border-amber-100 flex items-center gap-1 w-fit text-[10px] animate-pulse">
+                                      Pending
+                                    </span>
+                                  ) : isRejected ? (
+                                    <span className="text-rose-600 font-bold bg-rose-50/50 px-2 py-0.5 rounded border border-rose-100 flex items-center gap-1 w-fit text-[10px]">
+                                      Declined
                                     </span>
                                   ) : (
                                     <button 
-                                      onClick={() => handleGenerateLink(camp.id)}
-                                      className="text-slate-500 hover:text-[#0052FF] font-bold text-left transition-all cursor-pointer hover:underline"
+                                      onClick={() => setSelectedCampaignForModal(camp)}
+                                      className="text-slate-500 hover:text-[#0052FF] font-bold text-left transition-all cursor-pointer hover:underline text-[10px]"
                                     >
-                                      Not Joined
+                                      Join Offer
                                     </button>
                                   )}
                                 </td>
@@ -1522,7 +1551,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 {advertiserViewMode === 'grid' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
                     {filteredCampaigns.map((camp) => {
-                      const joined = myLinks.some(l => l.campaign_id === camp.id);
+                      const app = programApplications.find(a => a.campaign_id === camp.id);
+                      const isApproved = app?.status === 'approved' || myLinks.some(l => l.campaign_id === camp.id);
+                      const isPending = app?.status === 'pending';
+                      const isRejected = app?.status === 'rejected';
                       return (
                         <div key={camp.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all text-left">
                           <div className="space-y-3">
@@ -1546,13 +1578,21 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                               <div className="text-xs font-extrabold text-[#0052FF]">{camp.commission_rate || `${camp.payout_amount}% per Sale`}</div>
                             </div>
                             
-                            {joined ? (
+                            {isApproved ? (
                               <span className="text-emerald-600 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100 flex items-center gap-1 select-none">
-                                <Check className="h-3 w-3" /> Joined
+                                <Check className="h-3 w-3" /> Partnered
+                              </span>
+                            ) : isPending ? (
+                              <span className="text-amber-600 font-bold text-xs bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100 flex items-center gap-1 select-none animate-pulse">
+                                Pending
+                              </span>
+                            ) : isRejected ? (
+                              <span className="text-rose-600 font-bold text-xs bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-100 flex items-center gap-1 select-none">
+                                Declined
                               </span>
                             ) : (
                               <button 
-                                onClick={() => handleGenerateLink(camp.id)}
+                                onClick={() => setSelectedCampaignForModal(camp)}
                                 className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition-colors cursor-pointer shadow-sm"
                               >
                                 Join Offer
@@ -2284,40 +2324,78 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-              {myLinks.some(l => l.campaign_id === selectedCampaignForModal.id) ? (
-                <>
-                  <div className="text-[10px] font-bold text-slate-500 font-sans">You are partnered.</div>
-                  <button 
-                    onClick={() => {
-                      const link = myLinks.find(l => l.campaign_id === selectedCampaignForModal.id);
-                      if (link) handleCopyLink(link.code);
-                    }}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
-                  >
-                    Copy Tracking Link
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => setSelectedCampaignForModal(null)}
-                    className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-extrabold transition-all cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={async () => {
-                      await handleGenerateLink(selectedCampaignForModal.id);
-                      setSelectedCampaignForModal(null);
-                    }}
-                    className="px-5 py-2.5 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
-                  >
-                    Apply & Join Program
-                  </button>
-                </>
-              )}
+              {(() => {
+                const app = programApplications.find(a => a.campaign_id === selectedCampaignForModal.id);
+                const isApproved = app?.status === 'approved' || myLinks.some(l => l.campaign_id === selectedCampaignForModal.id);
+                const isPending = app?.status === 'pending';
+                const isRejected = app?.status === 'rejected';
+
+                if (isApproved) {
+                  return (
+                    <>
+                      <div className="text-[10px] font-bold text-slate-500 font-sans">You are partnered.</div>
+                      <button 
+                        onClick={() => {
+                          const link = myLinks.find(l => l.campaign_id === selectedCampaignForModal.id);
+                          if (link) handleCopyLink(link.code);
+                        }}
+                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+                      >
+                        Copy Tracking Link
+                      </button>
+                    </>
+                  );
+                }
+
+                if (isPending) {
+                  return (
+                    <>
+                      <div className="text-[10px] font-bold text-amber-500 font-sans animate-pulse">Application pending review...</div>
+                      <button 
+                        disabled
+                        className="px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl text-xs font-extrabold cursor-not-allowed shadow-none"
+                      >
+                        Pending Review
+                      </button>
+                    </>
+                  );
+                }
+
+                if (isRejected) {
+                  return (
+                    <>
+                      <div className="text-[10px] font-bold text-rose-500 font-sans">Application declined.</div>
+                      <button 
+                        disabled
+                        className="px-5 py-2.5 bg-rose-50 border border-rose-100 text-rose-455 rounded-xl text-xs font-extrabold cursor-not-allowed shadow-none"
+                      >
+                        Declined
+                      </button>
+                    </>
+                  );
+                }
+
+                return (
+                  <>
+                    <button 
+                      onClick={() => setSelectedCampaignForModal(null)}
+                      className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-extrabold transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={async () => {
+                        await handleApplyProgram(selectedCampaignForModal.id);
+                        setSelectedCampaignForModal(null);
+                      }}
+                      className="px-5 py-2.5 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+                    >
+                      Apply & Join Program
+                    </button>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
