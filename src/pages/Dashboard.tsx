@@ -352,6 +352,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               {[
                 { id: 'campaigns', label: 'My Campaigns', icon: FolderKanban },
                 { id: 'wallet', label: 'Wallet & Budget', icon: DollarSign },
+                { id: 'affiliates', label: 'Affiliates', icon: Users },
+                { id: 'brand-settings', label: 'Brand Settings', icon: Sliders },
                 { id: 'messages', label: 'Messages', icon: Mail },
               ].map((item) => {
                 const Icon = item.icon;
