@@ -64,7 +64,7 @@ export default function Dashboard() {
   // Render role-specific dashboard
   switch (profile.user_type) {
     case 'advertiser':
-      return <AdvertiserDashboard profile={profile} updateBalance={updateBalance} signOut={signOut} />;
+      return <AdvertiserDashboard profile={profile} signOut={signOut} />;
     case 'publisher':
       return <PublisherDashboard profile={profile} updateBalance={updateBalance} signOut={signOut} />;
     case 'admin':
@@ -77,14 +77,13 @@ export default function Dashboard() {
 // ----------------------------------------------------
 // 1. ADVERTISER DASHBOARD
 // ----------------------------------------------------
-function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
+function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any }) {
   const { updateProfileDetails } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'wallet' | 'messages' | 'affiliates' | 'brand-settings'>('overview');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [depositAmount, setDepositAmount] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Form fields for new campaign
@@ -98,7 +97,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [selectedPublisherForModal, setSelectedPublisherForModal] = useState<any | null>(null);
   const [hasClickedAffiliates, setHasClickedAffiliates] = useState(false);
   const [prevPendingCount, setPrevPendingCount] = useState(0);
-  
+
   const pendingApplicationsCount = programApplications.filter(app => app.status === 'pending').length;
 
   useEffect(() => {
@@ -120,6 +119,93 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [creativeImageUrl, setCreativeImageUrl] = useState('');
   const [brandLogoUrl, setBrandLogoUrl] = useState(profile?.avatar_url || '');
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+
+  // Initialize and load invoices
+  useEffect(() => {
+    if (!profile?.id) return;
+    const key = `rewardmate_advertiser_invoices_${profile.id}`;
+    const stored = localStorage.getItem(key);
+    
+    // Calculate live commission due
+    const approvedConvs = conversions.filter(c => c.status === 'approved');
+    const liveCommission = approvedConvs.reduce((sum, c) => sum + Number(c.payout), 0);
+    const liveCount = approvedConvs.length;
+
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Keep the current month's invoice in sync with live commission due
+      const updated = parsed.map((inv: any) => {
+        if (inv.status === 'payable') {
+          return {
+            ...inv,
+            commissionDue: liveCommission > 0 ? liveCommission : inv.commissionDue,
+            conversionsCount: liveCount > 0 ? liveCount : inv.conversionsCount
+          };
+        }
+        return inv;
+      });
+      localStorage.setItem(key, JSON.stringify(updated));
+      setInvoices(updated);
+      if (!selectedInvoice) {
+        setSelectedInvoice(updated.find((i: any) => i.status === 'payable') || updated[0]);
+      }
+    } else {
+      const currentMonth = new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+      const initial = [
+        {
+          id: 'INV-2026-05',
+          month: 'May 2026',
+          commissionDue: 180.00,
+          conversionsCount: 4,
+          status: 'paid',
+          issueDate: '31/05/2026',
+          dueDate: '14/06/2026'
+        },
+        {
+          id: 'INV-2026-06',
+          month: 'June 2026',
+          commissionDue: 350.00,
+          conversionsCount: 6,
+          status: 'paid',
+          issueDate: '30/06/2026',
+          dueDate: '14/07/2026'
+        },
+        {
+          id: 'INV-2026-07',
+          month: currentMonth,
+          commissionDue: liveCommission > 0 ? liveCommission : 150.00,
+          conversionsCount: liveCount > 0 ? liveCount : 1,
+          status: 'payable',
+          issueDate: new Date().toLocaleDateString('en-AU'),
+          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU')
+        }
+      ];
+      localStorage.setItem(key, JSON.stringify(initial));
+      setInvoices(initial);
+      setSelectedInvoice(initial[2]);
+    }
+  }, [profile?.id, conversions]);
+
+  const handlePayInvoice = (invoiceId: string) => {
+    const updated = invoices.map(inv => {
+      if (inv.id === invoiceId) {
+        return { ...inv, status: 'paid' };
+      }
+      return inv;
+    });
+    const key = `rewardmate_advertiser_invoices_${profile.id}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+    setInvoices(updated);
+    
+    // Also update selectedInvoice detail
+    const newSel = updated.find(inv => inv.id === invoiceId);
+    if (newSel) setSelectedInvoice(newSel);
+
+    toast.success(`Invoice ${invoiceId} has been successfully paid!`);
+  };
 
   useEffect(() => {
     if (profile) {
@@ -353,17 +439,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
     }
   };
 
-  const handleDeposit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!depositAmount || Number(depositAmount) <= 0) {
-      toast.error('Please enter a valid deposit amount.');
-      return;
-    }
-    try {
-      await updateBalance(Number(depositAmount), 'deposit');
-      setDepositAmount('');
-    } catch (err) {}
-  };
+
 
   // Derived metrics
   const totalSpend = campaigns.reduce((acc, c) => acc + Number(c.spend), 0);
@@ -425,7 +501,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               {[
                 { id: 'overview', label: 'Overview', icon: LayoutDashboard },
                 { id: 'campaigns', label: 'My Campaigns', icon: FolderKanban },
-                { id: 'wallet', label: 'Wallet & Budget', icon: DollarSign },
+                { id: 'wallet', label: 'Invoices', icon: DollarSign },
                 { id: 'affiliates', label: 'Affiliates', icon: Users },
                 { id: 'brand-settings', label: 'Brand Settings', icon: Sliders },
                 { id: 'messages', label: 'Messages', icon: Mail },
@@ -569,7 +645,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
             </button>
             <button
               onClick={() => setActiveTab('wallet')}
-              title="Deposit & Wallet"
+              title="Invoices"
               className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
                 activeTab === 'wallet' 
                   ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
@@ -577,7 +653,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               }`}
             >
               <DollarSign className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
-              {!isSidebarCollapsed && <span>Deposit & Wallet</span>}
+              {!isSidebarCollapsed && <span>Invoices</span>}
             </button>
              <button
               onClick={() => setActiveTab('affiliates')}
@@ -1019,59 +1095,140 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
           )}
 
           {activeTab === 'wallet' && (
-            <div className="grid md:grid-cols-2 gap-8 font-sans animate-in fade-in duration-205">
-              <div className="bg-white border border-slate-100 p-8 rounded-2xl space-y-6 shadow-sm">
+            <div className="grid md:grid-cols-3 gap-8 font-sans animate-in fade-in duration-205">
+              {/* Left 1/3: Invoice list */}
+              <div className="md:col-span-1 bg-white border border-slate-100 p-6 rounded-2xl space-y-6 shadow-sm flex flex-col h-[550px]">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Deposit Budget</h3>
-                  <p className="text-xs text-slate-550">Add funds to allocate to your affiliate campaigns.</p>
+                  <h3 className="text-base font-black text-slate-900 tracking-tight">Invoice History</h3>
+                  <p className="text-[10px] text-slate-500 font-bold">Automated monthly billing for commissions due.</p>
                 </div>
 
-                <form onSubmit={handleDeposit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Amount (AUD)</label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                      <input 
-                        type="number" 
-                        placeholder="e.g. 500"
-                        value={depositAmount}
-                        onChange={(e) => setDepositAmount(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-12 pl-12 pr-4 text-sm font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-650 transition-colors shadow shadow-blue-500/10 cursor-pointer"
-                  >
-                    Deposit Sandbox Funds
-                  </button>
-                </form>
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar">
+                  {invoices.map((inv) => {
+                    const isSelected = selectedInvoice?.id === inv.id;
+                    return (
+                      <div 
+                        key={inv.id} 
+                        onClick={() => setSelectedInvoice(inv)}
+                        className={`p-4 rounded-xl border transition-all cursor-pointer text-left space-y-2 ${
+                          isSelected 
+                            ? 'bg-[#0052FF]/5 border-[#0052FF]/20' 
+                            : 'bg-slate-50/40 border-slate-100 hover:border-slate-200'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black text-slate-800 font-mono">{inv.id}</span>
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                            inv.status === 'paid' 
+                              ? 'bg-emerald-500/10 text-emerald-600' 
+                              : 'bg-amber-500/10 text-amber-600 animate-pulse'
+                          }`}>
+                            {inv.status}
+                          </span>
+                        </div>
+                        
+                        <div>
+                          <div className="text-xs font-bold text-slate-700">{inv.month}</div>
+                          <div className="text-xs font-black text-slate-900 mt-1">${Number(inv.commissionDue).toFixed(2)} AUD</div>
+                        </div>
+
+                        <div className="text-[9px] text-slate-400 font-bold">
+                          {inv.conversionsCount} approved conversions
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="bg-white border border-slate-100 p-8 rounded-2xl space-y-6 shadow-sm">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Wallet Overview</h3>
-                  <p className="text-xs text-slate-550">Summary of advertiser credit balance.</p>
-                </div>
+              {/* Right 2/3: Selected Invoice Details */}
+              <div className="md:col-span-2 bg-white border border-slate-100 p-8 rounded-2xl shadow-sm flex flex-col justify-between h-[550px] text-left">
+                {selectedInvoice ? (
+                  <>
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-start border-b border-slate-100 pb-4">
+                        <div>
+                          <span className="text-[9px] font-black uppercase text-slate-400">Monthly Statement</span>
+                          <h3 className="text-base font-black text-slate-800 font-mono mt-0.5">{selectedInvoice.id}</h3>
+                        </div>
+                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-xl border ${
+                          selectedInvoice.status === 'paid' 
+                            ? 'bg-emerald-50 border-emerald-100 text-emerald-600' 
+                            : 'bg-amber-50 border-amber-100 text-amber-600'
+                        }`}>
+                          {selectedInvoice.status.toUpperCase()}
+                        </span>
+                      </div>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500 font-semibold">Available Balance</span>
-                    <span className="text-base font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
+                      {/* Details Meta */}
+                      <div className="grid grid-cols-2 gap-4 text-xs font-sans">
+                        <div>
+                          <span className="text-[9px] font-black uppercase text-slate-400 block">Statement For</span>
+                          <span className="font-extrabold text-slate-800 block mt-0.5">{profile.business_name || 'My Brand'}</span>
+                          <span className="text-[10px] text-slate-400 font-medium">{profile.email}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-black uppercase text-slate-400 block">Billing Period</span>
+                          <span className="font-extrabold text-slate-800 block mt-0.5">{selectedInvoice.month}</span>
+                          <span className="text-[10px] text-slate-455 font-bold">Issued: {selectedInvoice.issueDate}</span>
+                        </div>
+                      </div>
+
+                      {/* Invoice Items Table */}
+                      <div className="border border-slate-100 rounded-xl overflow-hidden mt-4">
+                        <table className="w-full text-xs font-sans text-left border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50 text-[9px] font-black uppercase text-slate-400 border-b border-slate-100">
+                              <th className="py-2.5 px-4">Description</th>
+                              <th className="py-2.5 px-4 text-center">Conversions</th>
+                              <th className="py-2.5 px-4 text-right">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-bold text-slate-650">
+                            <tr>
+                              <td className="py-3 px-4">Approved Commissions due (Direct Campaign Traffic)</td>
+                              <td className="py-3 px-4 text-center">{selectedInvoice.conversionsCount}</td>
+                              <td className="py-3 px-4 text-right text-slate-900">${Number(selectedInvoice.commissionDue).toFixed(2)} AUD</td>
+                            </tr>
+                            <tr className="bg-slate-50/50">
+                              <td className="py-2.5 px-4 text-slate-500">Service Fee (RewardMate Platform)</td>
+                              <td className="py-2.5 px-4 text-center">-</td>
+                              <td className="py-2.5 px-4 text-right text-emerald-600">FREE</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Pay Block Footer */}
+                    <div className="border-t border-slate-100 pt-6 flex justify-between items-center">
+                      <div>
+                        <span className="text-[9px] font-black uppercase text-slate-400 block">Total Due Amount</span>
+                        <span className="text-xl font-black text-slate-900">${Number(selectedInvoice.commissionDue).toFixed(2)} AUD</span>
+                      </div>
+                      
+                      {selectedInvoice.status === 'payable' ? (
+                        <button
+                          onClick={() => handlePayInvoice(selectedInvoice.id)}
+                          className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-xs h-11 px-6 rounded-xl transition-all shadow-sm shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          Pay Monthly Invoice
+                        </button>
+                      ) : (
+                        <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-100 text-xs font-black select-none">
+                          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Paid on {selectedInvoice.dueDate}</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+                    <span className="text-xs font-bold font-sans">No invoice selected.</span>
                   </div>
-                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500 font-semibold">Active Offers Listed</span>
-                    <span className="text-sm font-bold text-slate-800">
-                      {campaigns.filter(c => c.status === 'active').length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-3">
-                    <span className="text-sm text-slate-500 font-semibold">Total Capital Spent</span>
-                    <span className="text-sm font-bold text-slate-800">${totalSpend.toFixed(2)}</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -1319,40 +1476,53 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                                 </span>
                               </td>
                               <td className="py-4 px-6 text-right">
-                                {app.status === 'pending' ? (
-                                  <div className="flex justify-end space-x-2 font-sans animate-in fade-in duration-200">
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await updateApplicationStatus(app.id, 'approved');
-                                          toast.success('Affiliate approved successfully!');
-                                          loadData();
-                                        } catch (err: any) {
-                                          toast.error(err.message || 'Failed to approve application.');
-                                        }
-                                      }}
-                                      className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer"
-                                    >
-                                      Approve
-                                    </button>
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await updateApplicationStatus(app.id, 'rejected');
-                                          toast.success('Affiliate application declined.');
-                                          loadData();
-                                        } catch (err: any) {
-                                          toast.error(err.message || 'Failed to decline application.');
-                                        }
-                                      }}
-                                      className="border border-slate-200 hover:bg-slate-50 text-slate-650 hover:text-slate-800 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer"
-                                    >
-                                      Decline
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <span className="text-[10px] text-slate-400 font-bold uppercase">Processed</span>
-                                )}
+                                <div className="flex justify-end items-center space-x-2 font-sans">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedContact(app.publisher);
+                                      setActiveTab('messages');
+                                    }}
+                                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-450 hover:text-[#0052FF] transition-all cursor-pointer mr-1 shrink-0"
+                                    title="Send Direct Message"
+                                  >
+                                    <Mail className="h-4 w-4" />
+                                  </button>
+
+                                  {app.status === 'pending' ? (
+                                    <>
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await updateApplicationStatus(app.id, 'approved');
+                                            toast.success('Affiliate approved successfully!');
+                                            loadData();
+                                          } catch (err: any) {
+                                            toast.error(err.message || 'Failed to approve application.');
+                                          }
+                                        }}
+                                        className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors shadow-sm shadow-blue-500/10 cursor-pointer shrink-0"
+                                      >
+                                        Approve
+                                      </button>
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await updateApplicationStatus(app.id, 'rejected');
+                                            toast.success('Affiliate application declined.');
+                                            loadData();
+                                          } catch (err: any) {
+                                            toast.error(err.message || 'Failed to decline application.');
+                                          }
+                                        }}
+                                        className="border border-slate-200 hover:bg-slate-50 text-slate-650 hover:text-slate-800 font-extrabold text-[10px] h-7 px-3.5 rounded-xl transition-colors cursor-pointer shrink-0"
+                                      >
+                                        Decline
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase select-none shrink-0">{app.status}</span>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1984,7 +2154,17 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end font-sans">
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 font-sans">
+                <button 
+                  onClick={() => {
+                    setSelectedContact(pub);
+                    setActiveTab('messages');
+                    setSelectedPublisherForModal(null);
+                  }}
+                  className="px-5 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                >
+                  <Mail className="h-4 w-4 text-[#0052FF]" /> Message Affiliate
+                </button>
                 <button 
                   onClick={() => setSelectedPublisherForModal(null)}
                   className="px-5 py-2.5 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
