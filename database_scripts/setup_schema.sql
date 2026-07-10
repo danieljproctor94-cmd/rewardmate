@@ -34,7 +34,11 @@ CREATE TABLE public.profiles (
     bank_bsb TEXT,
     bank_account_number TEXT,
     bank_account_name TEXT,
-    commission_rate NUMERIC(5,2) DEFAULT 1.50
+    commission_rate NUMERIC(5,2) DEFAULT 1.50,
+    program_terms TEXT,
+    about_us TEXT,
+    target_countries TEXT,
+    year_founded INTEGER
 );
 
 -- Enable RLS on Profiles

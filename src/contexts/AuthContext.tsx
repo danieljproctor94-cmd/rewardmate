@@ -18,6 +18,10 @@ export interface Profile {
   channels?: string;
   traffic?: string;
   commission_rate?: number;
+  program_terms?: string;
+  about_us?: string;
+  target_countries?: string;
+  year_founded?: number;
   payout_method?: 'paypal' | 'bank' | null;
   paypal_email?: string;
   bank_name?: string;

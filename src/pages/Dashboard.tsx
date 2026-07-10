@@ -90,10 +90,15 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [brandCreatives, setBrandCreatives] = useState<BrandCreative[]>([]);
   const [brandLogoUrl, setBrandLogoUrl] = useState(profile?.avatar_url || '');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   useEffect(() => {
     if (profile) {
       setBrandLogoUrl(profile.avatar_url || '');
+      const countries = profile.target_countries 
+        ? profile.target_countries.split(',').map((c: string) => c.trim()) 
+        : [];
+      setSelectedCountries(countries);
     }
   }, [profile]);
 
@@ -1084,6 +1089,10 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     const website = (form.elements.namedItem('website') as HTMLInputElement).value;
                     const channels = (form.elements.namedItem('channels') as HTMLInputElement).value;
                     const full_name = (form.elements.namedItem('full_name') as HTMLInputElement).value;
+                    const year_founded = parseInt((form.elements.namedItem('year_founded') as HTMLInputElement).value);
+                    const about_us = (form.elements.namedItem('about_us') as HTMLTextAreaElement).value;
+                    const program_terms = (form.elements.namedItem('program_terms') as HTMLTextAreaElement).value;
+                    const target_countries = selectedCountries.join(',');
 
                     try {
                       setLoading(true);
@@ -1092,7 +1101,11 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                         website,
                         channels,
                         full_name,
-                        avatar_url: brandLogoUrl
+                        avatar_url: brandLogoUrl,
+                        year_founded: isNaN(year_founded) ? undefined : year_founded,
+                        about_us,
+                        program_terms,
+                        target_countries
                       });
                       toast.success('Brand settings updated successfully!');
                       setTimeout(() => {
@@ -1140,7 +1153,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                             setBrandLogoUrl(newSeed);
                             toast.success('Generated a premium brand icon seed!');
                           }}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-750 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-all shrink-0"
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-755 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider cursor-pointer transition-all shrink-0"
                         >
                           Auto-Gen
                         </button>
@@ -1158,7 +1171,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-450">Contact Person Name</label>
+                    <label className="text-[10px] font-black uppercase text-slate-455">Contact Person Name</label>
                     <input 
                       type="text" 
                       name="full_name"
@@ -1168,7 +1181,7 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-450">Brand / Business Name</label>
+                    <label className="text-[10px] font-black uppercase text-slate-455">Brand / Business Name</label>
                     <input 
                       type="text" 
                       name="business_name"
@@ -1198,6 +1211,75 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       required
                     />
                   </div>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">Year Founded</label>
+                    <input 
+                      type="number" 
+                      name="year_founded"
+                      defaultValue={profile.year_founded || ''}
+                      placeholder="e.g. 2018"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                    />
+                  </div>
+
+                  {/* Target Countries Selector (Multi-select checkbox buttons) */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <label className="text-[10px] font-black uppercase text-slate-455 block">Target Countries</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { code: 'AU', label: '🇦🇺 Australia' },
+                        { code: 'US', label: '🇺🇸 USA' },
+                        { code: 'GB', label: '🇬🇧 UK' },
+                        { code: 'NZ', label: '🇳🇿 New Zealand' },
+                        { code: 'CA', label: '🇨🇦 Canada' },
+                        { code: 'DE', label: '🇩🇪 Germany' }
+                      ].map((c) => {
+                        const isChecked = selectedCountries.includes(c.code);
+                        return (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => {
+                              if (isChecked) {
+                                setSelectedCountries(selectedCountries.filter(x => x !== c.code));
+                              } else {
+                                setSelectedCountries([...selectedCountries, c.code]);
+                              }
+                            }}
+                            className={`flex items-center justify-center py-2 px-1.5 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#0052FF]/10 border-[#0052FF] text-[#0052FF]'
+                                : 'bg-slate-50 border-slate-200 text-slate-650 hover:bg-slate-100'
+                            }`}
+                          >
+                            {c.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">About Us / Bio</label>
+                    <textarea 
+                      name="about_us"
+                      defaultValue={profile.about_us || ''}
+                      placeholder="Describe your brand, your products, and what makes your business unique..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] h-24 font-sans"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-455">Program Terms & Rules</label>
+                    <textarea 
+                      name="program_terms"
+                      defaultValue={profile.program_terms || ''}
+                      placeholder="Outline commission terms, brand guidelines, and disallowed traffic sources..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF] h-24 font-sans"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading}
