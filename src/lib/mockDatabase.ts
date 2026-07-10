@@ -24,6 +24,7 @@ export interface Campaign {
   avg_payout_days?: string;
   logo_url?: string;
   logo_bg?: string;
+  category?: string;
 }
 
 export interface AffiliateLink {
@@ -218,6 +219,7 @@ export const updateCampaignDetails = async (
     landing_page_url: string;
     payout_type: 'cpa' | 'revshare' | 'cpc';
     payout_amount: number;
+    category?: string;
   }
 ): Promise<void> => {
   if (!isSupabaseConfigured) {

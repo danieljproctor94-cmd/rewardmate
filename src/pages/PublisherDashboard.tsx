@@ -48,6 +48,9 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [advertiserSearchText, setAdvertiserSearchText] = useState('');
   const [advertiserViewMode, setAdvertiserViewMode] = useState<'list' | 'grid'>('list');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('All');
+  const [selectedPayoutFilter, setSelectedPayoutFilter] = useState<'All' | 'cpa' | 'revshare'>('All');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   // Traffic Sources State
   const [trafficSources, setTrafficSources] = useState<any[]>([]);
@@ -1475,10 +1478,19 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
           {/* TAB 2: FIND OFFERS (PARTNERS) */}
           {activeTab === 'offers' && (() => {
-            const filteredCampaigns = campaigns.filter(camp => 
-              camp.name.toLowerCase().includes(advertiserSearchText.toLowerCase()) ||
-              (camp.description && camp.description.toLowerCase().includes(advertiserSearchText.toLowerCase()))
-            );
+            const filteredCampaigns = campaigns.filter(camp => {
+              const matchesSearch = camp.name.toLowerCase().includes(advertiserSearchText.toLowerCase()) ||
+                (camp.description && camp.description.toLowerCase().includes(advertiserSearchText.toLowerCase()));
+              
+              const matchesCategory = selectedCategoryFilter === 'All' || 
+                (camp.category && camp.category.toLowerCase() === selectedCategoryFilter.toLowerCase());
+              
+              const matchesPayout = selectedPayoutFilter === 'All' ||
+                (selectedPayoutFilter === 'cpa' && (camp.payout_type === 'cpa' || camp.payout_type === 'cpc')) ||
+                (selectedPayoutFilter === 'revshare' && camp.payout_type === 'revshare');
+
+              return matchesSearch && matchesCategory && matchesPayout;
+            });
 
             return (
               <div className="space-y-6 animate-in fade-in duration-300">
@@ -1506,12 +1518,97 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     </div>
 
                     {/* Filter Button */}
-                    <button className="flex items-center space-x-2 px-3 bg-white border border-slate-200 hover:border-slate-350 text-slate-600 rounded-lg h-9 text-xs font-bold transition-all cursor-pointer">
-                      <span>Filter</span>
-                      <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                      </svg>
-                    </button>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                        className={`flex items-center space-x-2 px-3 border rounded-lg h-9 text-xs font-bold transition-all cursor-pointer select-none ${
+                          selectedCategoryFilter !== 'All' || selectedPayoutFilter !== 'All'
+                            ? 'bg-blue-50 border-[#0052FF] text-[#0052FF]'
+                            : 'bg-white border-slate-200 hover:border-slate-350 text-slate-600'
+                        }`}
+                      >
+                        <span>Filter</span>
+                        {(selectedCategoryFilter !== 'All' || selectedPayoutFilter !== 'All') && (
+                          <span className="h-2 w-2 rounded-full bg-[#0052FF] animate-pulse"></span>
+                        )}
+                        <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                        </svg>
+                      </button>
+
+                      {showFilterDropdown && (
+                        <>
+                          {/* Backdrop to close */}
+                          <div className="fixed inset-0 z-40" onClick={() => setShowFilterDropdown(false)} />
+                          
+                          {/* Floating filter box */}
+                          <div className="absolute left-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 space-y-4 text-left font-sans">
+                            {/* Category Filter */}
+                            <div className="space-y-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Offer Category</span>
+                              <div className="grid grid-cols-2 gap-1.5">
+                                {['All', 'Finance', 'Retail', 'Travel', 'Technology', 'Health & Beauty', 'Services'].map((cat) => (
+                                  <button
+                                    key={cat}
+                                    type="button"
+                                    onClick={() => setSelectedCategoryFilter(cat)}
+                                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-left truncate transition-all cursor-pointer ${
+                                      selectedCategoryFilter === cat
+                                        ? 'bg-[#0052FF] text-white'
+                                        : 'bg-slate-50 text-slate-650 hover:bg-slate-105'
+                                    }`}
+                                  >
+                                    {cat === 'All' ? 'All Categories' : cat}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Payout Model Filter */}
+                            <div className="space-y-2 pt-2 border-t border-slate-100">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Commission Model</span>
+                              <div className="flex flex-col gap-1.5">
+                                {[
+                                  { label: 'All Models', value: 'All' },
+                                  { label: 'CPA (Flat rate / CPC)', value: 'cpa' },
+                                  { label: 'Revshare (% Commission)', value: 'revshare' }
+                                ].map((payout) => (
+                                  <button
+                                    key={payout.value}
+                                    type="button"
+                                    onClick={() => setSelectedPayoutFilter(payout.value as any)}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold text-left transition-all cursor-pointer ${
+                                      selectedPayoutFilter === payout.value
+                                        ? 'bg-[#0052FF] text-white'
+                                        : 'bg-slate-50 text-slate-650 hover:bg-slate-105'
+                                    }`}
+                                  >
+                                    {payout.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Action Row */}
+                            {(selectedCategoryFilter !== 'All' || selectedPayoutFilter !== 'All') && (
+                              <div className="pt-2 border-t border-slate-100 flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCategoryFilter('All');
+                                    setSelectedPayoutFilter('All');
+                                  }}
+                                  className="text-[10px] text-rose-600 hover:text-rose-700 font-extrabold cursor-pointer"
+                                >
+                                  Clear Filters
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
                   </div>
 
                   {/* View Mode Selectors */}
@@ -1564,6 +1661,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                               <input type="checkbox" className="rounded border-slate-300 text-[#0052FF] focus:ring-[#0052FF]" />
                             </th>
                             <th className="py-3 px-4 font-bold tracking-wide">ADVERTISER</th>
+                            <th className="py-3 px-4 font-bold tracking-wide">CATEGORY</th>
                             <th className="py-3 px-4 font-bold tracking-wide">ITP 2.2</th>
                             <th className="py-3 px-4 font-bold tracking-wide">TARGET MARKETS</th>
                             <th className="py-3 px-4 font-bold tracking-wide">COMMISSION</th>
@@ -1608,6 +1706,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                     </div>
                                   </div>
                                 </td>
+                                <td className="py-3.5 px-4 font-bold text-slate-700">{camp.category || 'Retail'}</td>
                                 <td className="py-3.5 px-4 font-semibold text-slate-600">{camp.itp_support || 'Yes'}</td>
                                 <td className="py-3.5 px-4">
                                   <span className="bg-blue-50 text-[#0052FF] border border-blue-100/50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">
@@ -1694,9 +1793,14 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                               </div>
                               <div>
                                 <h4 className="text-xs font-bold text-slate-800 leading-none mb-1">{camp.name}</h4>
-                                <span className="bg-blue-50 text-[#0052FF] border border-blue-100/50 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
-                                  {camp.target_markets || 'AU'}
-                                </span>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="bg-blue-50 text-[#0052FF] border border-blue-100/50 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
+                                    {camp.target_markets || 'AU'}
+                                  </span>
+                                  <span className="bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
+                                    {camp.category || 'Retail'}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                             <p className="text-[11px] text-slate-500 leading-relaxed font-sans line-clamp-3">{camp.description}</p>

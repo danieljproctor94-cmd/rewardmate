@@ -92,6 +92,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   const [campUrl, setCampUrl] = useState('');
   const [campPayoutType, setCampPayoutType] = useState<'cpa' | 'revshare' | 'cpc'>('cpa');
   const [campPayoutAmount, setCampPayoutAmount] = useState('');
+  const [campCategory, setCampCategory] = useState('Retail');
   const [loading, setLoading] = useState(false);
   const [programApplications, setProgramApplications] = useState<ProgramApplication[]>([]);
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
@@ -106,6 +107,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   const [editCampUrl, setEditCampUrl] = useState('');
   const [editCampPayoutType, setEditCampPayoutType] = useState<'cpa' | 'revshare' | 'cpc'>('cpa');
   const [editCampPayoutAmount, setEditCampPayoutAmount] = useState('');
+  const [editCampCategory, setEditCampCategory] = useState('Retail');
 
   const pendingApplicationsCount = programApplications.filter(app => app.status === 'pending').length;
 
@@ -434,6 +436,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
         landing_page_url: campUrl,
         payout_type: campPayoutType,
         payout_amount: Number(campPayoutAmount),
+        category: campCategory,
         status: 'pending_approval',
         total_budget: 0
       });
@@ -446,6 +449,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
       setCampDesc('');
       setCampUrl('');
       setCampPayoutAmount('');
+      setCampCategory('Retail');
       
       loadData();
     } catch (err: any) {
@@ -462,6 +466,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
     setEditCampUrl(camp.landing_page_url);
     setEditCampPayoutType(camp.payout_type);
     setEditCampPayoutAmount(String(camp.payout_amount));
+    setEditCampCategory(camp.category || 'Retail');
   };
 
   const handleSaveEditCampaign = async (e: React.FormEvent) => {
@@ -475,7 +480,8 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
         description: editCampDesc,
         landing_page_url: editCampUrl,
         payout_type: editCampPayoutType,
-        payout_amount: Number(editCampPayoutAmount)
+        payout_amount: Number(editCampPayoutAmount),
+        category: editCampCategory
       });
 
       toast.success('Campaign details updated successfully!');
@@ -2271,6 +2277,22 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                 />
               </div>
 
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-sans">Category</label>
+                <select
+                  value={campCategory}
+                  onChange={(e) => setCampCategory(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans cursor-pointer"
+                >
+                  <option value="Finance">Finance</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Health & Beauty">Health & Beauty</option>
+                  <option value="Services">Services</option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Type</label>
@@ -2363,6 +2385,22 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
                   required
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-sans">Category</label>
+                <select
+                  value={editCampCategory}
+                  onChange={(e) => setEditCampCategory(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans cursor-pointer"
+                >
+                  <option value="Finance">Finance</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Health & Beauty">Health & Beauty</option>
+                  <option value="Services">Services</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
