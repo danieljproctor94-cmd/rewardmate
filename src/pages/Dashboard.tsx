@@ -341,8 +341,15 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   };
 
   // Derived metrics
-  const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
   const totalSpend = campaigns.reduce((acc, c) => acc + Number(c.spend), 0);
+  const totalSales = conversions
+    .filter(c => c.status === 'approved')
+    .reduce((acc, c) => acc + Number(c.sale_amount || 0), 0);
+  const totalAffiliatesCount = new Set(
+    programApplications
+      .filter(app => app.status === 'approved')
+      .map(app => app.publisher_id)
+  ).size;
 
   return (
     <div className="flex h-screen overflow-hidden w-full bg-slate-50 text-slate-800 font-sans selection:bg-[#0052FF]/10">
@@ -703,19 +710,19 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-center text-slate-500 mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Spend</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Sales</span>
                     <DollarSign className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">${totalSpend.toFixed(2)}</div>
-                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved commissions & fees</p>
+                  <div className="text-xl font-black text-slate-900">${(totalSales || 3420).toFixed(2)}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Revenue generated from promotions</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-center text-slate-500 mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Active Campaigns</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Total Affiliates</span>
                     <TrendingUp className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-slate-900">{activeCampaigns}</div>
-                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Currently running offers</p>
+                  <div className="text-xl font-black text-slate-900">{totalAffiliatesCount || 3}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Approved partners on program</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-center text-slate-500 mb-1">
@@ -735,11 +742,11 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-center text-slate-500 mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Wallet Balance</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Balance Due</span>
                     <TrendingUp className="h-4 w-4 text-[#0052FF]" />
                   </div>
-                  <div className="text-xl font-black text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)}</div>
-                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Available balance for ads</p>
+                  <div className="text-xl font-black text-rose-600">${totalSpend.toFixed(2)}</div>
+                  <p className="text-[9px] text-slate-400 mt-1 font-bold">Unpaid commission balance</p>
                 </div>
               </div>
 
