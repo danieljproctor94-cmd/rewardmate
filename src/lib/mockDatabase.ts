@@ -142,7 +142,33 @@ export const createCampaign = async (campaign: Omit<Campaign, 'id' | 'spend' | '
     setStored(CAMPAIGNS_KEY, [newCamp, ...campaigns]);
     return newCamp;
   }
-  const { data, error } = await supabase.from('campaigns').insert(campaign).select().single();
+  
+  // Destructure only valid database columns for INSERT
+  const {
+    advertiser_id,
+    name,
+    description,
+    landing_page_url,
+    payout_type,
+    payout_amount,
+    status,
+    total_budget
+  } = campaign;
+
+  const { data, error } = await supabase
+    .from('campaigns')
+    .insert({
+      advertiser_id,
+      name,
+      description,
+      landing_page_url,
+      payout_type,
+      payout_amount,
+      status,
+      total_budget: total_budget || 0.00
+    })
+    .select()
+    .single();
   if (error) throw error;
   return data;
 };
