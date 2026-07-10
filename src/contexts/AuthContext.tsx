@@ -17,6 +17,7 @@ export interface Profile {
   website?: string;
   channels?: string;
   traffic?: string;
+  commission_rate?: number;
   payout_method?: 'paypal' | 'bank' | null;
   paypal_email?: string;
   bank_name?: string;
@@ -60,7 +61,8 @@ const DEFAULT_MOCK_PROFILES: Profile[] = [
     avatar_url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=100&q=80',
     user_type: 'advertiser',
     approval_status: 'approved',
-    wallet_balance: 5000.00
+    wallet_balance: 5000.00,
+    commission_rate: 1.50
   },
   {
     id: 'mock-publisher-id',
@@ -348,6 +350,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           approval_status: (role === 'publisher' || role === 'advertiser') ? 'pending' : 'approved',
           wallet_balance: 0.00,
           onboarding_completed: role === 'advertiser' ? true : (role !== 'publisher'),
+          commission_rate: role === 'advertiser' ? 1.50 : undefined,
           ...extraData
         };
 

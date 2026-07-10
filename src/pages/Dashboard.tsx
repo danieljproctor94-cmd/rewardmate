@@ -1243,6 +1243,28 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     return () => clearInterval(interval);
   }, []);
 
+  const handleUpdateCommissionRate = async (userId: string, newRate: number) => {
+    try {
+      if (!isSupabaseConfigured) {
+        const stored = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+        const updated = stored.map((p: any) => p.id === userId ? { ...p, commission_rate: newRate } : p);
+        localStorage.setItem('rewardmate_mock_profiles', JSON.stringify(updated));
+        toast.success(`Successfully updated RewardMate fee rate to ${newRate}%`);
+        loadData();
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ commission_rate: newRate })
+          .eq('id', userId);
+        if (error) throw error;
+        toast.success(`Successfully updated RewardMate fee rate to ${newRate}%`);
+        loadData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update RewardMate fee rate.');
+    }
+  };
+
   const handleApproveCampaign = async (id: string) => {
     try {
       await updateCampaignStatus(id, 'active');
@@ -2226,6 +2248,39 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                               <div><span className="text-slate-400 font-bold">Contact Name:</span> {p.full_name || 'Not provided'}</div>
                                               <div><span className="text-slate-400 font-bold">Registered:</span> {new Date(p.created_at).toLocaleDateString('en-AU')}</div>
                                               <div><span className="text-slate-400 font-bold">Role ID:</span> <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">{p.id}</span></div>
+                                              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-4">
+                                                <div className="flex items-center space-x-1.5">
+                                                  <span className="text-slate-400 font-bold">RewardMate Fee:</span>
+                                                  <span className="font-extrabold text-[#0052FF]">{p.commission_rate !== undefined ? p.commission_rate : '1.50'}%</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                  <input 
+                                                    type="number" 
+                                                    step="0.1" 
+                                                    min="0"
+                                                    max="100"
+                                                    defaultValue={p.commission_rate !== undefined ? p.commission_rate : 1.50}
+                                                    id={`commission_rate_${p.id}`}
+                                                    className="w-14 h-7 bg-white border border-slate-200 rounded-lg text-center text-[10px] font-bold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                                                  />
+                                                  <button
+                                                    onClick={async () => {
+                                                      const inputEl = document.getElementById(`commission_rate_${p.id}`) as HTMLInputElement;
+                                                      if (inputEl) {
+                                                        const val = parseFloat(inputEl.value);
+                                                        if (isNaN(val) || val < 0 || val > 100) {
+                                                          toast.error('Please enter a valid rate between 0 and 100.');
+                                                          return;
+                                                        }
+                                                        await handleUpdateCommissionRate(p.id, val);
+                                                      }
+                                                    }}
+                                                    className="bg-[#0052FF] hover:bg-blue-650 text-white font-black text-[9px] h-7 px-2 rounded-lg transition-colors cursor-pointer"
+                                                  >
+                                                    Save
+                                                  </button>
+                                                </div>
+                                              </div>
                                             </div>
                                           </div>
                                           <div>

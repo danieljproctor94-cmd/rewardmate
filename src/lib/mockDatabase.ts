@@ -333,23 +333,32 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
     const updated = conversions.map(c => c.id === id ? { ...c, status } : c);
     setStored(CONVERSIONS_KEY, updated);
 
-    // If approved, trigger wallet balance payout to publisher
     if (status === 'approved') {
       const conv = conversions.find(c => c.id === id);
       if (conv) {
         const finalSaleAmount = conv.sale_amount || 100.00;
-        const rewardmateFee = conv.rewardmate_fee || Number((finalSaleAmount * 0.015).toFixed(2));
 
-        // Payout to publisher
         const profilesKey = 'rewardmate_mock_profiles';
         const profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
+
+        // Find advertiser (brand) profile to read their custom commission rate
+        const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+        const campaign = campaigns.find(camp => camp.id === conv.campaign_id);
+        const advertiserProfile = campaign ? profiles.find((p: any) => p.id === campaign.advertiser_id) : null;
+
+        // Custom rate defaults to 1.5%
+        const commissionRate = advertiserProfile && advertiserProfile.commission_rate !== undefined 
+          ? advertiserProfile.commission_rate 
+          : 1.50;
+
+        const rewardmateFee = conv.rewardmate_fee || Number((finalSaleAmount * (commissionRate / 100)).toFixed(2));
+
+        // Payout to publisher
         const updatedProfiles = profiles.map((p: any) => {
           if (p.id === conv.publisher_id) {
             return { ...p, wallet_balance: Number(p.wallet_balance) + Number(conv.payout) };
           }
-          // Spend deduction for advertiser: payout + 1.5% RewardMate fee
-          const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
-          const campaign = campaigns.find(camp => camp.id === conv.campaign_id);
+          // Spend deduction for advertiser: payout + RewardMate fee
           if (campaign && p.id === campaign.advertiser_id) {
             return { ...p, wallet_balance: Number(p.wallet_balance) - (Number(conv.payout) + rewardmateFee) };
           }
@@ -362,7 +371,6 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
         localStorage.setItem(profilesKey, JSON.stringify(updatedProfiles));
 
         // Increment campaign spend
-        const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
         const updatedCamp = campaigns.map(c => {
           if (c.id === conv.campaign_id) {
             return { ...c, spend: Number(c.spend) + Number(conv.payout) };

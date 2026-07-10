@@ -33,7 +33,8 @@ CREATE TABLE public.profiles (
     bank_name TEXT,
     bank_bsb TEXT,
     bank_account_number TEXT,
-    bank_account_name TEXT
+    bank_account_name TEXT,
+    commission_rate NUMERIC(5,2) DEFAULT 1.50
 );
 
 -- Enable RLS on Profiles
@@ -145,14 +146,20 @@ DECLARE
   v_advertiser_id UUID;
   v_rewardmate_fee NUMERIC(10,2);
   v_admin_id UUID;
+  v_commission_rate NUMERIC(5,2);
 BEGIN
   -- Only run if status transitioned to approved
   IF NEW.status = 'approved' AND (TG_OP = 'INSERT' OR OLD.status IS NULL OR OLD.status <> 'approved') THEN
     -- Find advertiser (brand)
     SELECT advertiser_id INTO v_advertiser_id FROM public.campaigns WHERE id = NEW.campaign_id;
     
-    -- Compute 1.5% fee based on sale_amount
-    v_rewardmate_fee := ROUND(COALESCE(NEW.sale_amount, 0.00) * 0.015, 2);
+    -- Get custom brand commission fee rate or default to 1.50%
+    SELECT COALESCE(commission_rate, 1.50) INTO v_commission_rate 
+    FROM public.profiles 
+    WHERE id = v_advertiser_id;
+    
+    -- Compute fee based on brand's specific commission_rate
+    v_rewardmate_fee := ROUND(COALESCE(NEW.sale_amount, 0.00) * (COALESCE(v_commission_rate, 1.50) / 100.00), 2);
     
     -- Store the fee inside the row
     NEW.rewardmate_fee := v_rewardmate_fee;
