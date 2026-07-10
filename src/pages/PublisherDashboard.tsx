@@ -593,14 +593,32 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const commissionsLinePath = getBezierPath(commissionsPoints);
   const commissionsAreaPath = commissionsPoints.length > 0 ? `${commissionsLinePath} L 1000 175 L 0 175 Z` : '';
 
-  // Dynamic Notifications based on Conversions
-  const liveNotifications = conversions.map(c => ({
-    id: c.id,
-    title: c.status === 'approved' ? 'Commission Approved' : c.status === 'rejected' ? 'Conversion Rejected' : 'Conversion Pending',
-    text: `Campaign: ${c.campaign_name || 'Offer'}. Payout: $${Number(c.payout).toFixed(2)} AUD.`,
-    time: new Date(c.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
-    type: c.status
-  }));
+  // Dynamic Notifications based on Conversions & Program Applications
+  const liveNotifications = [
+    ...conversions.map(c => ({
+      id: c.id,
+      title: c.status === 'approved' ? 'Commission Approved' : c.status === 'rejected' ? 'Conversion Rejected' : 'Conversion Pending',
+      text: `Campaign: ${c.campaign_name || 'Offer'}. Payout: $${Number(c.payout).toFixed(2)} AUD.`,
+      rawTime: new Date(c.created_at).getTime(),
+      time: new Date(c.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+      type: c.status
+    })),
+    ...programApplications.map(app => {
+      const campName = campaigns.find(c => c.id === app.campaign_id)?.name || 'Campaign Offer';
+      return {
+        id: app.id,
+        title: app.status === 'approved' ? 'Application Approved 🎉' : app.status === 'rejected' ? 'Application Declined' : 'Application Submitted 📩',
+        text: app.status === 'approved' 
+          ? `You have been approved to join ${campName}! Copy your tracking link to start promoting.`
+          : app.status === 'rejected'
+            ? `Your application to join ${campName} was declined.`
+            : `Your application to join ${campName} has been submitted for review.`,
+        rawTime: new Date(app.created_at).getTime(),
+        time: new Date(app.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+        type: app.status
+      };
+    })
+  ].sort((a, b) => b.rawTime - a.rawTime);
 
   // Dynamic Messages
   const liveMessages = messages
@@ -680,6 +698,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
+                const appCount = programApplications.length;
+                const isOffers = item.id === 'offers';
                 
                 return (
                   <button
@@ -694,8 +714,17 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         : 'text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {isOffers && appCount > 0 && (
+                        <span className="bg-[#0052FF] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full select-none">
+                          {appCount}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -810,6 +839,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 }
               };
 
+              let badgeCount = 0;
+              if (item.id === 'offers') {
+                badgeCount = programApplications.length;
+              } else if (item.id === 'messages') {
+                badgeCount = messages.filter(m => m.receiver_id === profile.id).length;
+              }
+
               return (
                 <button
                   key={item.id}
@@ -822,10 +858,24 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   }`}
                 >
                   <div className="flex items-center space-x-3 truncate">
-                    <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
-                    {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
+                    <div className="relative">
+                      <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
+                      {isSidebarCollapsed && badgeCount > 0 && (
+                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#0052FF]" />
+                      )}
+                    </div>
+                    {!isSidebarCollapsed && (
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="truncate">{item.label}</span>
+                        {badgeCount > 0 && (
+                          <span className="bg-[#0052FF] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full select-none shrink-0">
+                            {badgeCount}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {!isSidebarCollapsed && item.hasSub && (
+                  {!isSidebarCollapsed && item.hasSub && badgeCount === 0 && (
                     <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-slate-350" />
                   )}
                 </button>
