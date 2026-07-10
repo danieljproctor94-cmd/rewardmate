@@ -1397,7 +1397,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       onClick={() => setAdvertiserViewMode('grid')}
                       className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border cursor-pointer ${
                         advertiserViewMode === 'grid' 
-                          ? 'bg-[#00B2E2] border-[#00B2E2] text-white shadow-sm' 
+                          ? 'bg-[#0052FF] border-[#0052FF] text-white shadow-sm' 
                           : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
                       }`}
                       title="Grid View"
@@ -1413,7 +1413,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       onClick={() => setAdvertiserViewMode('list')}
                       className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border cursor-pointer ${
                         advertiserViewMode === 'list' 
-                          ? 'bg-[#00B2E2] border-[#00B2E2] text-white shadow-sm' 
+                          ? 'bg-[#0052FF] border-[#0052FF] text-white shadow-sm' 
                           : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
                       }`}
                       title="List View"
@@ -1487,7 +1487,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                 </td>
                                 <td className="py-3.5 px-4 font-semibold text-slate-600">{camp.itp_support || 'Yes'}</td>
                                 <td className="py-3.5 px-4">
-                                  <span className="bg-cyan-50 text-cyan-600 border border-cyan-100/50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">
+                                  <span className="bg-blue-50 text-[#0052FF] border border-blue-100/50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">
                                     {camp.target_markets || 'AU'}
                                   </span>
                                 </td>
@@ -1552,7 +1552,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                               </div>
                               <div>
                                 <h4 className="text-xs font-bold text-slate-800 leading-none mb-1">{camp.name}</h4>
-                                <span className="bg-cyan-50 text-cyan-600 border border-cyan-100/50 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
+                                <span className="bg-blue-50 text-[#0052FF] border border-blue-100/50 px-2 py-0.5 rounded text-[9px] font-bold tracking-wide uppercase">
                                   {camp.target_markets || 'AU'}
                                 </span>
                               </div>
