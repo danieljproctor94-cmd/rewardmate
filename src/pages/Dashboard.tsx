@@ -80,9 +80,8 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
   const [campName, setCampName] = useState('');
   const [campDesc, setCampDesc] = useState('');
   const [campUrl, setCampUrl] = useState('');
-  const [campPayoutType, setCampPayoutType] = useState<'cpa' | 'cpc'>('cpa');
+  const [campPayoutType, setCampPayoutType] = useState<'cpa' | 'revshare' | 'cpc'>('cpa');
   const [campPayoutAmount, setCampPayoutAmount] = useState('');
-  const [campBudget, setCampBudget] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [messages, setMessages] = useState<any[]>([]);
@@ -166,16 +165,9 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
 
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (Number(campBudget) > Number(profile.wallet_balance)) {
-      toast.error('Campaign budget exceeds your current wallet balance. Please deposit funds first.');
-      return;
-    }
     setLoading(true);
 
     try {
-      // Deduct campaign budget from wallet balance
-      await updateBalance(Number(campBudget), 'spend');
-      
       await createCampaign({
         advertiser_id: profile.id,
         advertiser_name: profile.full_name,
@@ -185,10 +177,10 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
         payout_type: campPayoutType,
         payout_amount: Number(campPayoutAmount),
         status: 'pending_approval',
-        total_budget: Number(campBudget)
+        total_budget: 0
       });
 
-      toast.success('Campaign submitted for Admin approval!');
+      toast.success('Offer submitted for Admin approval!');
       setShowCreateModal(false);
       
       // Reset form
@@ -196,7 +188,6 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
       setCampDesc('');
       setCampUrl('');
       setCampPayoutAmount('');
-      setCampBudget('');
       
       loadData();
     } catch (err: any) {
@@ -603,11 +594,13 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                       <div className="flex items-center gap-8 text-right shrink-0">
                         <div>
                           <div className="text-xs text-slate-500 font-semibold">Payout Rate</div>
-                          <div className="text-sm font-bold text-slate-900">${Number(camp.payout_amount).toFixed(2)} AUD <span className="text-[10px] text-slate-500 uppercase">{camp.payout_type}</span></div>
+                          <div className="text-sm font-bold text-slate-900">
+                            {camp.payout_type === 'revshare' ? `${camp.payout_amount}%` : `$${Number(camp.payout_amount).toFixed(2)} AUD`} <span className="text-[10px] text-slate-500 uppercase">{camp.payout_type}</span>
+                          </div>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-500 font-semibold">Spend / Budget</div>
-                          <div className="text-sm font-bold text-slate-900">${Number(camp.spend).toFixed(2)} / ${Number(camp.total_budget).toFixed(2)}</div>
+                          <div className="text-xs text-slate-500 font-semibold">Total Paid Commission</div>
+                          <div className="text-sm font-bold text-slate-900">${Number(camp.spend || 0).toFixed(2)} AUD</div>
                         </div>
                       </div>
                     </div>
@@ -661,9 +654,9 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                     <span className="text-base font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500 font-semibold">Pending Campaign Allocations</span>
+                    <span className="text-sm text-slate-500 font-semibold">Active Offers Listed</span>
                     <span className="text-sm font-bold text-slate-800">
-                      ${campaigns.filter(c => c.status === 'pending_approval').reduce((acc, c) => acc + Number(c.total_budget), 0).toFixed(2)}
+                      {campaigns.filter(c => c.status === 'active').length}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-3">
@@ -915,37 +908,28 @@ function AdvertiserDashboard({ profile, updateBalance, signOut, }: { profile: an
                   <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Type</label>
                   <select
                     value={campPayoutType}
-                    onChange={(e) => setCampPayoutType(e.target.value as 'cpa' | 'cpc')}
+                    onChange={(e) => setCampPayoutType(e.target.value as 'cpa' | 'revshare' | 'cpc')}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
                   >
-                    <option value="cpa">CPA (Cost per Acquisition)</option>
+                    <option value="cpa">CPA (Flat rate per Sale)</option>
+                    <option value="revshare">Revshare (% Commission per Sale)</option>
                     <option value="cpc">CPC (Cost per Click)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout ($)</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {campPayoutType === 'revshare' ? 'Commission Rate (%)' : 'Commission Amount ($)'}
+                  </label>
                   <input 
                     type="number" 
                     step="0.01"
-                    placeholder="e.g. 50.00"
+                    placeholder={campPayoutType === 'revshare' ? 'e.g. 10.00' : 'e.g. 50.00'}
                     value={campPayoutAmount}
                     onChange={(e) => setCampPayoutAmount(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campaign Budget ($)</label>
-                <input 
-                  type="number" 
-                  placeholder="e.g. 2000"
-                  value={campBudget}
-                  onChange={(e) => setCampBudget(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all"
-                  required
-                />
               </div>
 
               <button
@@ -2018,9 +2002,10 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
                       <div className="flex items-center gap-6 shrink-0">
                         <div className="text-right font-sans">
-                          <div className="text-xs text-slate-500">Payout / Budget</div>
-                          <div className="text-sm font-extrabold text-[#0052FF]">${Number(camp.payout_amount).toFixed(2)} AUD ({camp.payout_type.toUpperCase()})</div>
-                          <div className="text-[10px] text-slate-400 font-semibold">Budget: ${Number(camp.total_budget).toFixed(2)}</div>
+                          <div className="text-xs text-slate-500">Payout Rate</div>
+                          <div className="text-sm font-extrabold text-[#0052FF]">
+                            {camp.payout_type === 'revshare' ? `${camp.payout_amount}%` : `$${Number(camp.payout_amount).toFixed(2)} AUD`} ({camp.payout_type.toUpperCase()})
+                          </div>
                         </div>
 
                         <div className="flex gap-2">
@@ -2263,10 +2248,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                               <table className="w-full text-left text-xs border-collapse">
                                                 <thead>
                                                   <tr className="bg-slate-50 border-b border-slate-150 text-[9px] font-black text-slate-400 uppercase">
-                                                    <th className="py-2.5 px-4">Campaign Name</th>
+                                                    <th className="py-2.5 px-4">Offer Name</th>
                                                     <th className="py-2.5 px-4">Payout</th>
-                                                    <th className="py-2.5 px-4">Total Budget</th>
-                                                    <th className="py-2.5 px-4">Spend</th>
+                                                    <th className="py-2.5 px-4">Total Paid Commission</th>
                                                     <th className="py-2.5 px-4">Status</th>
                                                   </tr>
                                                 </thead>
@@ -2274,9 +2258,10 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                                   {brandCampaigns.map(c => (
                                                     <tr key={c.id} className="hover:bg-slate-50/30">
                                                       <td className="py-2 px-4 font-bold text-slate-800">{c.name}</td>
-                                                      <td className="py-2 px-4">${Number(c.payout_amount).toFixed(2)} ({c.payout_type.toUpperCase()})</td>
-                                                      <td className="py-2 px-4">${Number(c.total_budget).toFixed(2)}</td>
-                                                      <td className="py-2 px-4">${Number(c.spend).toFixed(2)}</td>
+                                                      <td className="py-2 px-4">
+                                                        {c.payout_type === 'revshare' ? `${c.payout_amount}%` : `$${Number(c.payout_amount).toFixed(2)}`} ({c.payout_type.toUpperCase()})
+                                                      </td>
+                                                      <td className="py-2 px-4">${Number(c.spend || 0).toFixed(2)}</td>
                                                       <td className="py-2 px-4">
                                                         <span className={`text-[9px] font-black uppercase rounded px-1.5 py-0.2 border ${
                                                           c.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :

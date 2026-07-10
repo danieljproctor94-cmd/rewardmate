@@ -298,9 +298,16 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       await logClick(link.code);
       const triggerConv = Math.random() < 0.7;
       if (triggerConv) {
-        const campaignPayout = link.campaign?.payout_amount || 25.00;
-        await createConversion(link.code, campaignPayout);
-        toast.success(`Click & Conversion Simulated! Payout of $${campaignPayout.toFixed(2)} logged.`);
+        // Generate a random sale amount between $50 and $500
+        const saleAmount = Math.floor(Math.random() * 450) + 50;
+        let campaignPayout = link.campaign?.payout_amount || 25.00;
+        
+        if (link.campaign?.payout_type === 'revshare') {
+          campaignPayout = saleAmount * (link.campaign.payout_amount / 100);
+        }
+        
+        await createConversion(link.code, campaignPayout, saleAmount);
+        toast.success(`Click & Conversion Simulated! Sale of $${saleAmount.toFixed(2)} logged. Affiliate payout of $${campaignPayout.toFixed(2)}.`);
       } else {
         toast.info('Click Simulated! (This hit did not convert).');
       }

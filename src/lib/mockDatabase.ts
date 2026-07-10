@@ -54,6 +54,8 @@ export interface Conversion {
   campaign_id: string;
   campaign_name?: string;
   payout: number;
+  sale_amount?: number;
+  rewardmate_fee?: number;
   status: 'pending' | 'approved' | 'rejected';
   transaction_id: string;
   created_at: string;
@@ -283,7 +285,10 @@ export const getConversions = async (role?: 'publisher' | 'advertiser' | 'admin'
   return data || [];
 };
 
-export const createConversion = async (clickId: string, payout: number): Promise<Conversion> => {
+export const createConversion = async (clickId: string, payout: number, saleAmount?: number): Promise<Conversion> => {
+  const finalSaleAmount = saleAmount || Math.floor(Math.random() * 450) + 50;
+  const rewardmateFee = Number((finalSaleAmount * 0.015).toFixed(2));
+
   if (!isSupabaseConfigured) {
     const clicks = getStored(CLICKS_KEY, DEFAULT_CLICKS);
     const click = clicks.find(c => c.id === clickId);
@@ -298,6 +303,8 @@ export const createConversion = async (clickId: string, payout: number): Promise
       campaign_id: click.campaign_id,
       campaign_name: 'Origin Energy Switch Deal',
       payout,
+      sale_amount: finalSaleAmount,
+      rewardmate_fee: rewardmateFee,
       status: 'pending',
       transaction_id: `TXN-SIM-${Math.floor(Math.random()*90000) + 10000}`,
       created_at: new Date().toISOString()
@@ -306,7 +313,16 @@ export const createConversion = async (clickId: string, payout: number): Promise
     return newConv;
   }
   // supabase logic
-  const { data, error } = await supabase.from('conversions').insert({ click_id: clickId, payout }).select().single();
+  const { data, error } = await supabase
+    .from('conversions')
+    .insert({ 
+      click_id: clickId, 
+      payout,
+      sale_amount: finalSaleAmount,
+      rewardmate_fee: rewardmateFee
+    })
+    .select()
+    .single();
   if (error) throw error;
   return data;
 };
@@ -321,6 +337,9 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
     if (status === 'approved') {
       const conv = conversions.find(c => c.id === id);
       if (conv) {
+        const finalSaleAmount = conv.sale_amount || 100.00;
+        const rewardmateFee = conv.rewardmate_fee || Number((finalSaleAmount * 0.015).toFixed(2));
+
         // Payout to publisher
         const profilesKey = 'rewardmate_mock_profiles';
         const profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
@@ -328,11 +347,15 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
           if (p.id === conv.publisher_id) {
             return { ...p, wallet_balance: Number(p.wallet_balance) + Number(conv.payout) };
           }
-          // Spend deduction for advertiser
+          // Spend deduction for advertiser: payout + 1.5% RewardMate fee
           const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
           const campaign = campaigns.find(camp => camp.id === conv.campaign_id);
           if (campaign && p.id === campaign.advertiser_id) {
-            return { ...p, wallet_balance: Number(p.wallet_balance) - Number(conv.payout) };
+            return { ...p, wallet_balance: Number(p.wallet_balance) - (Number(conv.payout) + rewardmateFee) };
+          }
+          // Credit admin with RewardMate fee
+          if (p.user_type === 'admin') {
+            return { ...p, wallet_balance: Number(p.wallet_balance) + rewardmateFee };
           }
           return p;
         });

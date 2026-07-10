@@ -131,10 +131,64 @@ CREATE TABLE public.conversions (
     publisher_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
     campaign_id UUID REFERENCES public.campaigns(id) ON DELETE CASCADE NOT NULL,
     payout NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    sale_amount NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    rewardmate_fee NUMERIC(10,2) NOT NULL DEFAULT 0.00,
     status TEXT CHECK (status IN ('pending', 'approved', 'rejected')) NOT NULL DEFAULT 'pending',
     transaction_id TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Trigger: Automatically handle wallet balance payout and RewardMate flat-rate 1.5% fee on conversion approval
+CREATE OR REPLACE FUNCTION public.handle_conversion_approval()
+RETURNS trigger AS $$
+DECLARE
+  v_advertiser_id UUID;
+  v_rewardmate_fee NUMERIC(10,2);
+  v_admin_id UUID;
+BEGIN
+  -- Only run if status transitioned to approved
+  IF NEW.status = 'approved' AND (TG_OP = 'INSERT' OR OLD.status IS NULL OR OLD.status <> 'approved') THEN
+    -- Find advertiser (brand)
+    SELECT advertiser_id INTO v_advertiser_id FROM public.campaigns WHERE id = NEW.campaign_id;
+    
+    -- Compute 1.5% fee based on sale_amount
+    v_rewardmate_fee := ROUND(COALESCE(NEW.sale_amount, 0.00) * 0.015, 2);
+    
+    -- Store the fee inside the row
+    NEW.rewardmate_fee := v_rewardmate_fee;
+    
+    -- Update publisher (affiliate) balance
+    UPDATE public.profiles 
+    SET wallet_balance = wallet_balance + NEW.payout 
+    WHERE id = NEW.publisher_id;
+    
+    -- Update advertiser (brand) balance: deduct payout + 1.5% RewardMate fee
+    IF v_advertiser_id IS NOT NULL THEN
+      UPDATE public.profiles 
+      SET wallet_balance = wallet_balance - (NEW.payout + v_rewardmate_fee) 
+      WHERE id = v_advertiser_id;
+    END IF;
+    
+    -- Update admin balance (first admin account found)
+    SELECT id INTO v_admin_id FROM public.profiles WHERE user_type = 'admin' LIMIT 1;
+    IF v_admin_id IS NOT NULL THEN
+      UPDATE public.profiles 
+      SET wallet_balance = wallet_balance + v_rewardmate_fee 
+      WHERE id = v_admin_id;
+    END IF;
+
+    -- Increment campaign spend
+    UPDATE public.campaigns
+    SET spend = COALESCE(spend, 0.00) + NEW.payout
+    WHERE id = NEW.campaign_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_conversion_approved
+  BEFORE INSERT OR UPDATE ON public.conversions
+  FOR EACH ROW EXECUTE FUNCTION public.handle_conversion_approval();
 
 -- Enable RLS on Conversions
 ALTER TABLE public.conversions ENABLE ROW LEVEL SECURITY;
