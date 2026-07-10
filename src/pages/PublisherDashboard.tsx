@@ -672,8 +672,6 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
-                const appCount = programApplications.length;
-                const isOffers = item.id === 'offers';
                 
                 return (
                   <button
@@ -688,17 +686,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                         : 'text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center">
-                        <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        <span>{item.label}</span>
-                      </div>
-                      {isOffers && appCount > 0 && (
-                        <span className="bg-[#0052FF] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full select-none">
-                          {appCount}
-                        </span>
-                      )}
-                    </div>
+                    <Icon className={`h-4.5 w-4.5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
                   </button>
                 );
               })}
@@ -814,9 +803,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               };
 
               let badgeCount = 0;
-              if (item.id === 'offers') {
-                badgeCount = programApplications.length;
-              } else if (item.id === 'messages') {
+              if (item.id === 'messages') {
                 badgeCount = messages.filter(m => m.receiver_id === profile.id).length;
               }
 
