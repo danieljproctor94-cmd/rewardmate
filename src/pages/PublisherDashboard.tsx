@@ -1739,21 +1739,41 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {trafficSources.map((source) => (
                     <div key={source.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50/40 flex justify-between items-center gap-4 hover:border-slate-200 transition-all text-left">
-                      <div className="space-y-1 truncate">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-slate-800 truncate">{source.name}</span>
-                          <span className="text-[8px] bg-slate-200/80 text-slate-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
-                            {source.type}
-                          </span>
-                          {source.is_default && (
-                            <span className="text-[8px] bg-[#0052FF]/10 text-[#0052FF] border border-[#0052FF]/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
-                              Default
-                            </span>
-                          )}
+                      <div className="flex items-center space-x-3.5 truncate">
+                        {/* Domain Favicon Avatar */}
+                        <div className="h-10 w-10 rounded-xl bg-white border border-slate-150 flex items-center justify-center p-1.5 shrink-0 shadow-sm">
+                          <img 
+                            src={`https://www.google.com/s2/favicons?sz=64&domain=${(() => {
+                              try {
+                                const formattedUrl = source.url.startsWith('http') ? source.url : `https://${source.url}`;
+                                return new URL(formattedUrl).hostname;
+                              } catch (e) {
+                                return source.url;
+                              }
+                            })()}`}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253'/%3E%3C/svg%3E";
+                            }}
+                            className="h-full w-full object-contain rounded"
+                            alt=""
+                          />
                         </div>
-                        <a href={source.url.startsWith('http') ? source.url : `https://${source.url}`} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-slate-400 hover:text-[#0052FF] truncate block">
-                          {source.url}
-                        </a>
+                        <div className="space-y-1 truncate">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-800 truncate">{source.name}</span>
+                            <span className="text-[8px] bg-slate-200/80 text-slate-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
+                              {source.type}
+                            </span>
+                            {source.is_default && (
+                              <span className="text-[8px] bg-[#0052FF]/10 text-[#0052FF] border border-[#0052FF]/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <a href={source.url.startsWith('http') ? source.url : `https://${source.url}`} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-slate-400 hover:text-[#0052FF] truncate block">
+                            {source.url}
+                          </a>
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0 font-sans">
