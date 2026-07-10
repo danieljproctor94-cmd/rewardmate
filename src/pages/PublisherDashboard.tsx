@@ -12,7 +12,7 @@ import {
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles
+  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles, Plus
 } from 'lucide-react';
 
 export const formatUserId = (id: string | undefined): string => {
@@ -49,6 +49,13 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [advertiserSearchText, setAdvertiserSearchText] = useState('');
   const [advertiserViewMode, setAdvertiserViewMode] = useState<'list' | 'grid'>('list');
+
+  // Traffic Sources State
+  const [trafficSources, setTrafficSources] = useState<any[]>([]);
+  const [isAddTrafficModalOpen, setIsAddTrafficModalOpen] = useState(false);
+  const [newTrafficName, setNewTrafficName] = useState('');
+  const [newTrafficUrl, setNewTrafficUrl] = useState('');
+  const [newTrafficType, setNewTrafficType] = useState('Website');
 
   // Account Settings Form State
   const [settingsFullName, setSettingsFullName] = useState(profile?.full_name || '');
@@ -274,7 +281,84 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       toast.error(err.message || 'Failed to submit application.');
     }
   };
+  // Load and manage traffic sources list
+  useEffect(() => {
+    if (!profile?.id) return;
+    const key = `rewardmate_publisher_traffic_sources_${profile.id}`;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Sync the default source URL if it was initialized to placeholder or empty
+      const updated = parsed.map((s: any) => {
+        if (s.id === 'ts-default' && (s.url === 'https://mywebsite.com' || s.url === '') && profile.website) {
+          return { ...s, url: profile.website };
+        }
+        return s;
+      });
+      localStorage.setItem(key, JSON.stringify(updated));
+      setTrafficSources(updated);
+    } else {
+      const defaultSource = {
+        id: 'ts-default',
+        name: 'Primary Website (Signup)',
+        url: profile.website || 'https://mywebsite.com',
+        type: 'Website',
+        is_default: true,
+        created_at: new Date().toISOString()
+      };
+      const initial = [defaultSource];
+      localStorage.setItem(key, JSON.stringify(initial));
+      setTrafficSources(initial);
+    }
+  }, [profile?.id, profile?.website]);
 
+  const handleAddTrafficSource = () => {
+    if (!newTrafficName.trim() || !newTrafficUrl.trim()) {
+      toast.error('Please fill in both the Name and URL fields.');
+      return;
+    }
+    const newSource = {
+      id: `ts-${Date.now()}`,
+      name: newTrafficName,
+      url: newTrafficUrl,
+      type: newTrafficType,
+      is_default: trafficSources.length === 0,
+      created_at: new Date().toISOString()
+    };
+    const updated = [...trafficSources, newSource];
+    const key = `rewardmate_publisher_traffic_sources_${profile.id}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+    setTrafficSources(updated);
+    setNewTrafficName('');
+    setNewTrafficUrl('');
+    setNewTrafficType('Website');
+    setIsAddTrafficModalOpen(false);
+    toast.success('Traffic source added successfully!');
+  };
+
+  const handleDeleteTrafficSource = (id: string) => {
+    const sourceToDelete = trafficSources.find(s => s.id === id);
+    if (sourceToDelete?.is_default) {
+      toast.error('You cannot delete your default traffic source.');
+      return;
+    }
+    const updated = trafficSources.filter(s => s.id !== id);
+    const key = `rewardmate_publisher_traffic_sources_${profile.id}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+    setTrafficSources(updated);
+    toast.success('Traffic source removed successfully!');
+  };
+
+  const handleSetDefaultTrafficSource = (id: string) => {
+    const updated = trafficSources.map(s => ({
+      ...s,
+      is_default: s.id === id
+    }));
+    const key = `rewardmate_publisher_traffic_sources_${profile.id}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+    setTrafficSources(updated);
+    toast.success('Default traffic source updated!');
+  };
   const handleCopyLink = (code: string) => {
     const trackingUrl = `${window.location.origin}/click/${code}`;
     navigator.clipboard.writeText(trackingUrl);
@@ -1598,47 +1682,112 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
           {/* TAB 3: MY AFFILIATE LINKS (TRAFFIC SOURCES) */}
           {activeTab === 'my-links' && (
-            <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="space-y-8 animate-in fade-in duration-300">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 font-sans">Your Traffic Sources & Links</h3>
-                <p className="text-xs text-slate-500 font-medium font-sans">Use these links on your site/channels to track referrals and earn commissions.</p>
+                <p className="text-xs text-slate-500 font-medium font-sans">Manage your traffic sources and use tracking links to earn commissions.</p>
               </div>
 
-              <div className="grid gap-4">
-                {myLinks.length === 0 ? (
-                  <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-sm font-bold text-slate-450 font-sans">
-                    You haven't generated any partner tracking links yet. Go to 'Advertisers' to get started!
+              {/* Traffic Sources Manager */}
+              <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 space-y-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Registered Traffic Sources</h4>
+                    <p className="text-[10px] text-slate-500 font-bold mt-0.5">Manage websites, blogs, and social channels where tracking links are promoted.</p>
                   </div>
-                ) : (
-                  myLinks.map((link) => (
-                    <div key={link.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm w-full">
-                      <div className="space-y-1.5">
-                        <h4 className="text-base font-extrabold text-slate-800 font-sans">{link.campaign?.name || 'Active Campaign'}</h4>
-                        <div className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 px-3 py-1.5 rounded-lg border border-[#0052FF]/10 inline-block font-mono">
-                          {window.location.origin}/click/{link.code}
+                  <button 
+                    onClick={() => setIsAddTrafficModalOpen(true)}
+                    className="bg-[#0052FF] text-white hover:bg-blue-650 font-bold h-9 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-colors cursor-pointer shrink-0"
+                  >
+                    <Plus className="h-4 w-4" /> Add Traffic Source
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {trafficSources.map((source) => (
+                    <div key={source.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50/40 flex justify-between items-center gap-4 hover:border-slate-200 transition-all text-left">
+                      <div className="space-y-1 truncate">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-slate-800 truncate">{source.name}</span>
+                          <span className="text-[8px] bg-slate-200/80 text-slate-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
+                            {source.type}
+                          </span>
+                          {source.is_default && (
+                            <span className="text-[8px] bg-[#0052FF]/10 text-[#0052FF] border border-[#0052FF]/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0">
+                              Default
+                            </span>
+                          )}
                         </div>
+                        <a href={source.url.startsWith('http') ? source.url : `https://${source.url}`} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-slate-400 hover:text-[#0052FF] truncate block">
+                          {source.url}
+                        </a>
                       </div>
 
-                      <div className="flex items-center gap-3 w-full md:w-auto font-sans">
-                        <button
-                          onClick={() => handleCopyLink(link.code)}
-                          className="flex-1 md:flex-none border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
-                        >
-                          <Copy className="h-4 w-4" /> Copy Link
-                        </button>
-                        
-                        {isMock && (
-                          <button
-                            onClick={() => handleSimulateClickAndConversion(link)}
-                            className="flex-1 md:flex-none bg-[#0052FF] text-white hover:bg-blue-650 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-colors cursor-pointer"
-                          >
-                            <Play className="h-4 w-4" /> Simulate Lead
-                          </button>
+                      <div className="flex items-center gap-1.5 shrink-0 font-sans">
+                        {!source.is_default && (
+                          <>
+                            <button
+                              onClick={() => handleSetDefaultTrafficSource(source.id)}
+                              className="text-[10px] font-extrabold text-slate-500 hover:text-[#0052FF] px-2.5 py-1.5 hover:bg-[#0052FF]/5 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Make Default
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTrafficSource(source.id)}
+                              className="text-[10px] font-extrabold text-rose-600 hover:text-rose-700 px-2.5 py-1.5 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
-                  ))
-                )}
+                  ))}
+                </div>
+              </div>
+
+              {/* Affiliate tracking links section */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Tracking Links</h4>
+                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">Use these custom redirect links on your approved channels.</p>
+                </div>
+                <div className="grid gap-4">
+                  {myLinks.length === 0 ? (
+                    <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-6 text-center text-xs font-semibold text-slate-500 font-sans">
+                      You haven't generated any tracking links yet. Once you join a brand campaign under 'Advertisers', your custom redirect links will appear here automatically.
+                    </div>
+                  ) : (
+                    myLinks.map((link) => (
+                      <div key={link.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm w-full">
+                        <div className="space-y-1.5 text-left">
+                          <h4 className="text-base font-extrabold text-slate-800 font-sans">{link.campaign?.name || 'Active Campaign'}</h4>
+                          <div className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 px-3 py-1.5 rounded-lg border border-[#0052FF]/10 inline-block font-mono">
+                            {window.location.origin}/click/{link.code}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 w-full md:w-auto font-sans">
+                          <button
+                            onClick={() => handleCopyLink(link.code)}
+                            className="flex-1 md:flex-none border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                          >
+                            <Copy className="h-4 w-4" /> Copy Link
+                          </button>
+                          
+                          {isMock && (
+                            <button
+                              onClick={() => handleSimulateClickAndConversion(link)}
+                              className="flex-1 md:flex-none bg-[#0052FF] text-white hover:bg-blue-650 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-colors cursor-pointer"
+                            >
+                              <Play className="h-4 w-4" /> Simulate Lead
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -2390,6 +2539,76 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                   </>
                 );
               })()}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Add Traffic Source Modal */}
+      {isAddTrafficModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-in scale-in duration-205 border border-slate-100 p-6 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Add Traffic Source</h3>
+              <button 
+                onClick={() => setIsAddTrafficModalOpen(false)}
+                className="h-8 w-8 rounded-lg hover:bg-slate-50 flex items-center justify-center text-slate-450 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 font-sans">
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400">Traffic Source Name</label>
+                <input 
+                  type="text" 
+                  value={newTrafficName}
+                  onChange={(e) => setNewTrafficName(e.target.value)}
+                  placeholder="e.g. My Coupon Blog, Instagram Page"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                />
+              </div>
+
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400">URL / Profile Handle</label>
+                <input 
+                  type="text" 
+                  value={newTrafficUrl}
+                  onChange={(e) => setNewTrafficUrl(e.target.value)}
+                  placeholder="e.g. https://mycouponsite.com or @instaname"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                />
+              </div>
+
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400">Traffic Type</label>
+                <select 
+                  value={newTrafficType}
+                  onChange={(e) => setNewTrafficType(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0052FF]"
+                >
+                  <option value="Website">Website</option>
+                  <option value="Blog">Blog</option>
+                  <option value="Social Media">Social Media</option>
+                  <option value="Email List">Email List / Newsletter</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 font-sans">
+              <button 
+                onClick={() => setIsAddTrafficModalOpen(false)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-extrabold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleAddTrafficSource}
+                className="px-4 py-2 bg-[#0052FF] hover:bg-blue-650 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
+              >
+                Add Source
+              </button>
             </div>
           </div>
         </div>
