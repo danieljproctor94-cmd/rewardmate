@@ -190,10 +190,7 @@ BEGIN
       WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') IN ('publisher', 'advertiser') THEN 'pending'
       ELSE 'approved'
     END,
-    CASE 
-      WHEN COALESCE(new.raw_user_meta_data->>'user_type', 'publisher') = 'advertiser' THEN 1000.00 -- Initial advertiser demo funds
-      ELSE 0.00
-    END,
+    0.00,
     COALESCE(new.raw_user_meta_data->>'business_name', ''),
     COALESCE(new.raw_user_meta_data->>'website', ''),
     COALESCE(new.raw_user_meta_data->>'channels', ''),

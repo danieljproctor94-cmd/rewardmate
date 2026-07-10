@@ -346,7 +346,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar_url: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(fullName || email)}`,
           user_type: role,
           approval_status: (role === 'publisher' || role === 'advertiser') ? 'pending' : 'approved',
-          wallet_balance: role === 'advertiser' ? 1000.00 : 0.00,
+          wallet_balance: 0.00,
           onboarding_completed: role === 'advertiser' ? true : (role !== 'publisher'),
           ...extraData
         };
