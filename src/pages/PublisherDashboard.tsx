@@ -1481,7 +1481,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                       <div className="font-bold text-slate-800 hover:text-[#0052FF] cursor-pointer text-xs" onClick={() => setSelectedCampaignForModal(camp)}>
                                         {camp.name}
                                       </div>
-                                      <div className="text-[9px] text-slate-455 font-bold">({camp.id.replace('campaign-', '')})</div>
+                                      <div className="text-[9px] text-slate-455 font-bold">({formatUserId(camp.id)})</div>
                                     </div>
                                   </div>
                                 </td>
