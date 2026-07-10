@@ -1598,12 +1598,21 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                 <td className="py-3.5 px-4">
                                   {isApproved ? (
                                     <button
-                                      onClick={() => {
+                                      onClick={async () => {
                                         const link = myLinks.find(l => l.campaign_id === camp.id);
                                         if (link) {
                                           handleCopyLink(link.code);
                                         } else {
-                                          toast.error('Tracking link not generated yet.');
+                                          try {
+                                            toast.loading('Generating tracking link...', { id: `gen-${camp.id}` });
+                                            const newLink = await generateAffiliateLink(profile.id, camp.id);
+                                            toast.success('Link generated and copied!', { id: `gen-${camp.id}` });
+                                            const trackingUrl = `${window.location.origin}/click/${newLink.code}`;
+                                            navigator.clipboard.writeText(trackingUrl);
+                                            loadData();
+                                          } catch (e: any) {
+                                            toast.error(e.message || 'Failed to generate link.', { id: `gen-${camp.id}` });
+                                          }
                                         }
                                       }}
                                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded border border-emerald-700 flex items-center gap-1 w-fit text-[10px] cursor-pointer transition-colors shadow-sm"
@@ -1675,12 +1684,21 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                             
                             {isApproved ? (
                               <button
-                                onClick={() => {
+                                onClick={async () => {
                                   const link = myLinks.find(l => l.campaign_id === camp.id);
                                   if (link) {
                                     handleCopyLink(link.code);
                                   } else {
-                                    toast.error('Tracking link not generated yet.');
+                                    try {
+                                      toast.loading('Generating tracking link...', { id: `gen-${camp.id}` });
+                                      const newLink = await generateAffiliateLink(profile.id, camp.id);
+                                      toast.success('Link generated and copied!', { id: `gen-${camp.id}` });
+                                      const trackingUrl = `${window.location.origin}/click/${newLink.code}`;
+                                      navigator.clipboard.writeText(trackingUrl);
+                                      loadData();
+                                    } catch (e: any) {
+                                      toast.error(e.message || 'Failed to generate link.', { id: `gen-${camp.id}` });
+                                    }
                                   }
                                 }}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
@@ -2575,9 +2593,22 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     <>
                       <div className="text-[10px] font-bold text-slate-500 font-sans">You are partnered.</div>
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                           const link = myLinks.find(l => l.campaign_id === selectedCampaignForModal.id);
-                          if (link) handleCopyLink(link.code);
+                          if (link) {
+                            handleCopyLink(link.code);
+                          } else {
+                            try {
+                              toast.loading('Generating tracking link...', { id: `gen-modal-${selectedCampaignForModal.id}` });
+                              const newLink = await generateAffiliateLink(profile.id, selectedCampaignForModal.id);
+                              toast.success('Link generated and copied!', { id: `gen-modal-${selectedCampaignForModal.id}` });
+                              const trackingUrl = `${window.location.origin}/click/${newLink.code}`;
+                              navigator.clipboard.writeText(trackingUrl);
+                              loadData();
+                            } catch (e: any) {
+                              toast.error(e.message || 'Failed to generate link.', { id: `gen-modal-${selectedCampaignForModal.id}` });
+                            }
+                          }
                         }}
                         className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all cursor-pointer shadow-sm"
                       >

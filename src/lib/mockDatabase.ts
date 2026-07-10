@@ -887,7 +887,11 @@ export const updateApplicationStatus = async (applicationId: string, status: 'ap
       .eq('id', applicationId)
       .single();
     if (app) {
-      await generateAffiliateLink(app.publisher_id, app.campaign_id);
+      try {
+        await generateAffiliateLink(app.publisher_id, app.campaign_id);
+      } catch (rlsError) {
+        console.warn('Skipped auto-generating affiliate link due to RLS permissions. The affiliate can generate it in their dashboard:', rlsError);
+      }
     }
   }
 };
