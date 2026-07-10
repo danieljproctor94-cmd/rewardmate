@@ -210,6 +210,30 @@ export const updateCampaignStatus = async (id: string, status: Campaign['status'
   if (error) throw error;
 };
 
+export const updateCampaignDetails = async (
+  campaignId: string, 
+  details: {
+    name: string;
+    description: string;
+    landing_page_url: string;
+    payout_type: 'cpa' | 'revshare' | 'cpc';
+    payout_amount: number;
+  }
+): Promise<void> => {
+  if (!isSupabaseConfigured) {
+    const list = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const updated = list.map(c => c.id === campaignId ? { ...c, ...details } : c);
+    setStored(CAMPAIGNS_KEY, updated);
+    return;
+  }
+
+  const { error } = await supabase
+    .from('campaigns')
+    .update(details)
+    .eq('id', campaignId);
+  if (error) throw error;
+};
+
 export const getAffiliateLinks = async (publisherId: string): Promise<AffiliateLink[]> => {
   if (!isSupabaseConfigured) {
     const links = getStored(LINKS_KEY, DEFAULT_LINKS);

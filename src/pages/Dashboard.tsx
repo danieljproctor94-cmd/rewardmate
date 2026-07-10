@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PublisherDashboard from './PublisherDashboard';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
-  getCampaigns, createCampaign, updateCampaignStatus, 
+  getCampaigns, createCampaign, updateCampaignStatus, updateCampaignDetails, 
   getClicks, getConversions, updateConversionStatus,
   getMessages, sendMessage, getAllAffiliateLinks,
   getContactInquiries, markContactInquiryReplied,
@@ -98,6 +98,14 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   const [selectedPublisherForModal, setSelectedPublisherForModal] = useState<any | null>(null);
   const [hasClickedAffiliates, setHasClickedAffiliates] = useState(false);
   const [prevPendingCount, setPrevPendingCount] = useState(0);
+  
+  // Edit Campaign state
+  const [selectedCampaignForEdit, setSelectedCampaignForEdit] = useState<Campaign | null>(null);
+  const [editCampName, setEditCampName] = useState('');
+  const [editCampDesc, setEditCampDesc] = useState('');
+  const [editCampUrl, setEditCampUrl] = useState('');
+  const [editCampPayoutType, setEditCampPayoutType] = useState<'cpa' | 'revshare' | 'cpc'>('cpa');
+  const [editCampPayoutAmount, setEditCampPayoutAmount] = useState('');
 
   const pendingApplicationsCount = programApplications.filter(app => app.status === 'pending').length;
 
@@ -442,6 +450,39 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
       loadData();
     } catch (err: any) {
       toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartEditCampaign = (camp: Campaign) => {
+    setSelectedCampaignForEdit(camp);
+    setEditCampName(camp.name);
+    setEditCampDesc(camp.description);
+    setEditCampUrl(camp.landing_page_url);
+    setEditCampPayoutType(camp.payout_type);
+    setEditCampPayoutAmount(String(camp.payout_amount));
+  };
+
+  const handleSaveEditCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCampaignForEdit) return;
+    setLoading(true);
+
+    try {
+      await updateCampaignDetails(selectedCampaignForEdit.id, {
+        name: editCampName,
+        description: editCampDesc,
+        landing_page_url: editCampUrl,
+        payout_type: editCampPayoutType,
+        payout_amount: Number(editCampPayoutAmount)
+      });
+
+      toast.success('Campaign details updated successfully!');
+      setSelectedCampaignForEdit(null);
+      loadData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update campaign details.');
     } finally {
       setLoading(false);
     }
@@ -1110,17 +1151,19 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-8 text-right shrink-0">
+                      <div className="flex items-center gap-6 text-right shrink-0">
                         <div>
                           <div className="text-xs text-slate-500 font-semibold">Payout Rate</div>
                           <div className="text-sm font-bold text-slate-900">
                             {camp.payout_type === 'revshare' ? `${camp.payout_amount}%` : `$${Number(camp.payout_amount).toFixed(2)} AUD`} <span className="text-[10px] text-slate-500 uppercase">{camp.payout_type}</span>
                           </div>
                         </div>
-                        <div>
-                          <div className="text-xs text-slate-500 font-semibold">Total Paid Commission</div>
-                          <div className="text-sm font-bold text-slate-900">${Number(camp.spend || 0).toFixed(2)} AUD</div>
-                        </div>
+                        <button
+                          onClick={() => handleStartEditCampaign(camp)}
+                          className="border border-slate-200 hover:bg-slate-50 text-slate-700 hover:text-slate-800 font-extrabold text-[10px] h-8 px-4 rounded-xl transition-all cursor-pointer shadow-sm"
+                        >
+                          Edit Offer
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -2263,6 +2306,100 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                 className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-650 disabled:opacity-50 cursor-pointer shadow shadow-blue-500/10 transition-colors"
               >
                 {loading ? <div className="h-5 w-5 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" /> : 'Submit for Approval'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Campaign Edit Modal */}
+      {selectedCampaignForEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-8 space-y-6 max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200 shadow-2xl">
+            <button 
+              onClick={() => setSelectedCampaignForEdit(null)}
+              className="absolute right-6 top-6 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">Edit Campaign Details</h3>
+              <p className="text-xs text-slate-500 font-medium font-sans">Update the name, description, landing page URL, or commission payout configuration.</p>
+            </div>
+
+            <form onSubmit={handleSaveEditCampaign} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campaign Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Woolworths Credit Card Promo"
+                  value={editCampName}
+                  onChange={(e) => setEditCampName(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</label>
+                <textarea 
+                  placeholder="Summarize the offer criteria, target audience, and traffic restrictions..."
+                  value={editCampDesc}
+                  onChange={(e) => setEditCampDesc(e.target.value)}
+                  rows={3}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Landing Page URL</label>
+                <input 
+                  type="url" 
+                  placeholder="https://www.company.com/promotion"
+                  value={editCampUrl}
+                  onChange={(e) => setEditCampUrl(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Payout Type</label>
+                  <select
+                    value={editCampPayoutType}
+                    onChange={(e) => setEditCampPayoutType(e.target.value as 'cpa' | 'revshare' | 'cpc')}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                  >
+                    <option value="cpa">CPA (Flat rate per Sale)</option>
+                    <option value="revshare">Revshare (% Commission per Sale)</option>
+                    <option value="cpc">CPC (Cost per Click)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {editCampPayoutType === 'revshare' ? 'Commission Rate (%)' : 'Commission Amount ($)'}
+                  </label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    placeholder={editCampPayoutType === 'revshare' ? 'e.g. 10.00' : 'e.g. 50.00'}
+                    value={editCampPayoutAmount}
+                    onChange={(e) => setEditCampPayoutAmount(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 px-4 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#0052FF] text-white font-bold h-12 rounded-xl text-sm flex items-center justify-center hover:bg-blue-650 disabled:opacity-50 cursor-pointer shadow shadow-blue-500/10 transition-all font-sans"
+              >
+                {loading ? <div className="h-5 w-5 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" /> : 'Save Changes'}
               </button>
             </form>
           </div>
