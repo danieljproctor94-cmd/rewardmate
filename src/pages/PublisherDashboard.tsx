@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import { supabase } from '../supabaseClient';
 import { 
   getCampaigns, getAffiliateLinks, generateAffiliateLink, 
   logClick, getClicks, getConversions, createConversion,
@@ -177,49 +177,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const loadData = async () => {
     try {
       let camps: Campaign[] = [];
-      if (isSupabaseConfigured) {
-        try {
-          const { data, error } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
-          if (error) throw error;
-          
-          camps = (data || []).map((camp: any) => {
-            const matchedMock = [
-              { name: 'Mattel Shop', itp_support: 'Yes', target_markets: 'AU', commission_rate: '8.00% per Sale', avc: '$8.00', aov: '$99.99', cr: '2.86%', epc: '$0.23', avg_payout_days: '25', logo_url: 'M', logo_bg: 'bg-red-600' },
-              { name: 'UPPAbaby', itp_support: 'Yes', target_markets: 'AU', commission_rate: '8.00% per Sale', avc: '-', aov: '-', cr: '-', epc: '-', avg_payout_days: '30', logo_url: 'U', logo_bg: 'bg-cyan-700' },
-              { name: 'Nanit', itp_support: 'Yes', target_markets: 'AU', commission_rate: '10.00% per Sale', avc: '-', aov: '-', cr: '-', epc: '-', avg_payout_days: '20', logo_url: 'N', logo_bg: 'bg-indigo-900' },
-              { name: 'Howards Storage World', itp_support: 'Yes', target_markets: 'AU', commission_rate: '5.00% per Sale', avc: '$671.80', aov: '$76.15', cr: '13.64%', epc: '$91.61', avg_payout_days: '15', logo_url: 'H', logo_bg: 'bg-sky-500' },
-              { name: 'Flo & Frankie', itp_support: 'Yes', target_markets: 'AU', commission_rate: '8.00% per Sale', avc: '$21.15', aov: '$264.31', cr: '0.53%', epc: '$0.11', avg_payout_days: '25', logo_url: 'F', logo_bg: 'bg-[#18181b]' },
-              { name: 'Kollektive', itp_support: 'Yes', target_markets: 'AU', commission_rate: '10.00% per Sale', avc: '$7.10', aov: '$53.25', cr: '2.50%', epc: '$0.18', avg_payout_days: '18', logo_url: 'K', logo_bg: 'bg-orange-300' },
-              { name: 'Zamel\'s', itp_support: 'Yes', target_markets: 'AU', commission_rate: '1.00% per Sale', avc: '$3.47', aov: '$181.07', cr: '4.65%', epc: '$0.16', avg_payout_days: '22', logo_url: 'Z', logo_bg: 'bg-slate-500' }
-            ].find(c => c.name.toLowerCase() === camp.name.toLowerCase());
-
-            if (matchedMock) {
-              return { ...camp, ...matchedMock };
-            }
-            return {
-              ...camp,
-              itp_support: 'Yes',
-              target_markets: 'AU',
-              commission_rate: camp.payout_type === 'revshare' 
-                ? `${Number(camp.payout_amount).toFixed(2)}% per Sale` 
-                : camp.payout_type === 'cpc'
-                  ? `$${Number(camp.payout_amount).toFixed(2)} per Click`
-                  : `$${Number(camp.payout_amount).toFixed(2)} per Sale`,
-              avc: '-',
-              aov: '-',
-              cr: '-',
-              epc: '-',
-              avg_payout_days: '30',
-              logo_url: camp.name.charAt(0).toUpperCase(),
-              logo_bg: 'bg-[#0052FF]'
-            };
-          });
-        } catch (dbErr) {
-          console.warn('Real database campaigns query failed, falling back to mock:', dbErr);
-          camps = await getCampaigns();
-        }
-      } else {
+      try {
         camps = await getCampaigns();
+      } catch (err) {
+        console.error('Failed to load campaigns:', err);
       }
 
       setCampaigns(camps.filter(c => c.status === 'active'));
