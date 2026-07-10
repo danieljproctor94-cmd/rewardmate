@@ -24,8 +24,14 @@ import { useSEO } from '../hooks/useSEO';
 
 export const formatUserId = (id: string | undefined): string => {
   if (!id) return '';
-  const cleanId = id.replace('mock-user-', '').replace('db-user-', '').replace(/-/g, '');
-  return cleanId.substring(0, 6).toUpperCase();
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  const numericId = Math.abs(hash) % 100000;
+  return String(numericId).padStart(5, '0');
 };
 
 export default function Dashboard() {
