@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
-  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles, Plus
+  ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles, Plus, Receipt
 } from 'lucide-react';
 
 export const formatUserId = (id: string | undefined): string => {
@@ -28,7 +28,7 @@ export const formatUserId = (id: string | undefined): string => {
 
 export default function PublisherDashboard({ profile, updateBalance, signOut, }: { profile: any, updateBalance: any, signOut: any }) {
   const { isMock, updateProfileDetails } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'offers' | 'my-links' | 'clicks-conv' | 'wallet' | 'messages' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'offers' | 'my-links' | 'clicks-conv' | 'wallet' | 'messages' | 'settings' | 'transactions'>('dashboard');
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [myLinks, setMyLinks] = useState<AffiliateLink[]>([]);
   const [clicks, setClicks] = useState<Click[]>([]);
@@ -669,6 +669,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                 { id: 'my-links', label: 'Traffic Sources', icon: Globe },
                 { id: 'clicks-conv', label: 'Reporting', icon: BarChart3 },
                 { id: 'wallet', label: 'Finance', icon: DollarSign },
+                { id: 'transactions', label: 'Transactions', icon: Receipt },
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -788,6 +789,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
               { id: 'clicks-conv', label: 'Reporting', icon: BarChart3, hasSub: true },
               { id: 'creatives', label: 'Creatives', icon: ImageIcon, hasSub: true },
               { id: 'wallet', label: 'Finance', icon: DollarSign, hasSub: true },
+              { id: 'transactions', label: 'Transactions', icon: Receipt, hasSub: true },
               { id: 'settings', label: 'Account Settings', icon: Sliders, hasSub: true },
             ].map((item) => {
               const Icon = item.icon;
@@ -1845,6 +1847,93 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
 
             </div>
           )}
+
+          {activeTab === 'transactions' && (() => {
+            const pubConvs = conversions.filter(c => c.publisher_id === profile.id);
+            return (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div className="flex justify-between items-center text-left">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Transactions Ledger</h2>
+                    <p className="text-xs text-slate-550 font-semibold">Verify and track commissions earned from customer conversions via your referral channels.</p>
+                  </div>
+                </div>
+
+                {/* Ledger Summary Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Approved Commission Balance</span>
+                    <h3 className="text-lg font-black text-slate-900 mt-1">
+                      ${pubConvs.filter(c => c.status === 'approved').reduce((sum, c) => sum + Number(c.payout), 0).toFixed(2)} AUD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Pending Commissions</span>
+                    <h3 className="text-lg font-black text-[#0052FF] mt-1">
+                      ${pubConvs.filter(c => c.status === 'pending').reduce((sum, c) => sum + Number(c.payout), 0).toFixed(2)} AUD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm text-left">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Voided Transactions</span>
+                    <h3 className="text-lg font-black text-rose-600 mt-1">
+                      {pubConvs.filter(c => c.status === 'voided').length} / {pubConvs.length}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Transactions Table */}
+                <div className="bg-white border border-slate-150 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm font-sans border-collapse text-left">
+                      <thead>
+                        <tr className="bg-slate-50/75 border-b border-slate-150 text-[10px] font-black uppercase text-slate-455 tracking-wider">
+                          <th className="py-3.5 px-6">Transaction ID & Date</th>
+                          <th className="py-3.5 px-6">Offer / Program</th>
+                          <th className="py-3.5 px-6 text-right">Sale Amount</th>
+                          <th className="py-3.5 px-6 text-right">My Commission</th>
+                          <th className="py-3.5 px-6 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {pubConvs.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-12 text-center text-slate-400 font-bold text-xs">
+                              No referral transactions logged yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          pubConvs.map((txn) => {
+                            const dateStr = new Date(txn.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            return (
+                              <tr key={txn.id} className="hover:bg-slate-50/40 transition-colors">
+                                <td className="py-4 px-6">
+                                  <div className="font-mono text-xs text-slate-900 font-black">{txn.transaction_id || formatUserId(txn.id)}</div>
+                                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">{dateStr}</div>
+                                </td>
+                                <td className="py-4 px-6 text-xs font-bold text-slate-800">{txn.campaign?.name || txn.campaign_name || 'Campaign Offer'}</td>
+                                <td className="py-4 px-6 text-right text-xs font-extrabold text-slate-950">${Number(txn.sale_amount || 0).toFixed(2)}</td>
+                                <td className="py-4 px-6 text-right text-xs font-black text-[#0052FF]">${Number(txn.payout).toFixed(2)}</td>
+                                <td className="py-4 px-6 text-center">
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide border ${
+                                    txn.status === 'approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                                    txn.status === 'pending' ? 'bg-amber-50 border-amber-100 text-amber-700 animate-pulse' :
+                                    txn.status === 'voided' ? 'bg-rose-50 border-rose-100 text-rose-700 line-through' :
+                                    'bg-slate-50 border-slate-200 text-slate-500'
+                                  }`}>
+                                    {txn.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* TAB 5: FINANCE WITH-DRAW WALLET */}
           {activeTab === 'wallet' && (

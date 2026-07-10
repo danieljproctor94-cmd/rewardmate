@@ -57,7 +57,7 @@ export interface Conversion {
   payout: number;
   sale_amount?: number;
   rewardmate_fee?: number;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'voided';
   transaction_id: string;
   created_at: string;
   campaign?: Campaign;
@@ -426,6 +426,50 @@ export const updateConversionStatus = async (id: string, status: Conversion['sta
         const updatedCamp = campaigns.map(c => {
           if (c.id === conv.campaign_id) {
             return { ...c, spend: Number(c.spend) + Number(conv.payout) };
+          }
+          return c;
+        });
+        setStored(CAMPAIGNS_KEY, updatedCamp);
+      }
+    }
+
+    if (status === 'voided') {
+      const conv = conversions.find(c => c.id === id);
+      if (conv) {
+        const finalSaleAmount = conv.sale_amount || 100.00;
+
+        const profilesKey = 'rewardmate_mock_profiles';
+        const profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
+
+        const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+        const campaign = campaigns.find(camp => camp.id === conv.campaign_id);
+        const advertiserProfile = campaign ? profiles.find((p: any) => p.id === campaign.advertiser_id) : null;
+
+        const commissionRate = advertiserProfile && advertiserProfile.commission_rate !== undefined 
+          ? advertiserProfile.commission_rate 
+          : 1.50;
+
+        const rewardmateFee = conv.rewardmate_fee || Number((finalSaleAmount * (commissionRate / 100)).toFixed(2));
+
+        // Revert payout and fees
+        const updatedProfiles = profiles.map((p: any) => {
+          if (p.id === conv.publisher_id) {
+            return { ...p, wallet_balance: Math.max(0, Number(p.wallet_balance) - Number(conv.payout)) };
+          }
+          if (campaign && p.id === campaign.advertiser_id) {
+            return { ...p, wallet_balance: Number(p.wallet_balance) + (Number(conv.payout) + rewardmateFee) };
+          }
+          if (p.user_type === 'admin') {
+            return { ...p, wallet_balance: Math.max(0, Number(p.wallet_balance) - rewardmateFee) };
+          }
+          return p;
+        });
+        localStorage.setItem(profilesKey, JSON.stringify(updatedProfiles));
+
+        // Decrement campaign spend
+        const updatedCamp = campaigns.map(c => {
+          if (c.id === conv.campaign_id) {
+            return { ...c, spend: Math.max(0, Number(c.spend) - Number(conv.payout)) };
           }
           return c;
         });
