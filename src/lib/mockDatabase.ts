@@ -107,11 +107,13 @@ export const getCampaigns = async (): Promise<Campaign[]> => {
       
     if (error) throw error;
     if (!data) return [];
+    const overrides = JSON.parse(localStorage.getItem('rewardmate_supabase_profiles_override') || '{}');
     return data.map((camp: any) => {
       const matchedMock = DEFAULT_CAMPAIGNS.find(c => c.name.toLowerCase() === camp.name.toLowerCase());
+      const advOverride = overrides[camp.advertiser_id];
       const adv = camp.profiles;
-      const logoUrl = adv?.avatar_url || (matchedMock ? matchedMock.logo_url : camp.name.charAt(0).toUpperCase());
-      const advertiserName = adv?.business_name || adv?.full_name || 'Partner Brand';
+      const logoUrl = advOverride?.avatar_url || adv?.avatar_url || (matchedMock ? matchedMock.logo_url : camp.name.charAt(0).toUpperCase());
+      const advertiserName = advOverride?.business_name || advOverride?.full_name || adv?.business_name || adv?.full_name || 'Partner Brand';
       
       if (matchedMock) {
         return {

@@ -533,6 +533,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.bank_bsb !== undefined) dbUpdates.bank_bsb = updates.bank_bsb;
         if (updates.bank_account_number !== undefined) dbUpdates.bank_account_number = updates.bank_account_number;
         if (updates.bank_account_name !== undefined) dbUpdates.bank_account_name = updates.bank_account_name;
+        if (updates.program_terms !== undefined) dbUpdates.program_terms = updates.program_terms;
+        if (updates.about_us !== undefined) dbUpdates.about_us = updates.about_us;
+        if (updates.target_countries !== undefined) dbUpdates.target_countries = updates.target_countries;
+        if (updates.year_founded !== undefined) dbUpdates.year_founded = updates.year_founded;
+        if (updates.facebook_url !== undefined) dbUpdates.facebook_url = updates.facebook_url;
+        if (updates.instagram_url !== undefined) dbUpdates.instagram_url = updates.instagram_url;
 
         if (Object.keys(dbUpdates).length > 0) {
           const { error: dbError } = await supabase
