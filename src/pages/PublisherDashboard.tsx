@@ -3,14 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabaseClient';
 import { 
   getCampaigns, getAffiliateLinks, generateAffiliateLink, 
-  logClick, getClicks, getConversions, createConversion,
+  getClicks, getConversions,
   getMessages, sendMessage, getProgramApplications, createProgramApplication
 } from '../lib/mockDatabase';
 import type { Campaign, AffiliateLink, Click, Conversion, ProgramApplication } from '../lib/mockDatabase';
 import { toast } from 'sonner';
 import { 
   LogOut, DollarSign, MousePointer, CheckCircle, Copy, 
-  Play, Check,
   FolderKanban, Users, Compass, Globe, BarChart3, Image as ImageIcon, Sliders,
   ChevronRight, ChevronLeft, Bell, Mail, HelpCircle, ArrowRight, Menu, X, Sparkles, Plus
 } from 'lucide-react';
@@ -363,31 +362,6 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
     const trackingUrl = `${window.location.origin}/click/${code}`;
     navigator.clipboard.writeText(trackingUrl);
     toast.success('Tracking Link copied to clipboard!');
-  };
-
-  // Click & Conversion Simulator tool
-  const handleSimulateClickAndConversion = async (link: AffiliateLink) => {
-    try {
-      await logClick(link.code);
-      const triggerConv = Math.random() < 0.7;
-      if (triggerConv) {
-        // Generate a random sale amount between $50 and $500
-        const saleAmount = Math.floor(Math.random() * 450) + 50;
-        let campaignPayout = link.campaign?.payout_amount || 25.00;
-        
-        if (link.campaign?.payout_type === 'revshare') {
-          campaignPayout = saleAmount * (link.campaign.payout_amount / 100);
-        }
-        
-        await createConversion(link.code, campaignPayout, saleAmount);
-        toast.success(`Click & Conversion Simulated! Sale of $${saleAmount.toFixed(2)} logged. Affiliate payout of $${campaignPayout.toFixed(2)}.`);
-      } else {
-        toast.info('Click Simulated! (This hit did not convert).');
-      }
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
   };
 
   const handleWithdraw = async (e: React.FormEvent) => {
@@ -1634,9 +1608,19 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                                 <td className="py-3.5 px-4 font-bold text-slate-500">{camp.avg_payout_days || '30'}</td>
                                 <td className="py-3.5 px-4">
                                   {isApproved ? (
-                                    <span className="text-emerald-600 font-bold bg-emerald-50/50 px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1 w-fit text-[10px]">
-                                      <Check className="h-3 w-3" /> Partnered
-                                    </span>
+                                    <button
+                                      onClick={() => {
+                                        const link = myLinks.find(l => l.campaign_id === camp.id);
+                                        if (link) {
+                                          handleCopyLink(link.code);
+                                        } else {
+                                          toast.error('Tracking link not generated yet.');
+                                        }
+                                      }}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded border border-emerald-700 flex items-center gap-1 w-fit text-[10px] cursor-pointer transition-colors shadow-sm"
+                                    >
+                                      <Copy className="h-3 w-3" /> Copy Link
+                                    </button>
                                   ) : isPending ? (
                                     <span className="text-amber-600 font-bold bg-amber-50/50 px-2 py-0.5 rounded border border-amber-100 flex items-center gap-1 w-fit text-[10px] animate-pulse">
                                       Pending
@@ -1701,9 +1685,19 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                             </div>
                             
                             {isApproved ? (
-                              <span className="text-emerald-600 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100 flex items-center gap-1 select-none">
-                                <Check className="h-3 w-3" /> Partnered
-                              </span>
+                              <button
+                                onClick={() => {
+                                  const link = myLinks.find(l => l.campaign_id === camp.id);
+                                  if (link) {
+                                    handleCopyLink(link.code);
+                                  } else {
+                                    toast.error('Tracking link not generated yet.');
+                                  }
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
+                              >
+                                <Copy className="h-3.5 w-3.5" /> Copy Link
+                              </button>
                             ) : isPending ? (
                               <span className="text-amber-600 font-bold text-xs bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100 flex items-center gap-1 select-none animate-pulse">
                                 Pending
@@ -1734,8 +1728,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
           {activeTab === 'my-links' && (
             <div className="space-y-8 animate-in fade-in duration-300">
               <div>
-                <h3 className="text-lg font-bold text-slate-800 font-sans">Your Traffic Sources & Links</h3>
-                <p className="text-xs text-slate-500 font-medium font-sans">Manage your traffic sources and use tracking links to earn commissions.</p>
+                <h3 className="text-lg font-bold text-slate-800 font-sans">Your Traffic Sources</h3>
+                <p className="text-xs text-slate-500 font-medium font-sans">Manage your websites, blogs, and social channels where brand programs are promoted.</p>
               </div>
 
               {/* Traffic Sources Manager */}
@@ -1793,50 +1787,6 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Affiliate tracking links section */}
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Tracking Links</h4>
-                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">Use these custom redirect links on your approved channels.</p>
-                </div>
-                <div className="grid gap-4">
-                  {myLinks.length === 0 ? (
-                    <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-6 text-center text-xs font-semibold text-slate-500 font-sans">
-                      You haven't generated any tracking links yet. Once you join a brand campaign under 'Advertisers', your custom redirect links will appear here automatically.
-                    </div>
-                  ) : (
-                    myLinks.map((link) => (
-                      <div key={link.id} className="bg-white rounded-2xl border border-slate-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm w-full">
-                        <div className="space-y-1.5 text-left">
-                          <h4 className="text-base font-extrabold text-slate-800 font-sans">{link.campaign?.name || 'Active Campaign'}</h4>
-                          <div className="text-xs font-bold text-[#0052FF] bg-[#0052FF]/5 px-3 py-1.5 rounded-lg border border-[#0052FF]/10 inline-block font-mono">
-                            {window.location.origin}/click/{link.code}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 w-full md:w-auto font-sans">
-                          <button
-                            onClick={() => handleCopyLink(link.code)}
-                            className="flex-1 md:flex-none border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
-                          >
-                            <Copy className="h-4 w-4" /> Copy Link
-                          </button>
-                          
-                          {isMock && (
-                            <button
-                              onClick={() => handleSimulateClickAndConversion(link)}
-                              className="flex-1 md:flex-none bg-[#0052FF] text-white hover:bg-blue-650 font-bold h-11 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition-colors cursor-pointer"
-                            >
-                              <Play className="h-4 w-4" /> Simulate Lead
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
                 </div>
               </div>
             </div>
