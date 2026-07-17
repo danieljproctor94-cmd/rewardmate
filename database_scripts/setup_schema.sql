@@ -74,8 +74,8 @@ CREATE TABLE public.campaigns (
 -- Enable RLS on Campaigns
 ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow authenticated users to read active/paused campaigns" ON public.campaigns
-    FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow public read access to campaigns" ON public.campaigns
+    FOR SELECT USING (true);
 
 CREATE POLICY "Allow advertisers to manage their own campaigns" ON public.campaigns
     FOR ALL USING (
