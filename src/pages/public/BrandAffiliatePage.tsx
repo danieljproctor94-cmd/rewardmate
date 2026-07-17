@@ -183,44 +183,16 @@ export default function BrandAffiliatePage() {
     } : undefined
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-[#070913]">
-        <div className="h-10 w-10 rounded-full border-4 border-[#0052FF]/20 border-t-[#0052FF] animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!brand) {
-    return (
-      <div className="min-h-screen bg-[#070913] text-white flex flex-col justify-center items-center p-6">
-        <div className="space-y-6 text-center max-w-md">
-          <AlertCircle className="h-16 w-16 text-rose-500 mx-auto animate-bounce" />
-          <h1 className="text-3xl font-black tracking-tight">Affiliate Program Not Found</h1>
-          <p className="text-slate-400 text-sm">
-            We couldn't locate an active advertiser profile matching <span className="text-[#38bdf8] font-semibold font-mono">"{brandSlug}"</span>.
-          </p>
-          <button 
-            onClick={() => navigate('/')} 
-            className="inline-flex items-center gap-2 bg-[#0052FF] hover:bg-blue-600 text-white font-bold h-11 px-6 rounded-full transition-all text-xs"
-          >
-            <ArrowLeft className="h-4 w-4" /> Back to Reward Mate
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Helper for countries mapping
-  const countryList = brand.target_countries 
+  const countryList = brand?.target_countries 
     ? brand.target_countries.split(',').map(c => c.trim()) 
     : ['AU'];
 
   return (
-    <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden min-h-screen">
+    <div className="bg-white text-slate-800 font-sans selection:bg-blue-500/20 overflow-x-hidden min-h-screen flex flex-col">
       
       {/* Top Sticky Header */}
-      <header className="w-full bg-[#070913] py-5 border-b border-white/5 relative z-50">
+      <header className="w-full bg-[#070913] py-5 border-b border-white/5 relative z-50 shrink-0">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between relative">
           <a href="/" className="flex items-center cursor-pointer">
             <img 
@@ -262,6 +234,62 @@ export default function BrandAffiliatePage() {
           </div>
         </div>
       </header>
+
+      {loading ? (
+        /* SKELETON LOADER STATE */
+        <div className="flex-1 bg-[#070913]">
+          {/* Skeleton Hero Header */}
+          <section className="bg-[#070913] text-white py-16 sm:py-24 relative overflow-hidden animate-pulse">
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[80px]" />
+            <div className="max-w-5xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 text-center md:text-left">
+              <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-3xl bg-white/5 border border-white/10 shrink-0 shadow-2xl" />
+              <div className="space-y-4 flex-1">
+                <div className="h-6 w-36 bg-white/10 rounded" />
+                <div className="h-10 w-64 bg-white/10 rounded" />
+                <div className="h-4 w-40 bg-white/10 rounded" />
+              </div>
+            </div>
+          </section>
+
+          {/* Skeleton Content Body */}
+          <div className="bg-white py-16">
+            <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="lg:col-span-2 space-y-12 text-left animate-pulse">
+                <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8 space-y-4">
+                  <div className="h-6 w-36 bg-slate-200 rounded" />
+                  <div className="space-y-2.5">
+                    <div className="h-3.5 w-full bg-slate-200 rounded" />
+                    <div className="h-3.5 w-5/6 bg-slate-200 rounded" />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6 animate-pulse">
+                <div className="h-48 w-full bg-slate-50 border border-slate-100 rounded-3xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : !brand ? (
+        /* NOT FOUND STATE */
+        <div className="flex-1 bg-[#070913] text-white flex flex-col justify-center items-center py-24 px-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,#0052FF_0%,transparent_70%)] opacity-20 blur-[80px] pointer-events-none" />
+          <div className="space-y-6 text-center max-w-md relative z-10">
+            <AlertCircle className="h-16 w-16 text-rose-500 mx-auto animate-bounce" />
+            <h1 className="text-3xl font-black tracking-tight">Affiliate Program Not Found</h1>
+            <p className="text-slate-400 text-sm">
+              We couldn't locate an active advertiser profile matching <span className="text-[#38bdf8] font-semibold font-mono">"{brandSlug}"</span>.
+            </p>
+            <button 
+              onClick={() => navigate('/')} 
+              className="inline-flex items-center gap-2 bg-[#0052FF] hover:bg-blue-600 text-white font-bold h-11 px-6 rounded-full transition-all text-xs cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to Reward Mate
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* REAL PAGE CONTENT wrapper */
+        <div className="flex-1 flex flex-col">
 
       {/* Brand Hero Header */}
       <section className="bg-[#070913] text-white py-16 sm:py-24 relative overflow-hidden">
@@ -617,6 +645,8 @@ export default function BrandAffiliatePage() {
         </div>
 
       </main>
+      </div>
+      )}
 
       {/* Footer Banner CTA */}
       <section className="py-20 bg-[#0a0f24] text-white relative overflow-hidden text-center mt-20">
