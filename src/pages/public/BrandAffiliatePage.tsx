@@ -136,7 +136,28 @@ export default function BrandAffiliatePage() {
   // SEO configuration
   const brandName = brand ? (brand.business_name || brand.full_name) : 'Brand';
   const brandLogo = brand?.avatar_url || '';
-  const brandCommission = brand?.commission_rate !== undefined ? `${brand.commission_rate}%` : '1.5%';
+  // Get dynamic commission text from active campaigns (avoiding platform fee in UI)
+  const getCommissionDisplay = () => {
+    if (campaigns.length === 0) return 'CPA / RevShare';
+    
+    const revshareCamp = campaigns.find(c => c.payout_type === 'revshare');
+    const cpaCamps = campaigns.filter(c => c.payout_type === 'cpa');
+    
+    if (revshareCamp) {
+      return `${Number(revshareCamp.payout_amount).toFixed(2)}%`;
+    } else if (cpaCamps.length > 0) {
+      const maxCpa = Math.max(...cpaCamps.map(c => Number(c.payout_amount)));
+      return `$${maxCpa.toFixed(2)}`;
+    } else {
+      const cpcCamp = campaigns.find(c => c.payout_type === 'cpc');
+      if (cpcCamp) {
+        return `$${Number(cpcCamp.payout_amount).toFixed(2)}`;
+      }
+    }
+    return 'CPA';
+  };
+
+  const brandCommission = getCommissionDisplay();
   const brandBio = brand?.about_us || `${brandName} is a partner merchant on the Reward Mate performance marketing network.`;
   
   useSEO({
@@ -156,8 +177,8 @@ export default function BrandAffiliatePage() {
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "AUD",
-        "lowPrice": brand.commission_rate || 1.5,
-        "price": brand.commission_rate || 1.5
+        "lowPrice": campaigns.length > 0 ? Number(campaigns[0].payout_amount) : 8.0,
+        "price": campaigns.length > 0 ? Number(campaigns[0].payout_amount) : 8.0
       }
     } : undefined
   });
