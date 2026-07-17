@@ -328,7 +328,7 @@ export default function BrandAffiliatePage() {
                   key={code} 
                   className="bg-white/5 border border-white/10 text-white/95 text-[10px] font-bold px-2.5 py-0.75 rounded-lg flex items-center gap-1"
                 >
-                  <MapPin className="h-3 w-3 text-emerald-400" /> {code === 'AU' ? '🇦🇺 Australia' : code === 'US' ? '🇺🇸 USA' : code === 'GB' ? '🇬🇧 UK' : code === 'NZ' ? '🇳🇿 New Zealand' : code === 'CA' ? '🇨🇦 Canada' : code}
+                  <MapPin className="h-3 w-3 text-emerald-400" /> {code === 'AU' ? 'Australia' : code === 'US' ? 'USA' : code === 'GB' ? 'UK' : code === 'NZ' ? 'New Zealand' : code === 'CA' ? 'Canada' : code}
                 </span>
               ))}
               
