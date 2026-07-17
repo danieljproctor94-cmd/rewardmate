@@ -193,7 +193,7 @@ export const createCampaign = async (campaign: Omit<Campaign, 'id' | 'spend' | '
     return newCamp;
   }
   
-  // Destructure only valid database columns for INSERT
+  // Destructure database columns for INSERT
   const {
     advertiser_id,
     name,
@@ -202,7 +202,8 @@ export const createCampaign = async (campaign: Omit<Campaign, 'id' | 'spend' | '
     payout_type,
     payout_amount,
     status,
-    total_budget
+    total_budget,
+    category
   } = campaign;
 
   const { data, error } = await supabase
@@ -215,7 +216,8 @@ export const createCampaign = async (campaign: Omit<Campaign, 'id' | 'spend' | '
       payout_type,
       payout_amount,
       status,
-      total_budget: total_budget || 0.00
+      total_budget: total_budget || 0.00,
+      category
     })
     .select()
     .single();
@@ -252,9 +254,17 @@ export const updateCampaignDetails = async (
     return;
   }
 
+  const { name, description, landing_page_url, payout_type, payout_amount, category } = details;
   const { error } = await supabase
     .from('campaigns')
-    .update(details)
+    .update({
+      name,
+      description,
+      landing_page_url,
+      payout_type,
+      payout_amount,
+      category
+    })
     .eq('id', campaignId);
   if (error) throw error;
 };

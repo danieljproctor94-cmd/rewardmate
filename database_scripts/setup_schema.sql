@@ -68,6 +68,7 @@ CREATE TABLE public.campaigns (
     status TEXT CHECK (status IN ('pending_approval', 'active', 'paused', 'rejected')) NOT NULL DEFAULT 'pending_approval',
     total_budget NUMERIC(12,2) NOT NULL DEFAULT 0.00,
     spend NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    category TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
