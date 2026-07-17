@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getAppUrl } from '../../lib/domain';
+import { getAppUrl, slugify } from '../../lib/domain';
 import { Check, ArrowRight, Star, Shield, TrendingUp, HelpCircle, Briefcase, User, Presentation, X, ChevronDown, Search, Zap, Mic, BookOpen, Menu } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
+import { getAdvertisers } from '../../lib/mockDatabase';
 
 export default function Landing() {
   const [activeTab, setActiveTab] = useState<'publishers' | 'advertisers'>('publishers');
@@ -10,6 +11,19 @@ export default function Landing() {
   const [showNotification, setShowNotification] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [brands, setBrands] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const list = await getAdvertisers();
+        setBrands(list);
+      } catch (err) {
+        console.error('Error fetching brands in landing:', err);
+      }
+    };
+    fetchBrands();
+  }, []);
 
   const schema = {
     "@context": "https://schema.org",
@@ -375,16 +389,44 @@ export default function Landing() {
       {/* Trusted Brands Logo Cloud section */}
       <section id="logos-section" className="py-12 border-b border-slate-100 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8">Trusted by Leading Brands</p>
-          <div className="flex flex-wrap items-center justify-center gap-10 md:gap-14 opacity-50 grayscale hover:opacity-75 transition-opacity">
-            <div className="text-sm font-extrabold text-slate-800 tracking-widest uppercase">ACME CORP</div>
-            <div className="text-sm font-black text-slate-800 tracking-tight lowercase">globex</div>
-            <div className="text-sm font-bold text-slate-800 tracking-wide">Initech</div>
-            <div className="text-sm font-extrabold text-slate-800 tracking-tighter italic">hooli</div>
-            <div className="text-sm font-black text-slate-800 tracking-widest uppercase">APEX</div>
-            <div className="text-sm font-semibold text-slate-800 tracking-wider font-serif">Omni Group</div>
-            <div className="text-sm font-medium text-slate-800 tracking-widest uppercase">NEXUS</div>
-            <div className="text-sm font-bold text-slate-800 tracking-wide uppercase italic">VEER</div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mb-8 font-sans">Trusted by Leading Brands</p>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-80 hover:opacity-100 transition-opacity">
+            {brands.length === 0 ? (
+              <>
+                <div className="text-sm font-extrabold text-slate-400 tracking-widest uppercase">ACME CORP</div>
+                <div className="text-sm font-black text-slate-400 tracking-tight lowercase">globex</div>
+                <div className="text-sm font-bold text-slate-400 tracking-wide">Initech</div>
+                <div className="text-sm font-extrabold text-slate-400 tracking-tighter italic">hooli</div>
+                <div className="text-sm font-black text-slate-400 tracking-widest uppercase">APEX</div>
+              </>
+            ) : (
+              brands.map((b) => {
+                const name = b.business_name || b.full_name || 'Partner Brand';
+                const slug = slugify(name);
+                return (
+                  <a 
+                    key={b.id}
+                    href={`/affiliate-programs/${slug}`}
+                    className="flex items-center gap-2 group hover:scale-105 transition-all text-slate-700 hover:text-[#0052FF]"
+                  >
+                    {b.avatar_url ? (
+                      <img 
+                        src={b.avatar_url} 
+                        className="h-7 w-7 rounded-full object-cover border border-slate-200 shadow-sm brightness-95 group-hover:brightness-100" 
+                        alt="" 
+                      />
+                    ) : (
+                      <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
+                        {name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-xs sm:text-sm font-extrabold tracking-tight uppercase group-hover:underline">
+                      {name}
+                    </span>
+                  </a>
+                );
+              })
+            )}
           </div>
         </div>
       </section>

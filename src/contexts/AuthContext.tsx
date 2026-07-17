@@ -65,12 +65,20 @@ const DEFAULT_MOCK_PROFILES: Profile[] = [
   {
     id: 'mock-advertiser-id',
     email: 'advertiser@rewardmate.com.au',
-    full_name: 'Daniel Proctor (Advertiser)',
+    full_name: 'Daniel Proctor',
+    business_name: 'Daniel Proctor',
     avatar_url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=100&q=80',
     user_type: 'advertiser',
     approval_status: 'approved',
     wallet_balance: 5000.00,
-    commission_rate: 1.50
+    commission_rate: 8.00,
+    about_us: 'Daniel Proctor Brand is a premium apparel and fashion retailer in Australia, offering elegant wardrobe designs, sustainable sourcing, and free countrywide shipping.',
+    program_terms: 'Join us to promote high-converting apparel. Coupon websites permitted. No trademark bidding or brand search CPC arbitrage.',
+    website: 'https://www.danielproctor.com.au',
+    channels: 'Retail & Fashion',
+    target_countries: 'AU,NZ',
+    year_founded: 2021,
+    auto_approve: true
   },
   {
     id: 'mock-publisher-id',
@@ -135,6 +143,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           let business_name = p.business_name;
           if (p.id === 'mock-publisher-id' && !business_name) {
             business_name = 'Sarah Connor Promotions';
+            updated = true;
+          }
+          if (p.id === 'mock-advertiser-id' && (!business_name || business_name === '' || name.includes('Advertiser'))) {
+            name = 'Daniel Proctor';
+            business_name = 'Daniel Proctor';
+            p.about_us = 'Daniel Proctor Brand is a premium apparel and fashion retailer in Australia, offering elegant wardrobe designs, sustainable sourcing, and free countrywide shipping.';
+            p.program_terms = 'Join us to promote high-converting apparel. Coupon websites permitted. No trademark bidding or brand search CPC arbitrage.';
+            p.website = 'https://www.danielproctor.com.au';
+            p.channels = 'Retail & Fashion';
+            p.target_countries = 'AU,NZ';
+            p.year_founded = 2021;
+            p.commission_rate = 8.00;
+            p.auto_approve = true;
             updated = true;
           }
           if (name && name.includes('David')) {

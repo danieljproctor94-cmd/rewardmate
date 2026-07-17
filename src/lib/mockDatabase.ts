@@ -69,7 +69,25 @@ const LINKS_KEY = 'rewardmate_mock_links';
 const CLICKS_KEY = 'rewardmate_mock_clicks';
 const CONVERSIONS_KEY = 'rewardmate_mock_conversions';
 
-const DEFAULT_CAMPAIGNS: Campaign[] = [];
+const DEFAULT_CAMPAIGNS: Campaign[] = [
+  {
+    id: 'campaign-daniel-1',
+    advertiser_id: 'mock-advertiser-id',
+    name: 'Daniel Proctor Premium CPA Deal',
+    description: 'Promote our high-converting fashion collections. Earn a flat 8.00% commission on every verified sale. High EPC and fast payouts.',
+    landing_page_url: 'https://www.danielproctor.com.au/promo',
+    payout_type: 'revshare',
+    payout_amount: 8.00,
+    status: 'active',
+    total_budget: 10000.00,
+    spend: 0.00,
+    created_at: new Date().toISOString(),
+    itp_support: 'Yes',
+    target_markets: 'AU, NZ',
+    category: 'Retail & Fashion',
+    logo_bg: 'bg-[#0052FF]'
+  }
+];
 const DEFAULT_LINKS: AffiliateLink[] = [];
 const DEFAULT_CLICKS: Click[] = [];
 const DEFAULT_CONVERSIONS: Conversion[] = [];
@@ -89,7 +107,12 @@ const setStored = <T>(key: string, data: T[]) => {
 
 export const getCampaigns = async (): Promise<Campaign[]> => {
   if (!isSupabaseConfigured) {
-    const campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    let campaigns = getStored(CAMPAIGNS_KEY, DEFAULT_CAMPAIGNS);
+    const hasDanielCampaign = campaigns.some(c => c.id === 'campaign-daniel-1');
+    if (!hasDanielCampaign) {
+      campaigns = [...DEFAULT_CAMPAIGNS, ...campaigns.filter(c => c.id !== 'campaign-daniel-1')];
+      setStored(CAMPAIGNS_KEY, campaigns);
+    }
     const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
     return campaigns.map(c => {
       const adv = profiles.find((p: any) => p.id === c.advertiser_id);
@@ -987,3 +1010,23 @@ export const deleteBrandCreative = async (id: string): Promise<void> => {
   const { error } = await supabase.from('brand_creatives').delete().eq('id', id);
   if (error) throw error;
 };
+
+export const getAdvertisers = async (): Promise<Profile[]> => {
+  if (!isSupabaseConfigured) {
+    const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    return profiles.filter((p: any) => p.user_type === 'advertiser');
+  }
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_type', 'advertiser');
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching advertisers from Supabase:', err);
+    const profiles = JSON.parse(localStorage.getItem('rewardmate_mock_profiles') || '[]');
+    return profiles.filter((p: any) => p.user_type === 'advertiser');
+  }
+};
+

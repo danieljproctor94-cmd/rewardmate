@@ -13,6 +13,7 @@ import About from './pages/public/About';
 import Contact from './pages/public/Contact';
 import Terms from './pages/public/Terms';
 import Onboarding from './pages/Onboarding';
+import BrandAffiliatePage from './pages/public/BrandAffiliatePage';
 
 export default function App() {
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/affiliate-programs/:brandSlug" element={<BrandAffiliatePage />} />
 
         {/* App Portal Routes */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
