@@ -438,14 +438,10 @@ export default function BrandAffiliatePage() {
                       </p>
 
                       {/* Campaign parameters checklist */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-4.5 text-left">
+                      <div className="grid grid-cols-3 gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-4.5 text-left">
                         <div>
                           <span className="text-[9px] text-slate-400 font-bold uppercase block">Payout Type</span>
                           <span className="text-xs font-bold text-slate-700 uppercase">{camp.payout_type}</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase block">Target Markets</span>
-                          <span className="text-xs font-bold text-slate-700">{camp.target_markets || 'AU'}</span>
                         </div>
                         <div>
                           <span className="text-[9px] text-slate-400 font-bold uppercase block">ITP Support</span>
