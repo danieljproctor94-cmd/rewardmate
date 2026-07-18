@@ -3350,7 +3350,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   // Metrics
   const pendingCamps = campaigns.filter(c => c.status === 'pending_approval').length;
   const pendingConvs = conversions.filter(c => c.status === 'pending').length;
-  const networkVolume = conversions.filter(c => c.status === 'approved').reduce((acc, c) => acc + Number(c.payout), 0);
 
   // Dynamic Messages for Admin
   const liveMessages = messages
@@ -3922,24 +3921,39 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
               {/* Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network Volume</div>
-                  <div className="text-2xl font-extrabold text-[#0052FF]">${networkVolume.toFixed(2)} AUD</div>
-                  <p className="text-[10px] text-slate-500 mt-1">Approved payouts across network</p>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Affiliates</div>
+                  <div className="text-2xl font-extrabold text-slate-900">
+                    {profiles.filter(p => p.user_type === 'publisher').length} Affiliates
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">Active publishers on network</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Network traffic</div>
-                  <div className="text-2xl font-extrabold text-slate-900">{clicks.length} Clicks</div>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Brands</div>
+                  <div className="text-2xl font-extrabold text-slate-900">
+                    {profiles.filter(p => p.user_type === 'advertiser').length} Brands
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">Connected partner brands</p>
+                </div>
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Clicks</div>
+                  <div className="text-2xl font-extrabold text-[#0052FF]">
+                    {clicks.length.toLocaleString()} Clicks
+                  </div>
                   <p className="text-[10px] text-slate-500 mt-1">Raw visitor redirects logged</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Offer reviews</div>
-                  <div className="text-2xl font-extrabold text-amber-600">{pendingCamps} Campaigns</div>
-                  <p className="text-[10px] text-slate-500 mt-1">Requires admin approval</p>
-                </div>
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lead audits</div>
-                  <div className="text-2xl font-extrabold text-amber-600">{pendingConvs} Leads</div>
-                  <p className="text-[10px] text-slate-500 mt-1">Requires audit to credit wallet</p>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Monthly Network Revenue</div>
+                  <div className="text-2xl font-extrabold text-emerald-600">
+                    ${(() => {
+                      const totalRev = adminInvoices.reduce((sum, inv) => {
+                        const brandProfile = profiles.find(p => p.id === inv.advertiser_id);
+                        const rate = brandProfile?.commission_rate !== undefined ? brandProfile.commission_rate : 1.50;
+                        return sum + (inv.commissionDue * (rate / 100));
+                      }, 0);
+                      return totalRev.toFixed(2);
+                    })()} AUD
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">1.50% network fee on commissions</p>
                 </div>
               </div>
 
