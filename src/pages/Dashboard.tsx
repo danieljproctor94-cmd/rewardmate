@@ -70,6 +70,7 @@ export const printInvoice = (inv: any, brand: any) => {
             height: 32px;
             width: auto;
             object-fit: contain;
+            filter: brightness(0);
           }
           .corporate-details {
             text-align: left;
