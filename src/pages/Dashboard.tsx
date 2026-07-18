@@ -260,9 +260,10 @@ export const printInvoice = (inv: any, brand: any) => {
             <h4>Remit Payment To</h4>
             <div class="details-content">
               <strong>Reward Mate Corporate</strong><br />
-              Queensland, Australia<br />
-              BSB: 084-001<br />
-              Account: 987654321
+              Bank: <strong>Bendigo Bank</strong><br />
+              BSB: <strong style="font-family: monospace;">633-000</strong><br />
+              Account No: <strong style="font-family: monospace;">198 765 432</strong><br />
+              Payment Ref: <strong style="font-family: monospace;">${inv.id}</strong>
             </div>
           </div>
         </div>
@@ -1496,7 +1497,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
               </div>
 
               {/* Right 2/3: Selected Invoice Details */}
-              <div className="md:col-span-2 bg-white border border-slate-100 p-8 rounded-2xl shadow-sm flex flex-col justify-between h-[550px] text-left">
+              <div className="md:col-span-2 bg-white border border-slate-100 p-8 rounded-2xl shadow-sm flex flex-col justify-between min-h-[550px] text-left">
                 {selectedInvoice ? (
                   <>
                     <div className="space-y-6">
@@ -1551,6 +1552,29 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                             </tr>
                           </tbody>
                         </table>
+                      </div>
+
+                      {/* Bank Payment Details */}
+                      <div className="bg-slate-50/70 border border-slate-150 rounded-2xl p-4.5 space-y-2.5 text-[11px] font-sans">
+                        <span className="text-[9px] font-black uppercase text-[#0052FF] block tracking-wider">Bendigo Bank Direct EFT Details</span>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-slate-700">
+                          <div>
+                            <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">Bank Name</span>
+                            <strong className="text-slate-800">Bendigo Bank</strong>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">BSB Code</span>
+                            <strong className="text-slate-800 font-mono">633-000</strong>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">Account Number</span>
+                            <strong className="text-slate-800 font-mono">198 765 432</strong>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">Reference Code</span>
+                            <strong className="text-[#0052FF] font-mono">{selectedInvoice.id}</strong>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
