@@ -435,3 +435,40 @@ CREATE POLICY "Allow advertisers to manage their own creatives" ON public.brand_
             WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
         )
     );
+
+-- 13. Invoices Table (Monthly invoices issued to brands/advertisers)
+CREATE TABLE IF NOT EXISTS public.invoices (
+    id TEXT NOT NULL PRIMARY KEY,
+    advertiser_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    month TEXT NOT NULL,
+    commission_due NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    conversions_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT CHECK (status IN ('payable', 'paid', 'overdue')) NOT NULL DEFAULT 'payable',
+    issue_date TEXT NOT NULL,
+    due_date TEXT NOT NULL,
+    paid_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Enable RLS on Invoices
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access or admin access to invoices" ON public.invoices
+    FOR SELECT USING (
+        auth.uid() = advertiser_id OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );
+
+CREATE POLICY "Allow advertisers or admin to update invoices" ON public.invoices
+    FOR UPDATE USING (
+        auth.uid() = advertiser_id OR
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );
+
+CREATE POLICY "Allow admin or advertisers to insert invoices" ON public.invoices
+    FOR INSERT WITH CHECK (true);

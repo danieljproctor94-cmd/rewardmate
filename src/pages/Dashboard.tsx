@@ -10,7 +10,8 @@ import {
   getContactInquiries, markContactInquiryReplied,
   getProgramApplications, updateApplicationStatus,
   getBrandCreatives, addBrandCreative, deleteBrandCreative,
-  getAdvertiserClicks
+  getAdvertiserClicks,
+  getInvoices, getAllInvoices, payInvoice, syncActiveInvoice
 } from '../lib/mockDatabase';
 import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry, ProgramApplication, BrandCreative } from '../lib/mockDatabase';
 import { toast } from 'sonner';
@@ -137,85 +138,60 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
   // Initialize and load invoices
   useEffect(() => {
     if (!profile?.id) return;
-    const key = `rewardmate_advertiser_invoices_${profile.id}`;
-    const stored = localStorage.getItem(key);
     
-    // Calculate live commission due
-    const approvedConvs = conversions.filter(c => c.status === 'approved');
-    const liveCommission = approvedConvs.reduce((sum, c) => sum + Number(c.payout), 0);
-    const liveCount = approvedConvs.length;
+    const loadInvoices = async () => {
+      try {
+        const loadedInvs = await getInvoices(profile.id);
+        
+        // Calculate live commission due
+        const approvedConvs = conversions.filter(c => c.status === 'approved');
+        const liveCommission = approvedConvs.reduce((sum, c) => sum + Number(c.payout), 0);
+        const liveCount = approvedConvs.length;
 
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Keep the current month's invoice in sync with live commission due
-      const updated = parsed.map((inv: any) => {
-        if (inv.status === 'payable') {
-          return {
-            ...inv,
-            commissionDue: liveCommission > 0 ? liveCommission : inv.commissionDue,
-            conversionsCount: liveCount > 0 ? liveCount : inv.conversionsCount
-          };
+        // If there's an active (payable) invoice, sync it with live database conversions
+        const activeInvoice = loadedInvs.find((inv: any) => inv.status === 'payable');
+        if (activeInvoice) {
+          const finalCommission = liveCommission > 0 ? liveCommission : activeInvoice.commissionDue;
+          const finalCount = liveCount > 0 ? liveCount : activeInvoice.conversionsCount;
+          
+          if (activeInvoice.commissionDue !== finalCommission || activeInvoice.conversionsCount !== finalCount) {
+            await syncActiveInvoice(activeInvoice.id, profile.id, finalCommission, finalCount);
+            // Re-fetch
+            const refreshed = await getInvoices(profile.id);
+            setInvoices(refreshed);
+            setSelectedInvoice(refreshed.find((i: any) => i.id === activeInvoice.id) || refreshed[0]);
+            return;
+          }
         }
-        return inv;
-      });
-      localStorage.setItem(key, JSON.stringify(updated));
-      setInvoices(updated);
-      if (!selectedInvoice) {
-        setSelectedInvoice(updated.find((i: any) => i.status === 'payable') || updated[0]);
+        
+        setInvoices(loadedInvs);
+        if (!selectedInvoice && loadedInvs.length > 0) {
+          setSelectedInvoice(loadedInvs.find((i: any) => i.status === 'payable') || loadedInvs[0]);
+        }
+      } catch (err) {
+        console.error('Error loading invoices:', err);
       }
-    } else {
-      const currentMonth = new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-      const initial = [
-        {
-          id: 'INV-2026-05',
-          month: 'May 2026',
-          commissionDue: 180.00,
-          conversionsCount: 4,
-          status: 'paid',
-          issueDate: '31/05/2026',
-          dueDate: '14/06/2026'
-        },
-        {
-          id: 'INV-2026-06',
-          month: 'June 2026',
-          commissionDue: 350.00,
-          conversionsCount: 6,
-          status: 'paid',
-          issueDate: '30/06/2026',
-          dueDate: '14/07/2026'
-        },
-        {
-          id: 'INV-2026-07',
-          month: currentMonth,
-          commissionDue: liveCommission > 0 ? liveCommission : 150.00,
-          conversionsCount: liveCount > 0 ? liveCount : 1,
-          status: 'payable',
-          issueDate: new Date().toLocaleDateString('en-AU'),
-          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU')
-        }
-      ];
-      localStorage.setItem(key, JSON.stringify(initial));
-      setInvoices(initial);
-      setSelectedInvoice(initial[2]);
-    }
+    };
+    
+    loadInvoices();
   }, [profile?.id, conversions]);
 
-  const handlePayInvoice = (invoiceId: string) => {
-    const updated = invoices.map(inv => {
-      if (inv.id === invoiceId) {
-        return { ...inv, status: 'paid' };
-      }
-      return inv;
-    });
-    const key = `rewardmate_advertiser_invoices_${profile.id}`;
-    localStorage.setItem(key, JSON.stringify(updated));
-    setInvoices(updated);
-    
-    // Also update selectedInvoice detail
-    const newSel = updated.find(inv => inv.id === invoiceId);
-    if (newSel) setSelectedInvoice(newSel);
+  const handlePayInvoice = async (invoiceId: string) => {
+    try {
+      if (!profile?.id) return;
+      await payInvoice(invoiceId, profile.id);
+      
+      const refreshed = await getInvoices(profile.id);
+      setInvoices(refreshed);
+      
+      const newSel = refreshed.find(inv => inv.id === invoiceId);
+      if (newSel) setSelectedInvoice(newSel);
 
-    toast.success(`Invoice ${invoiceId} has been successfully paid!`);
+      toast.success(`Invoice ${invoiceId} has been successfully paid!`);
+    } catch (err) {
+      console.error('Error paying invoice:', err);
+      toast.error('Failed to complete payment.');
+    }
   };
 
   useEffect(() => {
@@ -2607,7 +2583,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'campaign-approvals' | 'conversion-approvals' | 'brands' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaign-approvals' | 'conversion-approvals' | 'brands' | 'invoices' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
   const [adminChartRange, setAdminChartRange] = useState<'1m' | '3m' | '6m' | '12m' | 'ytd'>('3m');
@@ -2692,6 +2668,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [clicks, setClicks] = useState<Click[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [contactInquiries, setContactInquiries] = useState<ContactInquiry[]>([]);
+  const [adminInvoices, setAdminInvoices] = useState<any[]>([]);
   const [showMessages, setShowMessages] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -2871,6 +2848,10 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       // Fetch contact inquiries
       const inqs = await getContactInquiries();
       setContactInquiries(inqs);
+
+      // Fetch all brand invoices
+      const allInvs = await getAllInvoices();
+      setAdminInvoices(allInvs);
 
       await loadMessages();
     } catch (err) {
@@ -3252,6 +3233,26 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             >
               <Building className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Brands</span>}
+            </button>
+            <button
+              onClick={async () => {
+                setActiveTab('invoices');
+                try {
+                  const invs = await getAllInvoices();
+                  setAdminInvoices(invs);
+                } catch (e) {
+                  console.error('Error loading invoices:', e);
+                }
+              }}
+              title="Brand Invoices"
+              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
+                activeTab === 'invoices' 
+                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <Receipt className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
+              {!isSidebarCollapsed && <span>Brand Invoices</span>}
             </button>
             <button
               onClick={() => setActiveTab('affiliates')}
@@ -4350,6 +4351,117 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                               </Fragment>
                             );
                           })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* TAB: INVOICES */}
+          {activeTab === 'invoices' && (
+            <>
+              <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-sans">Brand Invoice Ledger</h3>
+                  <p className="text-xs text-slate-550 font-medium">Monitor paid, unpaid, and outstanding advertiser invoices across the network.</p>
+                </div>
+
+                {/* Summary Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Paid (Ledger)</span>
+                    <div className="text-2xl font-black text-emerald-600 font-sans">
+                      ${adminInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.commissionDue, 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })} AUD
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-semibold block">Collected from paid brand invoices</span>
+                  </div>
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Due / Unpaid</span>
+                    <div className="text-2xl font-black text-amber-500 font-sans">
+                      ${adminInvoices.filter(i => i.status === 'payable').reduce((sum, i) => sum + i.commissionDue, 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })} AUD
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-semibold block">Awaiting merchant payment</span>
+                  </div>
+                  <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Active Advertisers</span>
+                    <div className="text-2xl font-black text-[#0052FF] font-sans">
+                      {profiles.filter(p => p.user_type === 'advertiser').length}
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-semibold block">Brands currently subject to billing</span>
+                  </div>
+                </div>
+
+                {/* Invoices List Table */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
+                          <th className="py-4 px-6">Invoice ID</th>
+                          <th className="py-4 px-6">Brand / Advertiser</th>
+                          <th className="py-4 px-6">Billing Month</th>
+                          <th className="py-4 px-6 text-center">Conversions</th>
+                          <th className="py-4 px-6 text-right">Commission Due</th>
+                          <th className="py-4 px-6 text-center">Status</th>
+                          <th className="py-4 px-6">Due Date</th>
+                          <th className="py-4 px-6 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-600">
+                        {adminInvoices.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="py-10 text-center text-slate-400 italic">
+                              No invoices found in database.
+                            </td>
+                          </tr>
+                        ) : (
+                          adminInvoices.map((inv) => (
+                            <tr key={inv.id} className="hover:bg-slate-50/40 transition-colors">
+                              <td className="py-4 px-6 font-mono text-slate-900 font-bold">{inv.id}</td>
+                              <td className="py-4 px-6 font-extrabold text-slate-800">{inv.advertiser_name}</td>
+                              <td className="py-4 px-6">{inv.month}</td>
+                              <td className="py-4 px-6 text-center font-bold">{inv.conversionsCount}</td>
+                              <td className="py-4 px-6 text-right text-slate-900 font-bold">
+                                ${inv.commissionDue.toFixed(2)} AUD
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                <span className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                  inv.status === 'paid'
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                    : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                }`}>
+                                  {inv.status === 'paid' ? 'Paid' : 'Unpaid'}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-slate-500 font-medium">{inv.dueDate}</td>
+                              <td className="py-4 px-6 text-right">
+                                {inv.status === 'payable' ? (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await payInvoice(inv.id, inv.advertiser_id);
+                                        toast.success(`Invoice ${inv.id} marked as Paid!`);
+                                        const refreshed = await getAllInvoices();
+                                        setAdminInvoices(refreshed);
+                                      } catch (err: any) {
+                                        toast.error(err.message || 'Failed to update invoice.');
+                                      }
+                                    }}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                  >
+                                    Mark Paid
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 font-bold">
+                                    Paid {inv.paidAt ? new Date(inv.paidAt).toLocaleDateString('en-AU') : ''}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
                         )}
                       </tbody>
                     </table>
