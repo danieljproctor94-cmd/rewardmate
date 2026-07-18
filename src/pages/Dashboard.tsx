@@ -262,7 +262,7 @@ export const printInvoice = (inv: any, brand: any) => {
               <strong>Reward Mate Corporate</strong><br />
               Bank: <strong>Bendigo Bank</strong><br />
               BSB: <strong style="font-family: monospace;">633-000</strong><br />
-              Account No: <strong style="font-family: monospace;">198 765 432</strong><br />
+              Account No: <strong style="font-family: monospace;">Coming Soon</strong><br />
               Payment Ref: <strong style="font-family: monospace;">${inv.id}</strong>
             </div>
           </div>
@@ -1568,7 +1568,7 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                           </div>
                           <div>
                             <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">Account Number</span>
-                            <strong className="text-slate-800 font-mono">198 765 432</strong>
+                            <strong className="text-slate-800 font-mono">Coming Soon</strong>
                           </div>
                           <div>
                             <span className="text-slate-400 font-bold uppercase text-[9px] block mb-0.5">Reference Code</span>
