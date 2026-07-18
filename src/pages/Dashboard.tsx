@@ -19,7 +19,7 @@ import {
   LogOut, DollarSign, MousePointer, Plus, 
   TrendingUp, Check, X, AlertCircle, FolderKanban, Users, Mail, Bell,
   ChevronLeft, ChevronRight, Menu, Sliders, Building, LayoutDashboard,
-  Image as ImageIcon, Receipt
+  Image as ImageIcon, Receipt, Download
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 
@@ -33,6 +33,300 @@ export const formatUserId = (id: string | undefined): string => {
   }
   const numericId = Math.abs(hash) % 100000;
   return String(numericId).padStart(5, '0');
+};
+
+export const printInvoice = (inv: any, brand: any) => {
+  const printWindow = window.open('', '_blank', 'width=800,height=900');
+  if (!printWindow) {
+    toast.error('Popup blocker prevented invoice download. Please allow popups for this site.');
+    return;
+  }
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Invoice - ${inv.id}</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding: 40px;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+          }
+          .logo-container img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+          }
+          .corporate-details {
+            text-align: left;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+          }
+          .invoice-meta {
+            text-align: right;
+          }
+          .invoice-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+          }
+          .meta-item {
+            margin-bottom: 6px;
+            font-size: 13px;
+          }
+          .meta-label {
+            color: #64748b;
+            font-weight: 600;
+          }
+          .meta-value {
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .details-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 40px;
+          }
+          .details-block {
+            flex: 1;
+          }
+          .details-block h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin: 0 0 10px 0;
+            font-weight: 800;
+          }
+          .details-content {
+            font-size: 13px;
+            line-height: 1.6;
+          }
+          .details-content .name {
+            font-weight: 800;
+            font-size: 15px;
+            color: #0f172a;
+            margin-bottom: 4px;
+          }
+          .table-container {
+            margin-bottom: 40px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+          }
+          th {
+            background-color: #f8fafc;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            padding: 12px 16px;
+            border-bottom: 2px solid #e2e8f0;
+          }
+          td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+          }
+          td.numeric, th.numeric {
+            text-align: right;
+          }
+          td.center, th.center {
+            text-align: center;
+          }
+          .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+          }
+          .totals-table {
+            width: 320px;
+          }
+          .totals-table tr td {
+            padding: 10px 16px;
+            border: none;
+          }
+          .totals-table tr.grand-total td {
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 16px;
+            font-weight: 900;
+            color: #0f172a;
+          }
+          .payment-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 15px;
+          }
+          .status-paid {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+          }
+          .status-unpaid {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+          }
+          .footer-note {
+            margin-top: 80px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="logo-container">
+              <img src="/rewardmate-logo-cropped.png" alt="Reward Mate Logo" />
+            </div>
+            <div class="corporate-details">
+              <strong>REWARD MATE PTY LTD</strong><br />
+              ACN: 700 041 676<br />
+              Noosaville QLD, Australia<br />
+              support@rewardmate.com.au
+            </div>
+          </div>
+          <div class="invoice-meta">
+            <h1 class="invoice-title">TAX INVOICE</h1>
+            <div class="meta-item">
+              <span class="meta-label">Invoice No:</span>
+              <span class="meta-value">${inv.id}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Date Issued:</span>
+              <span class="meta-value">${inv.issueDate}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Due Date:</span>
+              <span class="meta-value">${inv.dueDate}</span>
+            </div>
+            <div class="payment-status ${inv.status === 'paid' ? 'status-paid' : 'status-unpaid'}">
+              Status: ${inv.status === 'paid' ? 'Paid' : 'Unpaid'}
+            </div>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div class="details-block">
+            <h4>Billed To</h4>
+            <div class="details-content">
+              <div class="name">${brand.business_name || brand.full_name || 'Brand Partner'}</div>
+              <div>Advertiser ID: ${brand.id}</div>
+              <div>Email Address: ${brand.email || ''}</div>
+            </div>
+          </div>
+          <div class="details-block" style="text-align: right;">
+            <h4>Remit Payment To</h4>
+            <div class="details-content">
+              <strong>Reward Mate Corporate</strong><br />
+              Queensland, Australia<br />
+              BSB: 084-001<br />
+              Account: 987654321
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th class="center">Conversions</th>
+                <th class="numeric">Amount (AUD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Approved Affiliate Referrals (Billing Month: ${inv.month})</td>
+                <td class="center">${inv.conversionsCount}</td>
+                <td class="numeric">$${Number(inv.commissionDue).toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b;">RewardMate Platform Campaign Service Fee</td>
+                <td class="center" style="color: #64748b;">-</td>
+                <td class="numeric" style="color: #16a34a; font-weight: bold;">FREE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="totals-section">
+          <table class="totals-table">
+            <tr>
+              <td>Subtotal:</td>
+              <td style="text-align: right;">$${Number(inv.commissionDue).toFixed(2)} AUD</td>
+            </tr>
+            <tr>
+              <td>GST (10% Inc):</td>
+              <td style="text-align: right;">$${(Number(inv.commissionDue) * 0.1).toFixed(2)} AUD</td>
+            </tr>
+            <tr class="grand-total">
+              <td>Total Payable:</td>
+              <td style="text-align: right;">$${Number(inv.commissionDue).toFixed(2)} AUD</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="footer-note">
+          Thank you for promoting with the Reward Mate Performance Network.<br />
+          For any billing enquiries, please contact support@rewardmate.com.au.
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          }
+        </script>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
 };
 
 export default function Dashboard() {
@@ -1267,21 +1561,30 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
                         <span className="text-xl font-black text-slate-900">${Number(selectedInvoice.commissionDue).toFixed(2)} AUD</span>
                       </div>
                       
-                      {selectedInvoice.status === 'payable' ? (
+                      <div className="flex items-center space-x-3">
                         <button
-                          onClick={() => handlePayInvoice(selectedInvoice.id)}
-                          className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-xs h-11 px-6 rounded-xl transition-all shadow-sm shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-1.5"
+                          onClick={() => printInvoice(selectedInvoice, profile)}
+                          className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-extrabold text-xs h-11 px-5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                          Pay Monthly Invoice
+                          <Download className="h-4 w-4" /> Download Tax Invoice
                         </button>
-                      ) : (
-                        <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-100 text-xs font-black select-none">
-                          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span>Paid on {selectedInvoice.dueDate}</span>
-                        </div>
-                      )}
+
+                        {selectedInvoice.status === 'payable' ? (
+                          <button
+                            onClick={() => handlePayInvoice(selectedInvoice.id)}
+                            className="bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold text-xs h-11 px-6 rounded-xl transition-all shadow-sm shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            Pay Monthly Invoice
+                          </button>
+                        ) : (
+                          <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-100 text-xs font-black select-none">
+                            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Paid on {selectedInvoice.dueDate}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -4438,27 +4741,44 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                               </td>
                               <td className="py-4 px-6 text-slate-500 font-medium">{inv.dueDate}</td>
                               <td className="py-4 px-6 text-right">
-                                {inv.status === 'payable' ? (
+                                <div className="flex items-center justify-end gap-2.5">
                                   <button
-                                    onClick={async () => {
-                                      try {
-                                        await payInvoice(inv.id, inv.advertiser_id);
-                                        toast.success(`Invoice ${inv.id} marked as Paid!`);
-                                        const refreshed = await getAllInvoices();
-                                        setAdminInvoices(refreshed);
-                                      } catch (err: any) {
-                                        toast.error(err.message || 'Failed to update invoice.');
-                                      }
+                                    onClick={() => {
+                                      const brandDetails = {
+                                        id: inv.advertiser_id,
+                                        business_name: inv.advertiser_name,
+                                        email: profiles.find(p => p.id === inv.advertiser_id)?.email || ''
+                                      };
+                                      printInvoice(inv, brandDetails);
                                     }}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                    className="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider"
+                                    title="Download Tax Invoice"
                                   >
-                                    Mark Paid
+                                    <Download className="h-3.5 w-3.5" /> PDF
                                   </button>
-                                ) : (
-                                  <span className="text-[10px] text-slate-400 font-bold">
-                                    Paid {inv.paidAt ? new Date(inv.paidAt).toLocaleDateString('en-AU') : ''}
-                                  </span>
-                                )}
+
+                                  {inv.status === 'payable' ? (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await payInvoice(inv.id, inv.advertiser_id);
+                                          toast.success(`Invoice ${inv.id} marked as Paid!`);
+                                          const refreshed = await getAllInvoices();
+                                          setAdminInvoices(refreshed);
+                                        } catch (err: any) {
+                                          toast.error(err.message || 'Failed to update invoice.');
+                                        }
+                                      }}
+                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                    >
+                                      Mark Paid
+                                    </button>
+                                  ) : (
+                                    <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap">
+                                      Paid {inv.paidAt ? new Date(inv.paidAt).toLocaleDateString('en-AU') : ''}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           ))
