@@ -11,7 +11,8 @@ import {
   getProgramApplications, updateApplicationStatus,
   getBrandCreatives, addBrandCreative, deleteBrandCreative,
   getAdvertiserClicks,
-  getInvoices, getAllInvoices, payInvoice, syncActiveInvoice
+  getInvoices, getAllInvoices, payInvoice, syncActiveInvoice,
+  getSystemSettings, saveSystemSettings
 } from '../lib/mockDatabase';
 import type { Campaign, Click, Conversion, AffiliateLink, ContactInquiry, ProgramApplication, BrandCreative } from '../lib/mockDatabase';
 import { toast } from 'sonner';
@@ -2997,6 +2998,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [contactInquiries, setContactInquiries] = useState<ContactInquiry[]>([]);
   const [adminInvoices, setAdminInvoices] = useState<any[]>([]);
+  const [billingRecurringDay, setBillingRecurringDay] = useState('1st');
+  const [paymentDueDays, setPaymentDueDays] = useState('14');
+  const [invoiceSettingsLoading, setInvoiceSettingsLoading] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
@@ -3181,6 +3185,12 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       const allInvs = await getAllInvoices();
       setAdminInvoices(allInvs);
 
+      // Fetch global invoice settings
+      const recurringDay = await getSystemSettings('invoice_recurring_day', '1st');
+      const dueDays = await getSystemSettings('invoice_due_days', '14');
+      setBillingRecurringDay(recurringDay);
+      setPaymentDueDays(dueDays);
+
       await loadMessages();
     } catch (err) {
       console.error(err);
@@ -3195,6 +3205,21 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       setContactInquiries(inqs);
     } catch (err: any) {
       toast.error(err.message || 'Failed to update inquiry status.');
+    }
+  };
+
+  const handleSaveInvoiceSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInvoiceSettingsLoading(true);
+    try {
+      await saveSystemSettings('invoice_recurring_day', billingRecurringDay);
+      await saveSystemSettings('invoice_due_days', paymentDueDays);
+      toast.success('Global invoicing configurations saved successfully!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to save invoicing settings.');
+    } finally {
+      setInvoiceSettingsLoading(false);
     }
   };
 
@@ -4722,95 +4747,151 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                   </div>
                 </div>
 
-                {/* Invoices List Table */}
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
-                          <th className="py-4 px-6">Invoice ID</th>
-                          <th className="py-4 px-6">Brand / Advertiser</th>
-                          <th className="py-4 px-6">Billing Month</th>
-                          <th className="py-4 px-6 text-center">Conversions</th>
-                          <th className="py-4 px-6 text-right">Commission Due</th>
-                          <th className="py-4 px-6 text-center">Status</th>
-                          <th className="py-4 px-6">Due Date</th>
-                          <th className="py-4 px-6 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-600">
-                        {adminInvoices.length === 0 ? (
-                          <tr>
-                            <td colSpan={8} className="py-10 text-center text-slate-400 italic">
-                              No invoices found in database.
-                            </td>
+                {/* Main Content Grid: Table + Settings */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  
+                  {/* Left 8/12: Invoices List Table */}
+                  <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
+                            <th className="py-4 px-6">Invoice ID</th>
+                            <th className="py-4 px-6">Brand / Advertiser</th>
+                            <th className="py-4 px-6">Billing Month</th>
+                            <th className="py-4 px-6 text-center">Conversions</th>
+                            <th className="py-4 px-6 text-right">Commission Due</th>
+                            <th className="py-4 px-6 text-center">Status</th>
+                            <th className="py-4 px-6">Due Date</th>
+                            <th className="py-4 px-6 text-right">Actions</th>
                           </tr>
-                        ) : (
-                          adminInvoices.map((inv) => (
-                            <tr key={inv.id} className="hover:bg-slate-50/40 transition-colors">
-                              <td className="py-4 px-6 font-mono text-slate-900 font-bold">{inv.id}</td>
-                              <td className="py-4 px-6 font-extrabold text-slate-800">{inv.advertiser_name}</td>
-                              <td className="py-4 px-6">{inv.month}</td>
-                              <td className="py-4 px-6 text-center font-bold">{inv.conversionsCount}</td>
-                              <td className="py-4 px-6 text-right text-slate-900 font-bold">
-                                ${inv.commissionDue.toFixed(2)} AUD
-                              </td>
-                              <td className="py-4 px-6 text-center">
-                                <span className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                                  inv.status === 'paid'
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                                    : 'bg-amber-50 text-amber-700 border border-amber-100'
-                                }`}>
-                                  {inv.status === 'paid' ? 'Paid' : 'Unpaid'}
-                                </span>
-                              </td>
-                              <td className="py-4 px-6 text-slate-500 font-medium">{inv.dueDate}</td>
-                              <td className="py-4 px-6 text-right">
-                                <div className="flex items-center justify-end gap-2.5">
-                                  <button
-                                    onClick={() => {
-                                      const brandDetails = {
-                                        id: inv.advertiser_id,
-                                        business_name: inv.advertiser_name,
-                                        email: profiles.find(p => p.id === inv.advertiser_id)?.email || ''
-                                      };
-                                      printInvoice(inv, brandDetails);
-                                    }}
-                                    className="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider"
-                                    title="Download Tax Invoice"
-                                  >
-                                    <Download className="h-3.5 w-3.5" /> PDF
-                                  </button>
-
-                                  {inv.status === 'payable' ? (
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await payInvoice(inv.id, inv.advertiser_id);
-                                          toast.success(`Invoice ${inv.id} marked as Paid!`);
-                                          const refreshed = await getAllInvoices();
-                                          setAdminInvoices(refreshed);
-                                        } catch (err: any) {
-                                          toast.error(err.message || 'Failed to update invoice.');
-                                        }
-                                      }}
-                                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                                    >
-                                      Mark Paid
-                                    </button>
-                                  ) : (
-                                    <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap">
-                                      Paid {inv.paidAt ? new Date(inv.paidAt).toLocaleDateString('en-AU') : ''}
-                                    </span>
-                                  )}
-                                </div>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-600">
+                          {adminInvoices.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} className="py-10 text-center text-slate-400 italic">
+                                No invoices found in database.
                               </td>
                             </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
+                          ) : (
+                            adminInvoices.map((inv) => (
+                              <tr key={inv.id} className="hover:bg-slate-50/40 transition-colors">
+                                <td className="py-4 px-6 font-mono text-slate-900 font-bold">{inv.id}</td>
+                                <td className="py-4 px-6 font-extrabold text-slate-800">{inv.advertiser_name}</td>
+                                <td className="py-4 px-6">{inv.month}</td>
+                                <td className="py-4 px-6 text-center font-bold">{inv.conversionsCount}</td>
+                                <td className="py-4 px-6 text-right text-slate-900 font-bold">
+                                  ${inv.commissionDue.toFixed(2)} AUD
+                                </td>
+                                <td className="py-4 px-6 text-center">
+                                  <span className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                    inv.status === 'paid'
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                      : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                  }`}>
+                                    {inv.status === 'paid' ? 'Paid' : 'Unpaid'}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-6 text-slate-500 font-medium">{inv.dueDate}</td>
+                                <td className="py-4 px-6 text-right">
+                                  <div className="flex items-center justify-end gap-2.5">
+                                    <button
+                                      onClick={() => {
+                                        const brandDetails = {
+                                          id: inv.advertiser_id,
+                                          business_name: inv.advertiser_name,
+                                          email: profiles.find(p => p.id === inv.advertiser_id)?.email || ''
+                                        };
+                                        printInvoice(inv, brandDetails);
+                                      }}
+                                      className="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-all cursor-pointer inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider"
+                                      title="Download Tax Invoice"
+                                    >
+                                      <Download className="h-3.5 w-3.5" /> PDF
+                                    </button>
+
+                                    {inv.status === 'payable' ? (
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await payInvoice(inv.id, inv.advertiser_id);
+                                            toast.success(`Invoice ${inv.id} marked as Paid!`);
+                                            const refreshed = await getAllInvoices();
+                                            setAdminInvoices(refreshed);
+                                          } catch (err: any) {
+                                            toast.error(err.message || 'Failed to update invoice.');
+                                          }
+                                        }}
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                      >
+                                        Mark Paid
+                                      </button>
+                                    ) : (
+                                      <span className="text-[10px] text-slate-400 font-bold whitespace-nowrap">
+                                        Paid {inv.paidAt ? new Date(inv.paidAt).toLocaleDateString('en-AU') : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
+
+                  {/* Right 4/12: Global Invoicing Settings Card */}
+                  <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">Global Invoicing Settings</h4>
+                      <p className="text-[10px] text-slate-455 font-bold mt-1">Configure automated billing cycles and payment timelines for all network brands.</p>
+                    </div>
+
+                    <form onSubmit={handleSaveInvoiceSettings} className="space-y-4">
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Recurring Billing Day</label>
+                        <select
+                          value={billingRecurringDay}
+                          onChange={(e) => setBillingRecurringDay(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
+                        >
+                          <option value="1st">1st day of the month</option>
+                          <option value="5th">5th day of the month</option>
+                          <option value="15th">15th day of the month</option>
+                          <option value="25th">25th day of the month</option>
+                          <option value="28th">28th day of the month</option>
+                          <option value="Last Day">Last day of the month</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5 text-left">
+                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Payment Term (Due Days)</label>
+                        <select
+                          value={paymentDueDays}
+                          onChange={(e) => setPaymentDueDays(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
+                        >
+                          <option value="7">Net 7 Days</option>
+                          <option value="14">Net 14 Days</option>
+                          <option value="30">Net 30 Days</option>
+                        </select>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={invoiceSettingsLoading}
+                        className="w-full bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold h-10 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {invoiceSettingsLoading ? (
+                          <div className="h-4 w-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+                        ) : (
+                          "Save Settings"
+                        )}
+                      </button>
+                    </form>
+                  </div>
+
                 </div>
               </div>
             </>

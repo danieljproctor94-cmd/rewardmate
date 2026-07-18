@@ -472,3 +472,23 @@ CREATE POLICY "Allow advertisers or admin to update invoices" ON public.invoices
 
 CREATE POLICY "Allow admin or advertisers to insert invoices" ON public.invoices
     FOR INSERT WITH CHECK (true);
+
+-- 14. System Settings Table (Global configurations)
+CREATE TABLE IF NOT EXISTS public.system_settings (
+    key TEXT NOT NULL PRIMARY KEY,
+    value JSONB NOT NULL
+);
+
+-- Enable RLS on System Settings
+ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read access to system settings" ON public.system_settings
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow admin to manage system settings" ON public.system_settings
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.user_type = 'admin'
+        )
+    );

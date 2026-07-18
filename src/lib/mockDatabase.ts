@@ -586,6 +586,44 @@ export const syncActiveInvoice = async (
     .eq('id', invoiceId);
   if (error) throw error;
 };
+
+export const getSystemSettings = async (key: string, defaultValue: any): Promise<any> => {
+  const SETTING_KEY = `rewardmate_system_setting_${key}`;
+  if (!isSupabaseConfigured) {
+    const val = localStorage.getItem(SETTING_KEY);
+    return val ? JSON.parse(val) : defaultValue;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', key)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+    
+    return data ? data.value : defaultValue;
+  } catch (err) {
+    console.error(`Error loading system setting for ${key}:`, err);
+    return defaultValue;
+  }
+};
+
+export const saveSystemSettings = async (key: string, value: any): Promise<void> => {
+  const SETTING_KEY = `rewardmate_system_setting_${key}`;
+  if (!isSupabaseConfigured) {
+    localStorage.setItem(SETTING_KEY, JSON.stringify(value));
+    return;
+  }
+
+  const { error } = await supabase
+    .from('system_settings')
+    .upsert({ key, value });
+  if (error) throw error;
+};
 export const getAffiliateLinks = async (publisherId: string): Promise<AffiliateLink[]> => {
   if (!isSupabaseConfigured) {
     const links = getStored(LINKS_KEY, DEFAULT_LINKS);
