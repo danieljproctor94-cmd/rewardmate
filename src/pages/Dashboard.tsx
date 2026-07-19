@@ -3935,11 +3935,11 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                   <p className="text-[10px] text-slate-500 mt-1">Connected partner brands</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Total Clicks</div>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Unpaid Invoice Total</div>
                   <div className="text-2xl font-extrabold text-[#0052FF]">
-                    {clicks.length.toLocaleString()} Clicks
+                    ${adminInvoices.filter(i => i.status === 'payable').reduce((sum, i) => sum + i.commissionDue, 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })} AUD
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1">Raw visitor redirects logged</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Awaiting brand payout clearing</p>
                 </div>
                 <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Monthly Network Revenue</div>
