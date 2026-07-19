@@ -1083,6 +1083,23 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
           </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setActiveTab('wallet')}
+              className="text-right hover:opacity-80 transition-opacity cursor-pointer focus:outline-none block"
+              title="Click to view invoices"
+            >
+              <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Unpaid Balance</div>
+              <div className="text-sm font-extrabold text-[#0052FF]">
+                ${(() => {
+                  const unpaidInvoices = invoices.filter(inv => inv.status === 'payable');
+                  const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + Number(inv.commissionDue), 0);
+                  return totalUnpaid.toFixed(2);
+                })()} AUD
+              </div>
+            </button>
+
+            {/* Vertical Divider */}
+            <div className="h-5 w-px bg-slate-200"></div>
 
             {/* Profile Dropdown Badge */}
             <div className="relative">
