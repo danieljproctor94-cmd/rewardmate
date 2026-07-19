@@ -4241,7 +4241,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                           <th className="py-4 px-6">Starting Country</th>
                           <th className="py-4 px-6">Campaigns Count</th>
                           <th className="py-4 px-6">Total Clicks</th>
-                          <th className="py-4 px-6 text-right">Account Balance</th>
+                          <th className="py-4 px-6 text-right">Unpaid Balance</th>
                           <th className="py-4 px-6 text-center">Actions</th>
                         </tr>
                       </thead>
@@ -4903,7 +4903,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
 
                       <div className="space-y-1">
                         <label className="text-[10px] font-extrabold uppercase text-slate-400">
-                          {newUserType === 'advertiser' ? 'Starting Funds (AUD)' : 'Starting Balance (AUD)'}
+                          {newUserType === 'advertiser' ? 'Starting Unpaid Balance (AUD)' : 'Starting Balance (AUD)'}
                         </label>
                         <input
                           type="number"
