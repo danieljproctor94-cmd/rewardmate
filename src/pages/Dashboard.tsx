@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PublisherDashboard from './PublisherDashboard';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { 
-  getCampaigns, createCampaign, updateCampaignStatus, updateCampaignDetails, 
+  getCampaigns, createCampaign, updateCampaignDetails, 
   getClicks, getConversions, updateConversionStatus,
   getMessages, sendMessage, getAllAffiliateLinks,
   getContactInquiries, markContactInquiryReplied,
@@ -2912,7 +2912,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'campaign-approvals' | 'conversion-approvals' | 'brands' | 'invoices' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'brands' | 'invoices' | 'affiliates' | 'messages' | 'settings' | 'contact-messages'>('overview');
   const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const [messageFilter, setMessageFilter] = useState<'all' | 'brands' | 'affiliates'>('all');
   const [adminChartRange, setAdminChartRange] = useState<'1m' | '3m' | '6m' | '12m' | 'ytd'>('3m');
@@ -3002,7 +3002,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [paymentDueDays, setPaymentDueDays] = useState('14');
   const [invoiceSettingsLoading, setInvoiceSettingsLoading] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<any[]>([]);
@@ -3251,45 +3250,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     }
   };
 
-  const handleApproveCampaign = async (id: string) => {
-    try {
-      await updateCampaignStatus(id, 'active');
-      toast.success('Campaign activated on network!');
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
 
-  const handleRejectCampaign = async (id: string) => {
-    try {
-      await updateCampaignStatus(id, 'rejected');
-      toast.success('Campaign rejected.');
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
-
-  const handleApproveConversion = async (id: string) => {
-    try {
-      await updateConversionStatus(id, 'approved');
-      toast.success('Conversion approved and publisher payout credited!');
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
-
-  const handleRejectConversion = async (id: string) => {
-    try {
-      await updateConversionStatus(id, 'rejected');
-      toast.success('Conversion rejected.');
-      loadData();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-  };
 
   const handleRemoveUser = async (userId: string) => {
     if (userId === profile.id) {
@@ -3347,9 +3308,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
     }
   };
 
-  // Metrics
-  const pendingCamps = campaigns.filter(c => c.status === 'pending_approval').length;
-  const pendingConvs = conversions.filter(c => c.status === 'pending').length;
+
 
   // Dynamic Messages for Admin
   const liveMessages = messages
@@ -3413,8 +3372,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto pt-2">
               {[
                 { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-                { id: 'campaign-approvals', label: 'Campaigns', icon: FolderKanban },
-                { id: 'conversion-approvals', label: 'Conversions', icon: DollarSign },
                 { id: 'brands', label: 'Brands', icon: Building },
                 { id: 'affiliates', label: 'Affiliates', icon: Users },
                 { id: 'messages', label: 'Messages', icon: Mail },
@@ -3549,30 +3506,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
             >
               <LayoutDashboard className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
               {!isSidebarCollapsed && <span>Overview</span>}
-            </button>
-            <button
-              onClick={() => setActiveTab('campaign-approvals')}
-              title={`Offer Approvals (${pendingCamps})`}
-              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
-                activeTab === 'campaign-approvals' 
-                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <FolderKanban className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
-              {!isSidebarCollapsed && <span>Offer Approvals ({pendingCamps})</span>}
-            </button>
-            <button
-              onClick={() => setActiveTab('conversion-approvals')}
-              title={`Conversion Audits (${pendingConvs})`}
-              className={`w-full flex items-center py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'justify-center px-0' : 'px-3.5'} ${
-                activeTab === 'conversion-approvals' 
-                  ? 'bg-white/10 text-white border-l-4 border-[#0052FF] pl-2.5' 
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              <Check className={`h-4.5 w-4.5 text-slate-400 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'}`} />
-              {!isSidebarCollapsed && <span>Conversion Audits ({pendingConvs})</span>}
             </button>
             <button
               onClick={() => setActiveTab('brands')}
@@ -3716,7 +3649,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                 <button 
                   onClick={() => {
                     setShowMessages(!showMessages);
-                    setShowNotifications(false);
                   }}
                   title="Messages"
                   className="relative p-1.5 text-slate-455 hover:text-slate-800 transition-colors cursor-pointer"
@@ -3759,62 +3691,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                             <p className="text-[10px] text-slate-655 font-sans leading-tight line-clamp-2">{m.preview}</p>
                           </div>
                         ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Notification Bell */}
-              <div className="relative">
-                <button 
-                  onClick={() => {
-                    setShowNotifications(!showNotifications);
-                    setShowMessages(false);
-                  }}
-                  title="Notifications"
-                  className="relative p-1.5 text-slate-455 hover:text-slate-800 transition-colors cursor-pointer"
-                >
-                  <Bell className="h-4.5 w-4.5" />
-                  {pendingConvs + pendingCamps > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-purple-600 text-white text-[7px] font-black h-3 px-1 rounded-full flex items-center justify-center min-w-3 border border-white">
-                      {pendingConvs + pendingCamps}
-                    </span>
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-4 space-y-3 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-bold text-slate-800 font-sans">Notifications</span>
-                    </div>
-                    <div className="max-h-60 overflow-y-auto space-y-2 font-sans text-xs">
-                      {pendingCamps > 0 && (
-                        <div 
-                          onClick={() => {
-                            setActiveTab('campaign-approvals');
-                            setShowNotifications(false);
-                          }}
-                          className="p-3 rounded-xl bg-purple-50/50 border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer text-left space-y-1"
-                        >
-                          <div className="font-bold text-purple-700">Pending Offers ({pendingCamps})</div>
-                          <p className="text-[10px] text-slate-500">New campaign requests are waiting for admin review.</p>
-                        </div>
-                      )}
-                      {pendingConvs > 0 && (
-                        <div 
-                          onClick={() => {
-                            setActiveTab('conversion-approvals');
-                            setShowNotifications(false);
-                          }}
-                          className="p-3 rounded-xl bg-purple-50/50 border border-purple-100 hover:bg-purple-50 transition-colors cursor-pointer text-left space-y-1"
-                        >
-                          <div className="font-bold text-purple-700">Pending Conversions ({pendingConvs})</div>
-                          <p className="text-[10px] text-slate-500">Conversions are waiting for admin approval.</p>
-                        </div>
-                      )}
-                      {pendingConvs === 0 && pendingCamps === 0 && (
-                        <div className="text-center py-6 text-xs text-slate-400">All tasks completed!</div>
                       )}
                     </div>
                   </div>
@@ -3866,15 +3742,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                     </div>
 
                     {/* Dropdown Options */}
-                    <button 
-                      onClick={() => {
-                        setShowUserDropdown(false);
-                        setActiveTab('campaign-approvals');
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs font-bold text-slate-655 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                    >
-                      Offer Approvals
-                    </button>
                     
                     <button 
                       onClick={() => {
@@ -4335,113 +4202,6 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'campaign-approvals' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Advertiser Offer Approvals</h3>
-                <p className="text-xs text-slate-500 font-medium">Verify that the target landing pages comply with program criteria.</p>
-              </div>
-
-              {campaigns.filter(c => c.status === 'pending_approval').length === 0 ? (
-                <div className="bg-white border border-slate-100 p-12 text-center text-slate-400 rounded-2xl shadow-sm">
-                  <p className="font-bold text-sm text-slate-800">No campaigns pending review.</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {campaigns.filter(c => c.status === 'pending_approval').map((camp) => (
-                    <div key={camp.id} className="bg-white border border-slate-100 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-base font-bold text-slate-900">{camp.name}</h4>
-                          <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">By {camp.advertiser_name}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 max-w-xl leading-relaxed">{camp.description}</p>
-                        <div className="text-[10px] text-slate-400">
-                          URL: <a href={camp.landing_page_url} target="_blank" rel="noreferrer" className="text-[#0052FF] underline">{camp.landing_page_url}</a>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right font-sans">
-                          <div className="text-xs text-slate-500">Payout Rate</div>
-                          <div className="text-sm font-extrabold text-[#0052FF]">
-                            {camp.payout_type === 'revshare' ? `${camp.payout_amount}%` : `$${Number(camp.payout_amount).toFixed(2)} AUD`} ({camp.payout_type.toUpperCase()})
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApproveCampaign(camp.id)}
-                            className="bg-[#0052FF] hover:bg-blue-650 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-colors shadow-sm shadow-blue-500/10"
-                          >
-                            <Check className="h-4 w-4" /> Approve
-                          </button>
-                          <button
-                            onClick={() => handleRejectCampaign(camp.id)}
-                            className="bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 text-red-500 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-all"
-                          >
-                            <X className="h-4 w-4" /> Reject
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'conversion-approvals' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Conversion Audit Panel</h3>
-                <p className="text-xs text-slate-500 font-medium">Auditing pending leads. Approving transfers the commission from Advertiser balance directly to Publisher wallet.</p>
-              </div>
-
-              {conversions.filter(c => c.status === 'pending').length === 0 ? (
-                <div className="bg-white border border-slate-100 p-12 text-center text-slate-400 rounded-2xl shadow-sm">
-                  <p className="font-bold text-sm text-slate-800">No conversions pending approval.</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {conversions.filter(c => c.status === 'pending').map((conv) => (
-                    <div key={conv.id} className="bg-white border border-slate-100 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
-                      <div className="space-y-1">
-                        <h4 className="text-base font-bold text-slate-900">{conv.campaign_name || conv.campaign?.name}</h4>
-                        <div className="text-xs text-slate-505 font-medium">
-                          Publisher: <span className="font-bold text-slate-700">{conv.publisher_name}</span>
-                        </div>
-                        <div className="text-[10px] text-slate-450 font-mono">TxID: {conv.transaction_id}</div>
-                      </div>
-
-                      <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right">
-                          <div className="text-xs text-slate-500">Payout Commission</div>
-                          <div className="text-sm font-extrabold text-[#0052FF]">${Number(conv.payout).toFixed(2)} AUD</div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApproveConversion(conv.id)}
-                            className="bg-[#0052FF] hover:bg-blue-655 text-white font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-colors shadow-sm shadow-blue-500/10"
-                          >
-                            <Check className="h-4 w-4" /> Credit Publisher
-                          </button>
-                          <button
-                            onClick={() => handleRejectConversion(conv.id)}
-                            className="bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 text-red-500 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1 cursor-pointer transition-all"
-                          >
-                            <X className="h-4 w-4" /> Decline
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
