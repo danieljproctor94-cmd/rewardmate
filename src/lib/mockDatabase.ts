@@ -329,62 +329,7 @@ export const getInvoices = async (advertiserId: string): Promise<Invoice[]> => {
     
     if (error) throw error;
     
-    if (!data || data.length === 0) {
-      // Seed default invoices into Supabase for this advertiser
-      const currentMonth = new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-      const defaultInvs = [
-        {
-          id: `INV-2026-05-${advertiserId.substring(0,4)}`,
-          advertiser_id: advertiserId,
-          month: 'May 2026',
-          commission_due: 180.00,
-          conversions_count: 4,
-          status: 'paid',
-          issue_date: '31/05/2026',
-          due_date: '14/06/2026'
-        },
-        {
-          id: `INV-2026-06-${advertiserId.substring(0,4)}`,
-          advertiser_id: advertiserId,
-          month: 'June 2026',
-          commission_due: 350.00,
-          conversions_count: 6,
-          status: 'paid',
-          issue_date: '30/06/2026',
-          due_date: '14/07/2026'
-        },
-        {
-          id: `INV-2026-07-${advertiserId.substring(0,4)}`,
-          advertiser_id: advertiserId,
-          month: currentMonth,
-          commission_due: 150.00,
-          conversions_count: 1,
-          status: 'payable',
-          issue_date: new Date().toLocaleDateString('en-AU'),
-          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU')
-        }
-      ];
-      
-      const { data: inserted, error: insertError } = await supabase
-        .from('invoices')
-        .insert(defaultInvs)
-        .select();
-        
-      if (insertError) throw insertError;
-      return (inserted || []).map((inv: any) => ({
-        id: inv.id,
-        advertiser_id: inv.advertiser_id,
-        month: inv.month,
-        commissionDue: Number(inv.commission_due),
-        conversionsCount: Number(inv.conversions_count),
-        status: inv.status,
-        issueDate: inv.issue_date,
-        dueDate: inv.due_date,
-        paidAt: inv.paid_at
-      }));
-    }
-    
-    return data.map((inv: any) => ({
+    return (data || []).map((inv: any) => ({
       id: inv.id,
       advertiser_id: inv.advertiser_id,
       month: inv.month,
@@ -450,84 +395,13 @@ export const getAllInvoices = async (): Promise<Invoice[]> => {
   }
 
   try {
-    const { data: advertisers, error: advErr } = await supabase
-      .from('profiles')
-      .select('id, business_name, full_name')
-      .eq('user_type', 'advertiser');
-    
-    if (advErr) throw advErr;
+
 
     const { data: invoices, error: invErr } = await supabase
       .from('invoices')
       .select('*, profiles:advertiser_id(business_name, full_name)');
     
     if (invErr) throw invErr;
-
-    const advertiserIdsWithInvs = new Set((invoices || []).map(i => i.advertiser_id));
-    const missingAdvertisers = (advertisers || []).filter(a => !advertiserIdsWithInvs.has(a.id));
-
-    if (missingAdvertisers.length > 0) {
-      const currentMonth = new Date().toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-      let seedInvs: any[] = [];
-      for (const adv of missingAdvertisers) {
-        seedInvs.push(
-          {
-            id: `INV-2026-05-${adv.id.substring(0,4)}`,
-            advertiser_id: adv.id,
-            month: 'May 2026',
-            commission_due: 180.00,
-            conversions_count: 4,
-            status: 'paid',
-            issue_date: '31/05/2026',
-            due_date: '14/06/2026'
-          },
-          {
-            id: `INV-2026-06-${adv.id.substring(0,4)}`,
-            advertiser_id: adv.id,
-            month: 'June 2026',
-            commission_due: 350.00,
-            conversions_count: 6,
-            status: 'paid',
-            issue_date: '30/06/2026',
-            due_date: '14/07/2026'
-          },
-          {
-            id: `INV-2026-07-${adv.id.substring(0,4)}`,
-            advertiser_id: adv.id,
-            month: currentMonth,
-            commission_due: 150.00,
-            conversions_count: 1,
-            status: 'payable',
-            issue_date: new Date().toLocaleDateString('en-AU'),
-            due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU')
-          }
-        );
-      }
-      
-      const { error: seedErr } = await supabase
-        .from('invoices')
-        .insert(seedInvs);
-      
-      if (!seedErr) {
-        const { data: refetched, error: refetchErr } = await supabase
-          .from('invoices')
-          .select('*, profiles:advertiser_id(business_name, full_name)');
-        if (!refetchErr && refetched) {
-          return refetched.map((inv: any) => ({
-            id: inv.id,
-            advertiser_id: inv.advertiser_id,
-            month: inv.month,
-            commissionDue: Number(inv.commission_due),
-            conversionsCount: Number(inv.conversions_count),
-            status: inv.status,
-            issueDate: inv.issue_date,
-            dueDate: inv.due_date,
-            paidAt: inv.paid_at,
-            advertiser_name: inv.profiles?.business_name || inv.profiles?.full_name || 'Brand Partner'
-          })).sort((a, b) => b.dueDate.localeCompare(a.dueDate));
-        }
-      }
-    }
     
     return (invoices || []).map((inv: any) => ({
       id: inv.id,
