@@ -73,6 +73,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
   const [settingsBankAccountNumber, setSettingsBankAccountNumber] = useState(profile?.bank_account_number || '');
   const [settingsBankAccountName, setSettingsBankAccountName] = useState(profile?.bank_account_name || '');
   const [settingsMediaKitUrl, setSettingsMediaKitUrl] = useState(profile?.media_kit_url || '');
+  const [settingsPayoutThreshold, setSettingsPayoutThreshold] = useState(String(profile?.payout_threshold !== undefined ? profile.payout_threshold : '50'));
   const [saveLoading, setSaveLoading] = useState(false);
  
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
       setSettingsBankAccountNumber(profile.bank_account_number || '');
       setSettingsBankAccountName(profile.bank_account_name || '');
       setSettingsMediaKitUrl(profile.media_kit_url || '');
+      setSettingsPayoutThreshold(String(profile.payout_threshold !== undefined ? profile.payout_threshold : '50'));
     }
   }, [profile]);
 
@@ -184,6 +186,11 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
           throw new Error('BSB must be exactly 6 digits (e.g. 062-900).');
         }
       }
+      
+      const thresholdVal = Number(settingsPayoutThreshold);
+      if (isNaN(thresholdVal) || thresholdVal < 50) {
+        throw new Error('Payout threshold must be a valid number of at least $50.00 AUD.');
+      }
 
       await updateProfileDetails({
         full_name: settingsFullName,
@@ -198,7 +205,8 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
         bank_bsb: settingsBankBsb,
         bank_account_number: settingsBankAccountNumber,
         bank_account_name: settingsBankAccountName,
-        media_kit_url: settingsMediaKitUrl
+        media_kit_url: settingsMediaKitUrl,
+        payout_threshold: thresholdVal
       });
       
       await loadData();
@@ -397,6 +405,15 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
     e.preventDefault();
     if (!withdrawAmount || Number(withdrawAmount) <= 0) {
       toast.error('Please enter a valid withdrawal amount.');
+      return;
+    }
+    const currentThreshold = Number(profile.payout_threshold !== undefined ? profile.payout_threshold : 50.00);
+    if (Number(withdrawAmount) < currentThreshold) {
+      toast.error(`The minimum withdrawal amount is $${currentThreshold.toFixed(2)} AUD as per your configured payout threshold.`);
+      return;
+    }
+    if (Number(profile.wallet_balance) < currentThreshold) {
+      toast.error(`Your available balance must be at least the threshold of $${currentThreshold.toFixed(2)} AUD to request a payout.`);
       return;
     }
     if (Number(withdrawAmount) > Number(profile.wallet_balance)) {
@@ -2181,6 +2198,10 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                     <span className="text-base font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                    <span className="text-sm text-slate-500">Payout Threshold</span>
+                    <span className="text-sm font-bold text-slate-800">${Number(profile.payout_threshold !== undefined ? profile.payout_threshold : 50.00).toFixed(2)} AUD</span>
+                  </div>
+                  <div className="flex justify-between items-center py-3 border-b border-slate-100">
                     <span className="text-sm text-slate-500">Pending Approvals</span>
                     <span className="text-sm font-bold text-slate-800">
                       ${conversions.filter(c => c.status === 'pending').reduce((acc, c) => acc + Number(c.payout), 0).toFixed(2)}
@@ -2667,6 +2688,27 @@ export default function PublisherDashboard({ profile, updateBalance, signOut, }:
                       <p className="text-xs font-bold font-sans">No payout channel selected yet. Select PayPal or Bank Transfer above to get started.</p>
                     </div>
                   )}
+
+                  {/* Payout Threshold Configuration */}
+                  <div className="pt-4.5 border-t border-slate-100 space-y-2.5 text-left">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Custom Payout Threshold ($ AUD)</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">$</span>
+                      <input 
+                        type="number" 
+                        min="50"
+                        step="1"
+                        value={settingsPayoutThreshold}
+                        onChange={(e) => setSettingsPayoutThreshold(e.target.value)}
+                        placeholder="50"
+                        required
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl h-11 pl-8 pr-4 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all font-sans"
+                      />
+                    </div>
+                    <span className="text-[9px] text-slate-400 font-semibold block leading-normal">
+                      The default minimum payout threshold is **$50.00 AUD**. You may set a custom higher threshold above $50 to request larger consolidated withdrawals.
+                    </span>
+                  </div>
                 </div>
               </div>
 

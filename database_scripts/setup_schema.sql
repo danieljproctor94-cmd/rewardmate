@@ -41,7 +41,8 @@ CREATE TABLE public.profiles (
     year_founded INTEGER,
     facebook_url TEXT,
     instagram_url TEXT,
-    auto_approve BOOLEAN DEFAULT false
+    auto_approve BOOLEAN DEFAULT false,
+    payout_threshold NUMERIC(10,2) DEFAULT 50.00 CHECK (payout_threshold >= 50.00)
 );
 
 -- Enable RLS on Profiles

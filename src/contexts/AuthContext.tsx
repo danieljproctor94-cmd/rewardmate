@@ -32,6 +32,7 @@ export interface Profile {
   bank_account_number?: string;
   bank_account_name?: string;
   media_kit_url?: string;
+  payout_threshold?: number;
 }
 
 interface AuthContextType {
@@ -331,6 +332,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         bank_account_number: meta.bank_account_number || (profileData && profileData.bank_account_number) || '',
         bank_account_name: meta.bank_account_name || (profileData && profileData.bank_account_name) || '',
         media_kit_url: meta.media_kit_url || (profileData && profileData.media_kit_url) || '',
+        payout_threshold: meta.payout_threshold !== undefined ? Number(meta.payout_threshold) : (profileData && profileData.payout_threshold !== undefined ? Number(profileData.payout_threshold) : 50.00),
         ...userOverride,
       });
     } catch (err: any) {
@@ -545,6 +547,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.avatar_url !== undefined) newMeta.avatar_url = updates.avatar_url;
         if (updates.auto_approve !== undefined) newMeta.auto_approve = updates.auto_approve;
         if (updates.media_kit_url !== undefined) newMeta.media_kit_url = updates.media_kit_url;
+        if (updates.payout_threshold !== undefined) newMeta.payout_threshold = updates.payout_threshold;
 
         const { error: authError } = await supabase.auth.updateUser({
           data: newMeta
@@ -573,6 +576,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (updates.instagram_url !== undefined) dbUpdates.instagram_url = updates.instagram_url;
         if (updates.auto_approve !== undefined) dbUpdates.auto_approve = updates.auto_approve;
         if (updates.media_kit_url !== undefined) dbUpdates.media_kit_url = updates.media_kit_url;
+        if (updates.payout_threshold !== undefined) dbUpdates.payout_threshold = updates.payout_threshold;
 
         if (Object.keys(dbUpdates).length > 0) {
           const { error: dbError } = await supabase
