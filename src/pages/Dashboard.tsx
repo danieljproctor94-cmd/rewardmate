@@ -1083,13 +1083,6 @@ function AdvertiserDashboard({ profile, signOut, }: { profile: any, signOut: any
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-[10px] text-slate-450 font-bold uppercase tracking-wider">Wallet Balance</div>
-              <div className="text-sm font-extrabold text-[#0052FF]">${Number(profile.wallet_balance).toFixed(2)} AUD</div>
-            </div>
-
-            {/* Vertical Divider */}
-            <div className="h-5 w-px bg-slate-200"></div>
 
             {/* Profile Dropdown Badge */}
             <div className="relative">
@@ -4311,7 +4304,13 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                                   <td className="py-4 px-6 font-bold text-slate-600">{brandCampaigns.length} Campaigns</td>
                                   <td className="py-4 px-6 font-bold text-slate-600">{brandClicks} Clicks</td>
                                   <td className="py-4 px-6 text-right font-sans">
-                                    <div className="font-bold text-slate-800">${Number(p.wallet_balance).toFixed(2)} AUD</div>
+                                    <div className="font-bold text-slate-800">
+                                      ${(() => {
+                                        const unpaidInvoices = adminInvoices.filter(inv => inv.advertiser_id === p.id && inv.status === 'payable');
+                                        const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.commissionDue, 0);
+                                        return totalUnpaid.toFixed(2);
+                                      })()} AUD
+                                    </div>
                                   </td>
                                   <td className="py-4 px-6 font-sans text-center" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center justify-center gap-2">
