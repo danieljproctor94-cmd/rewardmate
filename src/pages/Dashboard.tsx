@@ -3011,6 +3011,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
   const [searchContactText, setSearchContactText] = useState('');
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showInvoiceSettingsModal, setShowInvoiceSettingsModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserFullName, setNewUserFullName] = useState('');
   const [newUserType, setNewUserType] = useState<'admin' | 'publisher' | 'advertiser'>('publisher');
@@ -3214,6 +3215,7 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
       await saveSystemSettings('invoice_recurring_day', billingRecurringDay);
       await saveSystemSettings('invoice_due_days', paymentDueDays);
       toast.success('Global invoicing configurations saved successfully!');
+      setShowInvoiceSettingsModal(false);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || 'Failed to save invoicing settings.');
@@ -4491,9 +4493,18 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
           {activeTab === 'invoices' && (
             <>
               <div className="space-y-6 animate-in fade-in duration-300 font-sans text-left">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 font-sans">Brand Invoice Ledger</h3>
-                  <p className="text-xs text-slate-550 font-medium">Monitor paid, unpaid, and outstanding advertiser invoices across the network.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 font-sans">Brand Invoice Ledger</h3>
+                    <p className="text-xs text-slate-550 font-medium">Monitor paid, unpaid, and outstanding advertiser invoices across the network.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowInvoiceSettingsModal(true)}
+                    className="bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm self-start sm:self-center font-sans"
+                  >
+                    <Sliders className="h-4 w-4 text-slate-500" />
+                    Billing Settings
+                  </button>
                 </div>
 
                 {/* Summary Cards Grid */}
@@ -4521,12 +4532,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                   </div>
                 </div>
 
-                {/* Main Content Grid: Table + Settings */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                  
-                  {/* Left 8/12: Invoices List Table */}
-                  <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
+                {/* Main Content Grid: Full Width Invoices List Table */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden w-full">
+                  <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-455">
@@ -4614,62 +4622,9 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                       </table>
                     </div>
                   </div>
-
-                  {/* Right 4/12: Global Invoicing Settings Card */}
-                  <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
-                    <div>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">Global Invoicing Settings</h4>
-                      <p className="text-[10px] text-slate-455 font-bold mt-1">Configure automated billing cycles and payment timelines for all network brands.</p>
-                    </div>
-
-                    <form onSubmit={handleSaveInvoiceSettings} className="space-y-4">
-                      <div className="space-y-1.5 text-left">
-                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Recurring Billing Day</label>
-                        <select
-                          value={billingRecurringDay}
-                          onChange={(e) => setBillingRecurringDay(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
-                        >
-                          <option value="1st">1st day of the month</option>
-                          <option value="5th">5th day of the month</option>
-                          <option value="15th">15th day of the month</option>
-                          <option value="25th">25th day of the month</option>
-                          <option value="28th">28th day of the month</option>
-                          <option value="Last Day">Last day of the month</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5 text-left">
-                        <label className="text-[10px] font-extrabold uppercase text-slate-400">Payment Term (Due Days)</label>
-                        <select
-                          value={paymentDueDays}
-                          onChange={(e) => setPaymentDueDays(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl h-10 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
-                        >
-                          <option value="7">Net 7 Days</option>
-                          <option value="14">Net 14 Days</option>
-                          <option value="30">Net 30 Days</option>
-                        </select>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={invoiceSettingsLoading}
-                        className="w-full bg-[#0052FF] hover:bg-blue-650 text-white font-extrabold h-10 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                      >
-                        {invoiceSettingsLoading ? (
-                          <div className="h-4 w-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
-                        ) : (
-                          "Save Settings"
-                        )}
-                      </button>
-                    </form>
-                  </div>
-
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
           {/* TAB: AFFILIATES */}
           {activeTab === 'affiliates' && (
@@ -5038,6 +4993,80 @@ function AdminDashboard({ profile, signOut }: { profile: any, signOut: any }) {
                         className="h-10 px-5 bg-[#0052FF] hover:bg-blue-650 text-white font-bold rounded-xl transition-colors cursor-pointer shadow-md shadow-blue-500/10"
                       >
                         Create Account
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {showInvoiceSettingsModal && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 text-left font-sans">
+                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      Global Invoicing Settings
+                    </h3>
+                    <button 
+                      onClick={() => setShowInvoiceSettingsModal(false)}
+                      className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveInvoiceSettings} className="p-6 space-y-5 text-xs font-semibold text-slate-605">
+                    <p className="text-[11px] text-slate-550 font-medium leading-relaxed">
+                      Configure automated billing cycles and payment timelines for all network brands.
+                    </p>
+
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-extrabold uppercase text-slate-400">Recurring Billing Day</label>
+                      <select
+                        value={billingRecurringDay}
+                        onChange={(e) => setBillingRecurringDay(e.target.value)}
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl h-11 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
+                      >
+                        <option value="1st">1st day of the month</option>
+                        <option value="5th">5th day of the month</option>
+                        <option value="15th">15th day of the month</option>
+                        <option value="25th">25th day of the month</option>
+                        <option value="28th">28th day of the month</option>
+                        <option value="Last Day">Last day of the month</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] font-extrabold uppercase text-slate-400">Payment Term (Due Days)</label>
+                      <select
+                        value={paymentDueDays}
+                        onChange={(e) => setPaymentDueDays(e.target.value)}
+                        className="w-full bg-slate-50/70 border border-slate-200 rounded-xl h-11 px-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0052FF] focus:bg-white transition-all cursor-pointer font-sans"
+                      >
+                        <option value="7">Net 7 Days</option>
+                        <option value="14">Net 14 Days</option>
+                        <option value="30">Net 30 Days</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setShowInvoiceSettingsModal(false)}
+                        className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={invoiceSettingsLoading}
+                        className="h-10 px-5 bg-[#0052FF] hover:bg-blue-650 text-white font-bold rounded-xl transition-colors cursor-pointer shadow-md shadow-blue-500/10 flex items-center justify-center min-w-[120px]"
+                      >
+                        {invoiceSettingsLoading ? (
+                          <div className="h-4 w-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+                        ) : (
+                          "Save Settings"
+                        )}
                       </button>
                     </div>
                   </form>
